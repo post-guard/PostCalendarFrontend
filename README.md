@@ -1,40 +1,37 @@
-# PostCalendarFrontend
+# 邮历
 
-This template should help get you started developing with Vue 3 in Vite.
+> 邮历，一路有你
 
-## Recommended IDE Setup
+邮历`web`端仓库。
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+## 开发
 
-## Type Support for `.vue` Imports in TS
+使用`Vue 3+Vite`开发。
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
+项目中添加了`Typescript`支持，建议使用`Typescript`以获得更好的编程和维护体验。
 
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
+### 初始化项目
 
-1. Disable the built-in TypeScript Extension
-    1) Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-    2) Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
+安装程序中需要使用的依赖：
 
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
+```shell
 pnpm install
 ```
 
-### Compile and Hot-Reload for Development
+启动开发服务器（具有热重载功能）：
 
-```sh
+```shell
 pnpm dev
 ```
 
-### Type-Check, Compile and Minify for Production
+编译为工程打包文件：
 
-```sh
+```shell
 pnpm build
 ```
+
+### 开发使用的IDE
+
+- `VSCode + Volar`
+
+- `Jetbrains Webstorm`
