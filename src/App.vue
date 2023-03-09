@@ -1,47 +1,76 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <a-layout>
+    <a-layout-header>
+      <div id="logo">
+        <h2 id="header-text">邮历</h2>
+      </div>
+      <a-menu v-model:selectedKeys="selectedKey"
+      theme="dark"
+      mode="horizontal"
+      :style="{lineHeight: '64px'}"
+      id="header-menu">
+        <a-menu-item key="1">
+          <router-link to="/">主页</router-link>
+        </a-menu-item>
+        <a-menu-item key="2">
+          <router-link to="/calendar">日程</router-link>
+        </a-menu-item>
+      </a-menu>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
+      <a-button ghost id="login" @click="login">
+        {{logged ? "登录成功" : "点击登录"}}
+      </a-button>
+    </a-layout-header>
 
-  <main>
-    <TheWelcome />
-  </main>
+    <a-layout-content>
+      <div id="main-content">
+        <router-view></router-view>
+      </div>
+    </a-layout-content>
+
+    <a-layout-footer class="footer">
+      Copyright 2023 By 邮历团队
+    </a-layout-footer>
+  </a-layout>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
+<script setup lang="ts">
+import {ref} from "vue";
+
+const selectedKey = ref(['1'])
+const logged = ref(false)
+
+function login() {
+  logged.value = !logged.value;
+}
+</script>
+
+<style>
+#logo {
+  float: left;
+  width: fit-content;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+#header-text {
+  color: white;
+  margin-right: 24px;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+#header-menu {
+  width: fit-content;
+  float: left;
+}
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+#login {
+  float: right;
+  margin: 16px 24px 16px 0;
+}
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+#main-content {
+  min-height: 500px;
+}
+
+.footer {
+  text-align: center;
 }
 </style>
