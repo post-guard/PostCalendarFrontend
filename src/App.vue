@@ -1,5 +1,5 @@
 <template>
-  <a-layout>
+<!--  <a-layout>
     <a-layout-header>
       <div id="logo">
         <h2 id="header-text">邮历</h2>
@@ -31,22 +31,25 @@
     <a-layout-footer class="footer">
       Copyright 2023 By 邮历团队
     </a-layout-footer>
-  </a-layout>
+  </a-layout>-->
+  <router-view>
+
+  </router-view>
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
+/*import {ref} from "vue";
 
 const selectedKey = ref(['1'])
 const logged = ref(false)
 
 function login() {
   logged.value = !logged.value;
-}
+}*/
 </script>
 
 <style>
-#logo {
+/*#logo {
   float: left;
   width: fit-content;
 }
@@ -72,5 +75,5 @@ function login() {
 
 .footer {
   text-align: center;
-}
+}*/
 </style>
