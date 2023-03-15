@@ -14,7 +14,7 @@
         </a-form-item>
 
         <a-form-item>
-          <a-input v-model:value="name" placeholder="Email" size="large">
+          <a-input v-model:value="email" placeholder="Email" size="large">
             <template #prefix>
               <mail-outlined />
             </template>
@@ -22,23 +22,24 @@
         </a-form-item>
 
         <a-form-item>
-          <a-input-password v-model:value="password" placeholder="password" size="large">
+          <a-input-password v-model:value="password" placeholder="Password" size="large">
             <template #prefix>
               <LockOutlined/>
             </template>
           </a-input-password>
         </a-form-item>
 
-        <a-form-item>
-          <a-button type="primary" size="large" block style="" id="loginbutton" @click="login">
-            登录
-          </a-button>
-        </a-form-item>
 
         <a-form-item>
           <a href="/#/register" id="click-to-register">
             没有账号？点我注册
           </a>
+        </a-form-item>
+
+        <a-form-item>
+          <a-button type="primary" size="large" block style="" id="loginbutton" @click="login">
+            登录
+          </a-button>
         </a-form-item>
 
       </a-form>
@@ -53,11 +54,11 @@ import {MailOutlined, LockOutlined} from "@ant-design/icons-vue";
 
 import {ref} from "vue";
 
-const name = ref("")
+const email = ref("")
 const password = ref("")
 
 function login() {
-  if (name.value === "") {
+  if (email.value === "") {
     alert("fuck");
   }
 }
@@ -106,16 +107,20 @@ position: absolute;
   position: relative;
   width: 100%;
   height: 100%;
-  top: 70px;
+  top: 30px;
   left: 0;
+  padding: 10px 0 10px 0;
+
 }
 
 #click-to-register{
   position: relative;
   width: 100%;
   height: 100%;
-  top:-30px;
+  top:20px;
   left: 0;
+  margin: 0 0 0 0;
+  padding: 10px 0 10px 0;
 }
 
 *{        /* CSS Reset */
