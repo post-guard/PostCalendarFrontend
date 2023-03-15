@@ -14,15 +14,15 @@
         </a-form-item>
 
         <a-form-item>
-          <a-input v-model:value="this.name" placeholder="Email" size="large">
+          <a-input v-model:value="name" placeholder="Email" size="large">
             <template #prefix>
-              <MailOutlined type="user" />
+              <mail-outlined />
             </template>
           </a-input>
         </a-form-item>
 
         <a-form-item>
-          <a-input-password v-model:value="this.password" placeholder="password" size="large">
+          <a-input-password v-model:value="password" placeholder="password" size="large">
             <template #prefix>
               <LockOutlined/>
             </template>
@@ -30,7 +30,7 @@
         </a-form-item>
 
         <a-form-item>
-          <a-button type="primary" size="large" block style="" id="loginbutton">
+          <a-button type="primary" size="large" block style="" id="loginbutton" @click="login">
             登录
           </a-button>
         </a-form-item>
@@ -48,31 +48,17 @@
 
 </template>
 
-<script>
-import {MailOutlined,LockOutlined} from "@ant-design/icons-vue";
+<script setup lang="ts">
+import {MailOutlined, LockOutlined} from "@ant-design/icons-vue";
 
+import {ref} from "vue";
 
-export default {
-  name: "LoginPage",
-  data (){
-    return{
-      name: '',
-      password: ''
-    }
-  },
+const name = ref("")
+const password = ref("")
 
-  components: {
-    MailOutlined,
-    LockOutlined
-  },
-
-  methods:{
-      login()
-      {
-        if (this.name === '') {
-          alert("fuck");
-        }
-      }
+function login() {
+  if (name.value === "") {
+    alert("fuck");
   }
 }
 </script>
@@ -100,8 +86,8 @@ position: relative;
   position: absolute;
   width: 100%;
   height: 100%;
-  top: 0%;
-  left: 0%;
+  top: 0;
+  left: 0;
   background: white;
   opacity: 90%;
   border-radius: 5%;
@@ -112,7 +98,7 @@ position: absolute;
   width: 100%;
   height: 100%;
   top: 10%;
-  left: 0%;
+  left: 0;
   opacity: 100%;
 
 }
@@ -121,7 +107,7 @@ position: absolute;
   width: 100%;
   height: 100%;
   top: 70px;
-  left: 0px;
+  left: 0;
 }
 
 #click-to-register{
@@ -129,7 +115,7 @@ position: absolute;
   width: 100%;
   height: 100%;
   top:-30px;
-  left: 0px;
+  left: 0;
 }
 
 *{        /* CSS Reset */
