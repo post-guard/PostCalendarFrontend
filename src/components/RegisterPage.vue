@@ -13,7 +13,7 @@
             </h1>
           </a-form-item>
 
-          <a-form-item>
+          <a-form-item has-feedback>
             <a-input v-model:value="name" placeholder="Username" size="large">
               <template #prefix>
                 <user-outlined />
@@ -21,7 +21,7 @@
             </a-input>
           </a-form-item>
 
-          <a-form-item>
+          <a-form-item has-feedback>
             <a-input v-model:value="email" placeholder="Email" size="large">
               <template #prefix>
                 <mail-outlined />
@@ -29,7 +29,7 @@
             </a-input>
           </a-form-item>
 
-          <a-form-item>
+          <a-form-item has-feedback>
             <a-input-password v-model:value="password" placeholder="Password" size="large">
               <template #prefix>
                 <LockOutlined/>
@@ -53,7 +53,11 @@
           </a-form-item>
 
           <a-form-item>
-            <a-button type="primary" size="large" block style="" id="registerbutton" @click="register">
+            <a-button
+                :disabled="button_disabled"
+                type="primary" size="large" block style="" id="registerbutton" @click="register"
+                :help="button_help"
+            >
               注册
             </a-button>
           </a-form-item>
@@ -68,18 +72,26 @@
 <script setup lang="ts">
 import {MailOutlined, LockOutlined,UserOutlined} from "@ant-design/icons-vue";
 
-import {ref} from "vue";
+import {computed, ref} from "vue";
 
 const name = ref("")
 const password = ref("")
 const email = ref("")
 const confirmPassword = ref("")
 
+const button_help = ref("");
+
 function register() {
-  if (password.value !== confirmPassword.value ) {
-    alert("nice guy");
+  if (password.value !== confirmPassword.value) {
+    button_help.value = "前后输入的密码不一致";
   }
 }
+
+const button_disabled = computed(() => {
+  return !(name.value && password.value && email.value && confirmPassword.value);
+});
+
+
 </script>
 
 <style scoped>
@@ -95,8 +107,8 @@ function register() {
 .registerBox{
   position: relative;
   width: 26%;
-  height: 65%;
-  top: 17.5%;
+  height: 68%;
+  top: 15%;
   left: 37%;
 }
 

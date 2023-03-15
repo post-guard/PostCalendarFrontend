@@ -58,9 +58,7 @@ const email = ref("")
 const password = ref("")
 
 function login() {
-  if (email.value === "") {
-    alert("fuck");
-  }
+
 }
 </script>
 
@@ -77,8 +75,8 @@ function login() {
 .loginBox{
 position: relative;
   width: 26%;
-  height: 50%;
-  top: 25%;
+  height: 52%;
+  top: 24%;
   left: 37%;
 }
 
