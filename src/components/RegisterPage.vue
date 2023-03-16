@@ -6,14 +6,24 @@
 
       </div>
       <div class="registerElement">
-        <a-form :model="registerState" :wrapperCol="{ span: 20, offset: 2 }" :label-col="{span: 4, offset: 0}">
+        <a-form
+            :wrapperCol="{ span: 20, offset: 2 }"
+            :label-col="{span: 4, offset: 0}"
+            :rules="rules"
+            ref="registerForm"
+        >
+
           <a-form-item style="text-align: center">
             <h1>
               注册
             </h1>
           </a-form-item>
 
-          <a-form-item has-feedback>
+          <a-form-item
+              name="name"
+              has-feedback
+          >
+
             <a-input v-model:value="name" placeholder="Username" size="large">
               <template #prefix>
                 <user-outlined />
@@ -21,7 +31,10 @@
             </a-input>
           </a-form-item>
 
-          <a-form-item has-feedback>
+          <a-form-item
+              name="email"
+              has-feedback
+          >
             <a-input v-model:value="email" placeholder="Email" size="large">
               <template #prefix>
                 <mail-outlined />
@@ -29,7 +42,10 @@
             </a-input>
           </a-form-item>
 
-          <a-form-item has-feedback>
+          <a-form-item
+              name="password"
+              has-feedback
+          >
             <a-input-password v-model:value="password" placeholder="Password" size="large">
               <template #prefix>
                 <LockOutlined/>
@@ -37,9 +53,12 @@
             </a-input-password>
           </a-form-item>
 
-          <a-form-item>
+          <a-form-item has-feedback
+                name="confirm"
+          >
             <a-input-password v-model:value="confirmPassword" placeholder="Confirm Password" size="large"
-            @change="validConfirmPassword">
+
+            >
               <template #prefix>
                 <LockOutlined/>
               </template>
@@ -53,7 +72,9 @@
             </a>
           </a-form-item>
 
-          <a-form-item>
+          <a-form-item
+              name="registerbutton"
+          >
             <a-button
                 :disabled="button_disabled"
                 type="primary" size="large" block style="" id="registerButton" @click="register"
@@ -79,23 +100,124 @@ const name = ref("")
 const password = ref("")
 const email = ref("")
 const confirmPassword = ref("")
+const registerForm = ref();
 
-const button_disabled = computed(() => {
+
+//TODO:待实现表单全部校验通过后按钮才能亮起的效果
+const button_disabled = computed(()=>{
+
+  //setTimeout("button_disabled()",1000);
+
+
   return !(name.value && password.value && email.value && confirmPassword.value
-      && password.value === confirmPassword.value);
+  && password.value === confirmPassword.value
+  );
+
+
+  //return registerForm.value.validate()+
+
 });
+
 
 // 点击注册按钮调用这个函数
 function register() {
 
 }
 
-// 当确认密码输入框中内容改变时调用这个函数
-function validConfirmPassword() {
-  if (password.value !== confirmPassword.value) {
-    console.log("两次输入的结果不一致");
+
+const validateName = function(rule: any, value:string, callback: any){
+
+  //姓名不能为空
+  if(name.value === ''){
+    callback("姓名不能为空");
+  }
+  //只能由下划线、空格、字母、汉字和数字构成，但是不能由下划线和空格开头或结尾
+  else if((/^[a-zA-Z0-9\s_\u4e00-\u9fa5]+$/i.test(name.value))){
+
+    if( !(/^(?!_)(?!.*?_$)(?!\s)(?!.*?\s$)[\da-zA-Z0-9\s_\u4e00-\u9fa5]+$/i.test(name.value)) ){
+
+      callback("姓名不能以下划线或空格开头或结尾");
+    }
+
+    else{
+      callback();
+    }
+  }
+  else{
+    callback("姓名只能由字母、数字或下划线构成")
   }
 }
+
+
+const validateEmail = function(rule: any, value:string, callback: any){
+
+  //邮箱地址不能为空
+  if(email.value === ''){
+    callback("邮箱地址不能为空");
+  }
+  //检验是不是合法的邮件地址
+  else if(/^([a-zA-Z0-9]+[-_]?)+@[a-zA-Z0-9]+\.[a-z]+$/i.test(email.value)){
+    callback();
+
+  }
+  else{
+    callback("不是一个有效的邮箱地址");
+  }
+
+}
+
+
+const validatePassword = function (rule: any, value:string, callback: any){
+
+
+
+  //密码不能为空
+  if(password.value === ''){
+
+    callback("密码不能为空");
+  }
+
+  else{
+
+    callback();
+  }
+
+}
+
+
+const validateConfirm = function (rule: any, value:string, callback: any){
+
+
+  if(password.value !== confirmPassword.value){
+    callback("两次输入的密码不一致");
+  }
+  else if(confirmPassword.value===''){
+    callback("密码不能为空");
+  }
+
+  else{
+    callback();
+  }
+
+}
+// 校验规则
+const rules={
+  name:[
+    {require:true, validator: validateName,trigger: "change"}
+  ],
+  email:[
+    {require:true, validator: validateEmail,trigger: "change"}
+  ],
+  password:[
+    {require:true, validator: validatePassword,trigger: "change"}
+  ],
+  confirm:[
+    {require:true, validator: validateConfirm,trigger: "change"}
+  ]
+
+
+}
+
 </script>
 
 <style scoped>
