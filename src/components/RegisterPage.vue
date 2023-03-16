@@ -56,7 +56,7 @@
             <a-button
                 :disabled="button_disabled"
                 type="primary" size="large" block style="" id="registerbutton" @click="register"
-                :help="button_help"
+
             >
               注册
             </a-button>
@@ -83,13 +83,26 @@ const button_help = ref("");
 
 function register() {
   if (password.value !== confirmPassword.value) {
-    button_help.value = "前后输入的密码不一致";
+
   }
 }
 
 const button_disabled = computed(() => {
   return !(name.value && password.value && email.value && confirmPassword.value);
 });
+
+const validConfirmPassword = (rule,password,confirm,callback) =>{
+  if(password !== confirm){
+    callback(new Error("前后输入的密码不一致"))；
+  }
+  else{
+    callback();
+  }
+};
+
+rules:{
+  confirmPassword:[{}]
+}
 
 
 </script>
