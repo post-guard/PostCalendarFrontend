@@ -38,7 +38,8 @@
           </a-form-item>
 
           <a-form-item>
-            <a-input-password v-model:value="confirmPassword" placeholder="Confirm Password" size="large">
+            <a-input-password v-model:value="confirmPassword" placeholder="Confirm Password" size="large"
+            @change="validConfirmPassword">
               <template #prefix>
                 <LockOutlined/>
               </template>
@@ -55,7 +56,7 @@
           <a-form-item>
             <a-button
                 :disabled="button_disabled"
-                type="primary" size="large" block style="" id="registerbutton" @click="register"
+                type="primary" size="large" block style="" id="registerButton" @click="register"
 
             >
               注册
@@ -79,32 +80,22 @@ const password = ref("")
 const email = ref("")
 const confirmPassword = ref("")
 
-const button_help = ref("");
-
-function register() {
-  if (password.value !== confirmPassword.value) {
-
-  }
-}
-
 const button_disabled = computed(() => {
-  return !(name.value && password.value && email.value && confirmPassword.value);
+  return !(name.value && password.value && email.value && confirmPassword.value
+      && password.value === confirmPassword.value);
 });
 
-const validConfirmPassword = (rule,password,confirm,callback) =>{
-  if(password !== confirm){
-    callback(new Error("前后输入的密码不一致"))；
-  }
-  else{
-    callback();
-  }
-};
+// 点击注册按钮调用这个函数
+function register() {
 
-rules:{
-  confirmPassword:[{}]
 }
 
-
+// 当确认密码输入框中内容改变时调用这个函数
+function validConfirmPassword() {
+  if (password.value !== confirmPassword.value) {
+    console.log("两次输入的结果不一致");
+  }
+}
 </script>
 
 <style scoped>
@@ -146,7 +137,7 @@ rules:{
   opacity: 100%;
 
 }
-#registerbutton{
+#registerButton{
   position: relative;
   width: 100%;
   height: 100%;
