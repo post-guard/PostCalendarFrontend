@@ -11,6 +11,7 @@
             :label-col="{span: 4, offset: 0}"
             :rules="rules"
             ref="registerForm"
+            :model="registerForm"
         >
 
           <a-form-item style="text-align: center">
@@ -73,10 +74,12 @@
           </a-form-item>
 
           <a-form-item
-              name="registerbutton"
+
+
+
           >
             <a-button
-                :disabled="button_disabled"
+                :disabled = "button_disabled"
                 type="primary" size="large" block style="" id="registerButton" @click="register"
 
             >
@@ -93,7 +96,7 @@
 
 <script setup lang="ts">
 import {MailOutlined, LockOutlined,UserOutlined} from "@ant-design/icons-vue";
-
+import type {Rule} from "ant-design-vue/es/form";
 import {computed, ref} from "vue";
 
 const name = ref("")
@@ -101,20 +104,17 @@ const password = ref("")
 const email = ref("")
 const confirmPassword = ref("")
 const registerForm = ref();
+//the WORST shit code of the year
+const name_is_legal = ref(false);
+const password_is_legal = ref(false);
+const email_is_legal = ref(false);
+const confirm_is_legal = ref(false);
 
 
 //TODO:待实现表单全部校验通过后按钮才能亮起的效果
 const button_disabled = computed(()=>{
 
-  //setTimeout("button_disabled()",1000);
-
-
-  return !(name.value && password.value && email.value && confirmPassword.value
-  && password.value === confirmPassword.value
-  );
-
-
-  //return registerForm.value.validate()+
+  return !(name_is_legal.value && password_is_legal.value && email_is_legal.value && confirm_is_legal.value)
 
 });
 
@@ -125,94 +125,114 @@ function register() {
 }
 
 
-const validateName = function(rule: any, value:string, callback: any){
+function validateName(){
 
+  name_is_legal.value = false;
   //姓名不能为空
   if(name.value === ''){
-    callback("姓名不能为空");
+    return Promise.reject("姓名不能为空");
+    //callback("姓名不能为空");
   }
   //只能由下划线、空格、字母、汉字和数字构成，但是不能由下划线和空格开头或结尾
   else if((/^[a-zA-Z0-9\s_\u4e00-\u9fa5]+$/i.test(name.value))){
 
     if( !(/^(?!_)(?!.*?_$)(?!\s)(?!.*?\s$)[\da-zA-Z0-9\s_\u4e00-\u9fa5]+$/i.test(name.value)) ){
 
-      callback("姓名不能以下划线或空格开头或结尾");
+      //callback("姓名不能以下划线或空格开头或结尾");
+      return Promise.reject("姓名不能以下划线或空格开头或结尾");
     }
 
     else{
-      callback();
+      //callback();
+      name_is_legal.value = true;
+      return Promise.resolve();
     }
   }
   else{
-    callback("姓名只能由字母、数字或下划线构成")
+    //callback("姓名只能由字母、数字或下划线构成");
+    return Promise.reject("姓名只能由字母、数字或下划线构成");
   }
 }
 
 
-const validateEmail = function(rule: any, value:string, callback: any){
+function validateEmail(){
+
+  email_is_legal.value = false;
 
   //邮箱地址不能为空
   if(email.value === ''){
-    callback("邮箱地址不能为空");
+    //callback("邮箱地址不能为空");
+    return Promise.reject("邮箱地址不能为空");
   }
   //检验是不是合法的邮件地址
   else if(/^([a-zA-Z0-9]+[-_]?)+@[a-zA-Z0-9]+\.[a-z]+$/i.test(email.value)){
-    callback();
+    //callback();
+    email_is_legal.value = true;
+    return Promise.resolve();
 
   }
   else{
-    callback("不是一个有效的邮箱地址");
+    return Promise.reject("不是一个有效的邮箱地址");
+    //callback("不是一个有效的邮箱地址");
   }
 
 }
 
 
-const validatePassword = function (rule: any, value:string, callback: any){
+function validatePassword(){
 
-
+  password_is_legal.value = false;
+  registerForm.value.validateFields('confirm');
 
   //密码不能为空
   if(password.value === ''){
 
-    callback("密码不能为空");
+    //callback("密码不能为空");
+    return Promise.reject("密码不能为空");
   }
 
   else{
-
-    callback();
+    password_is_legal.value = true;
+    return Promise.resolve();
+    //callback();
   }
 
 }
 
 
-const validateConfirm = function (rule: any, value:string, callback: any){
+function validateConfirm(){
 
+  confirm_is_legal.value = false;
 
   if(password.value !== confirmPassword.value){
-    callback("两次输入的密码不一致");
+    return Promise.reject("两次输入的密码不一致");
+    //callback("两次输入的密码不一致");
   }
   else if(confirmPassword.value===''){
-    callback("密码不能为空");
+    return Promise.reject("验证密码不能为空");
+    //callback("验证密码不能为空");
   }
 
   else{
-    callback();
+    confirm_is_legal.value = true;
+    return Promise.resolve();
+    //callback();
   }
 
 }
 // 校验规则
-const rules={
+const rules:Record<string, Rule[]> = {
   name:[
-    {require:true, validator: validateName,trigger: "change"}
+    {required:true, validator: validateName,trigger: "change"}
   ],
   email:[
-    {require:true, validator: validateEmail,trigger: "change"}
+    {required:true, validator: validateEmail,trigger: "change"}
   ],
   password:[
-    {require:true, validator: validatePassword,trigger: "change"}
+    {required:true, validator: validatePassword,trigger: "change"}
   ],
   confirm:[
-    {require:true, validator: validateConfirm,trigger: "change"}
+    {required:true, validator: validateConfirm,trigger: ["change"]}
   ]
 
 

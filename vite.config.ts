@@ -12,7 +12,7 @@ export default defineConfig({
       Components({
         resolvers: [AntDesignVueResolver()],
         dts: true
-      })
+      }),
   ],
   resolve: {
     alias: {
