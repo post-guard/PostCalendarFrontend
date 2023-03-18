@@ -232,7 +232,7 @@ const rules:Record<string, Rule[]> = {
     {required:true, validator: validatePassword,trigger: "change"}
   ],
   confirm:[
-    {required:true, validator: validateConfirm,trigger: ["change"]}
+    {required:true, validator: validateConfirm,trigger: "change"}
   ]
 
 

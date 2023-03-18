@@ -52,12 +52,31 @@
 <script setup lang="ts">
 import {MailOutlined, LockOutlined} from "@ant-design/icons-vue";
 
-import {ref} from "vue";
 
+import {ref, getCurrentInstance} from "vue";
+import type {ComponentInternalInstance} from "vue";
 const email = ref("")
 const password = ref("")
+const { proxy } = getCurrentInstance() as ComponentInternalInstance;
+
+
+interface responce {
+  data: User[];
+  message:string;
+}
+
+interface User{
+  emailAddress: string;
+  id? : number;
+  username: string;
+}
 
 function login() {
+
+
+proxy?.$axios.get('/user/getUsers').then((response:any)=>{
+    console.log(response);
+  })
 
 }
 </script>
