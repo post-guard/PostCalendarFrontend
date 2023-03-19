@@ -65,7 +65,7 @@ const password = ref("")
 
 function login() {
 
-  loginService('/auth/login',{
+  loginService('/api/auth/login',{
     /*"emailAddress": email.value,
     "password": password.value,*/
     "emailAddress": "root@root.org",
