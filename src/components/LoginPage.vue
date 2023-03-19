@@ -51,32 +51,30 @@
 
 <script setup lang="ts">
 import {MailOutlined, LockOutlined} from "@ant-design/icons-vue";
-
+import {Iaxios} from "@/networks/axios-defaults"
 
 import {ref, getCurrentInstance} from "vue";
 import type {ComponentInternalInstance} from "vue";
+
 const email = ref("")
 const password = ref("")
-const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
-
-interface responce {
-  data: User[];
-  message:string;
+const axios : Iaxios= {
+  Default: function (port: string, timeout: number): void {
+    throw new Error('Function not implemented.');
+  },
+  Login: function (emailAddress: string, password: string, proxy: ComponentInternalInstance): object {
+    throw new Error('Function not implemented.');
+  }
 }
-
-interface User{
-  emailAddress: string;
-  id? : number;
-  username: string;
-}
-
+axios.Default('8888',5000);
+//TODO:需要对proxy的传参进行更改
 function login() {
 
+  const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
-proxy?.$axios.get('/user/getUsers').then((response:any)=>{
-    console.log(response);
-  })
+  axios.Login(email.value,password.value,proxy);
+
 
 }
 </script>

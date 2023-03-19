@@ -111,7 +111,7 @@ const email_is_legal = ref(false);
 const confirm_is_legal = ref(false);
 
 
-//TODO:待实现表单全部校验通过后按钮才能亮起的效果
+
 const button_disabled = computed(()=>{
 
   return !(name_is_legal.value && password_is_legal.value && email_is_legal.value && confirm_is_legal.value)
