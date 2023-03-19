@@ -98,6 +98,7 @@
 import {MailOutlined, LockOutlined,UserOutlined} from "@ant-design/icons-vue";
 import type {Rule} from "ant-design-vue/es/form";
 import {computed, ref} from "vue";
+import {registerService} from "@/networks/axiosAPI";
 
 const name = ref("")
 const password = ref("")
@@ -121,6 +122,19 @@ const button_disabled = computed(()=>{
 
 // 点击注册按钮调用这个函数
 function register() {
+
+  const data = {
+    //"emailAddress" : email.value,
+    "emailAddress" : "McDonald@KFC.jing",
+    "password" : password.value,
+    "username" : name.value,
+  }
+  const result1 = registerService('auth/register',data);
+
+  /*if(result1 === '注册失败'){
+    alert("fuck");
+  }*/
+
 
 }
 

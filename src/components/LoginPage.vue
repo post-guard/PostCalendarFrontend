@@ -6,7 +6,7 @@
 
     </div>
     <div class="loginElement">
-      <a-form :model="loginState" :wrapperCol="{ span: 20, offset: 2 }" :label-col="{span: 4, offset: 0}">
+      <a-form  :wrapperCol="{ span: 20, offset: 2 }" :label-col="{span: 4, offset: 0}">
         <a-form-item style="text-align: center">
           <h1>
             登录
@@ -51,29 +51,27 @@
 
 <script setup lang="ts">
 import {MailOutlined, LockOutlined} from "@ant-design/icons-vue";
-import {Iaxios} from "@/networks/axios-defaults"
 
-import {ref, getCurrentInstance} from "vue";
-import type {ComponentInternalInstance} from "vue";
+
+import {ref} from "vue";
+
+
+import {getAllUsers, loginService} from "@/networks/axiosAPI";
 
 const email = ref("")
 const password = ref("")
 
-const axios : Iaxios= {
-  Default: function (port: string, timeout: number): void {
-    throw new Error('Function not implemented.');
-  },
-  Login: function (emailAddress: string, password: string, proxy: ComponentInternalInstance): object {
-    throw new Error('Function not implemented.');
-  }
-}
-axios.Default('8888',5000);
-//TODO:需要对proxy的传参进行更改
+
+
 function login() {
 
-  const { proxy } = getCurrentInstance() as ComponentInternalInstance;
+  loginService('/auth/login',{
+    /*"emailAddress": email.value,
+    "password": password.value,*/
+    "emailAddress": "root@root.org",
+    "password": "root",
+  })
 
-  axios.Login(email.value,password.value,proxy);
 
 
 }
