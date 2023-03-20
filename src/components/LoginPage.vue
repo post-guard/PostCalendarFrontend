@@ -29,7 +29,6 @@
           </a-input-password>
         </a-form-item>
 
-
         <a-form-item>
           <a href="/#/register" id="click-to-register">
             没有账号？点我注册
@@ -37,7 +36,7 @@
         </a-form-item>
 
         <a-form-item>
-          <a-button type="primary" size="large" block style="" id="loginbutton" @click="login">
+          <a-button :disabled="buttonDisable" type="primary" size="large" block style="" id="loginbutton" @click="login">
             登录
           </a-button>
         </a-form-item>
@@ -51,29 +50,34 @@
 
 <script setup lang="ts">
 import {MailOutlined, LockOutlined} from "@ant-design/icons-vue";
+import {computed, ref} from "vue";
+import {Request} from "@/networks/Request"
+import type {IResponse} from "@/models/IResponse";
 
+interface LoginResponse {
+  id: number,
+  username: string,
+  emailAddress: string,
+  token: string
+}
 
-import {ref} from "vue";
+const email = ref("");
+const password = ref("");
 
-
-import {getAllUsers, loginService} from "@/networks/axiosAPI";
-
-const email = ref("")
-const password = ref("")
-
-
+const buttonDisable = computed(() => {
+  return email.value === "" || password.value === "";
+});
 
 function login() {
+  let request = new Request();
 
-  loginService('/api/auth/login',{
-    /*"emailAddress": email.value,
-    "password": password.value,*/
-    "emailAddress": "root@root.org",
-    "password": "root",
-  })
-
-
-
+  request.post<IResponse<LoginResponse>>("/api/auth/login", {
+    "emailAddress": email.value,
+    "password": password.value
+  }).then((response) => {
+    console.log(response.message);
+    console.log(response.data);
+  });
 }
 </script>
 

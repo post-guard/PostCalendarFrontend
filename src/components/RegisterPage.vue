@@ -27,7 +27,7 @@
 
             <a-input v-model:value="name" placeholder="Username" size="large">
               <template #prefix>
-                <user-outlined />
+                <user-outlined/>
               </template>
             </a-input>
           </a-form-item>
@@ -38,7 +38,7 @@
           >
             <a-input v-model:value="email" placeholder="Email" size="large">
               <template #prefix>
-                <mail-outlined />
+                <mail-outlined/>
               </template>
             </a-input>
           </a-form-item>
@@ -55,7 +55,7 @@
           </a-form-item>
 
           <a-form-item has-feedback
-                name="confirm"
+                       name="confirm"
           >
             <a-input-password v-model:value="confirmPassword" placeholder="Confirm Password" size="large"
 
@@ -76,10 +76,9 @@
           <a-form-item
 
 
-
           >
             <a-button
-                :disabled = "button_disabled"
+                :disabled="button_disabled"
                 type="primary" size="large" block style="" id="registerButton" @click="register"
 
             >
@@ -95,10 +94,9 @@
 </template>
 
 <script setup lang="ts">
-import {MailOutlined, LockOutlined,UserOutlined} from "@ant-design/icons-vue";
+import {MailOutlined, LockOutlined, UserOutlined} from "@ant-design/icons-vue";
 import type {Rule} from "ant-design-vue/es/form";
 import {computed, ref} from "vue";
-import {registerService} from "@/networks/axiosAPI";
 
 const name = ref("")
 const password = ref("")
@@ -112,8 +110,7 @@ const email_is_legal = ref(false);
 const confirm_is_legal = ref(false);
 
 
-
-const button_disabled = computed(()=>{
+const button_disabled = computed(() => {
 
   return !(name_is_legal.value && password_is_legal.value && email_is_legal.value && confirm_is_legal.value)
 
@@ -125,67 +122,57 @@ function register() {
 
   const data = {
     //"emailAddress" : email.value,
-    "emailAddress" : "McDonald@KFC.jing",
-    "password" : password.value,
-    "username" : name.value,
+    "emailAddress": "McDonald@KFC.jing",
+    "password": password.value,
+    "username": name.value,
   }
-  const result1 = registerService('auth/register',data);
-
-  /*if(result1 === '注册失败'){
-    alert("fuck");
-  }*/
-
 
 }
 
 
-function validateName(){
+function validateName() {
 
   name_is_legal.value = false;
   //姓名不能为空
-  if(name.value === ''){
+  if (name.value === '') {
     return Promise.reject("姓名不能为空");
     //callback("姓名不能为空");
   }
   //只能由下划线、空格、字母、汉字和数字构成，但是不能由下划线和空格开头或结尾
-  else if((/^[a-zA-Z0-9\s_\u4e00-\u9fa5]+$/i.test(name.value))){
+  else if ((/^[a-zA-Z0-9\s_\u4e00-\u9fa5]+$/i.test(name.value))) {
 
-    if( !(/^(?!_)(?!.*?_$)(?!\s)(?!.*?\s$)[\da-zA-Z0-9\s_\u4e00-\u9fa5]+$/i.test(name.value)) ){
+    if (!(/^(?!_)(?!.*?_$)(?!\s)(?!.*?\s$)[\da-zA-Z0-9\s_\u4e00-\u9fa5]+$/i.test(name.value))) {
 
       //callback("姓名不能以下划线或空格开头或结尾");
       return Promise.reject("姓名不能以下划线或空格开头或结尾");
-    }
-
-    else{
+    } else {
       //callback();
       name_is_legal.value = true;
       return Promise.resolve();
     }
-  }
-  else{
+  } else {
     //callback("姓名只能由字母、数字或下划线构成");
     return Promise.reject("姓名只能由字母、数字或下划线构成");
   }
 }
 
 
-function validateEmail(){
+function validateEmail() {
 
   email_is_legal.value = false;
 
   //邮箱地址不能为空
-  if(email.value === ''){
+  if (email.value === '') {
     //callback("邮箱地址不能为空");
     return Promise.reject("邮箱地址不能为空");
   }
   //检验是不是合法的邮件地址
-  else if(/^([a-zA-Z0-9]+[-_]?)+@[a-zA-Z0-9]+\.[a-z]+$/i.test(email.value)){
+  else if (/^([a-zA-Z0-9]+[-_]?)+@[a-zA-Z0-9]+\.[a-z]+$/i.test(email.value)) {
     //callback();
     email_is_legal.value = true;
     return Promise.resolve();
 
-  }
-  else{
+  } else {
     return Promise.reject("不是一个有效的邮箱地址");
     //callback("不是一个有效的邮箱地址");
   }
@@ -193,19 +180,17 @@ function validateEmail(){
 }
 
 
-function validatePassword(){
+function validatePassword() {
 
   password_is_legal.value = false;
   registerForm.value.validateFields('confirm');
 
   //密码不能为空
-  if(password.value === ''){
+  if (password.value === '') {
 
     //callback("密码不能为空");
     return Promise.reject("密码不能为空");
-  }
-
-  else{
+  } else {
     password_is_legal.value = true;
     return Promise.resolve();
     //callback();
@@ -214,39 +199,37 @@ function validatePassword(){
 }
 
 
-function validateConfirm(){
+function validateConfirm() {
 
   confirm_is_legal.value = false;
 
-  if(password.value !== confirmPassword.value){
+  if (password.value !== confirmPassword.value) {
     return Promise.reject("两次输入的密码不一致");
     //callback("两次输入的密码不一致");
-  }
-  else if(confirmPassword.value===''){
+  } else if (confirmPassword.value === '') {
     return Promise.reject("验证密码不能为空");
     //callback("验证密码不能为空");
-  }
-
-  else{
+  } else {
     confirm_is_legal.value = true;
     return Promise.resolve();
     //callback();
   }
 
 }
+
 // 校验规则
-const rules:Record<string, Rule[]> = {
-  name:[
-    {required:true, validator: validateName,trigger: "change"}
+const rules: Record<string, Rule[]> = {
+  name: [
+    {required: true, validator: validateName, trigger: "change"}
   ],
-  email:[
-    {required:true, validator: validateEmail,trigger: "change"}
+  email: [
+    {required: true, validator: validateEmail, trigger: "change"}
   ],
-  password:[
-    {required:true, validator: validatePassword,trigger: "change"}
+  password: [
+    {required: true, validator: validatePassword, trigger: "change"}
   ],
-  confirm:[
-    {required:true, validator: validateConfirm,trigger: "change"}
+  confirm: [
+    {required: true, validator: validateConfirm, trigger: "change"}
   ]
 
 
@@ -256,15 +239,15 @@ const rules:Record<string, Rule[]> = {
 
 <style scoped>
 
-.registerPage{
-  position : absolute;
+.registerPage {
+  position: absolute;
   width: 100%;
   height: 100%;
   background-image: url("https://img0.baidu.com/it/u=759713920,3089363671&fm=253&fmt=auto&app=120&f=JPEG?w=1422&h=800");
   background-size: cover;
 }
 
-.registerBox{
+.registerBox {
   position: relative;
   width: 26%;
   height: 68%;
@@ -272,7 +255,7 @@ const rules:Record<string, Rule[]> = {
   left: 37%;
 }
 
-.registerBoxBg{
+.registerBoxBg {
 
   position: absolute;
   width: 100%;
@@ -284,7 +267,8 @@ const rules:Record<string, Rule[]> = {
   border-radius: 5%;
   z-index: auto;
 }
-.registerElement{
+
+.registerElement {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -293,7 +277,8 @@ const rules:Record<string, Rule[]> = {
   opacity: 100%;
 
 }
-#registerButton{
+
+#registerButton {
   position: relative;
   width: 100%;
   height: 100%;
@@ -303,18 +288,18 @@ const rules:Record<string, Rule[]> = {
 
 }
 
-#click-to-login{
+#click-to-login {
   position: relative;
   width: 100%;
   height: 100%;
-  top:14px;
+  top: 14px;
   left: 0;
   margin: 0 0 0 0;
   padding: 10px 0 10px 0;
 }
 
-*{        /* CSS Reset */
-  margin : 0;
-  padding : 0;
+* { /* CSS Reset */
+  margin: 0;
+  padding: 0;
 }
 </style>
