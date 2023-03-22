@@ -17,18 +17,28 @@ export class Request {
     }
 
     public get<T>(url: string): Promise<T> {
-        return new Promise((resolve) => {
-            this.instance.get<T>(url).then((response) => {
-                return resolve(response.data);
-            });
+        return new Promise((resolve, reject) => {
+            this.instance.get<T>(url)
+                .then((response) => {
+                    return resolve(response.data);
+                })
+                .catch((err) => {
+                    return reject(err.response.data);
+                });
+
         });
     }
 
     public post<T>(url: string, data: any): Promise<T> {
-        return new Promise<T>((resolve) => {
-            this.instance.post<T>(url, data).then((response) => {
+        return new Promise<T>((resolve,reject) => {
+            this.instance.post<T>(url, data)
+                .then((response) => {
                 return resolve(response.data);
-            });
+            })
+                .catch((err) =>{
+                    return reject(err.response.data);
+                })
+
         });
     }
 

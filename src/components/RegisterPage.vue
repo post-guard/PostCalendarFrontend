@@ -97,6 +97,8 @@
 import {MailOutlined, LockOutlined, UserOutlined} from "@ant-design/icons-vue";
 import type {Rule} from "ant-design-vue/es/form";
 import {computed, ref} from "vue";
+import {Request} from "@/networks/Request";
+import type {IResponse} from "@/models/IResponse";
 
 const name = ref("")
 const password = ref("")
@@ -117,15 +119,22 @@ const button_disabled = computed(() => {
 });
 
 
+
 // 点击注册按钮调用这个函数
 function register() {
 
-  const data = {
-    //"emailAddress" : email.value,
+  let request = new Request();
+
+  request.post<IResponse<string>>("/api/auth/register", {
     "emailAddress": "McDonald@KFC.jing",
     "password": password.value,
     "username": name.value,
-  }
+  }).then((response) => {
+    console.log(response.message);
+    console.log(response.data);
+  })
+
+
 
 }
 

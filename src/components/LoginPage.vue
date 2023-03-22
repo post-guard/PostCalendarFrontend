@@ -77,7 +77,8 @@ function login() {
   }).then((response) => {
     console.log(response.message);
     console.log(response.data);
-  });
+  })
+
 }
 </script>
 
