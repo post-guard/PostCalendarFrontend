@@ -53,6 +53,9 @@ import {MailOutlined, LockOutlined} from "@ant-design/icons-vue";
 import {computed, ref} from "vue";
 import {Request} from "@/networks/Request"
 import type {IResponse} from "@/models/IResponse";
+import {message} from "ant-design-vue";
+import {router} from "@/router";
+import {User} from "@/models/User";
 
 interface LoginResponse {
   id: number,
@@ -76,7 +79,23 @@ function login() {
     "password": password.value
   }).then((response) => {
     console.log(response.message);
-    console.log(response.data);
+    console.log(response.data.token);
+
+    request.setAuthorization()
+
+    message.info('登录成功')
+            .then(
+                () => {
+                  router.push({path:"/#/",query:{data={
+                    id:response.data.id,
+                        email: response.data.emailAddress,
+                        username: response.data.username
+                  }
+                    }})
+                }
+            )
+
+
   })
 
 }
