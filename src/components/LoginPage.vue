@@ -54,8 +54,9 @@ import {computed, ref} from "vue";
 import {Request} from "@/networks/Request"
 import type {IResponse} from "@/models/IResponse";
 import {message} from "ant-design-vue";
+
 import {router} from "@/router";
-import {User} from "@/models/User";
+
 
 interface LoginResponse {
   id: number,
@@ -78,25 +79,37 @@ function login() {
     "emailAddress": email.value,
     "password": password.value
   }).then((response) => {
+
     console.log(response.message);
     console.log(response.data.token);
 
-    request.setAuthorization()
+    request.setAuthorization(response.data.token);
 
-    message.info('登录成功')
+
+    message.success('登录成功')
             .then(
                 () => {
-                  router.push({path:"/#/",query:{data={
-                    id:response.data.id,
-                        email: response.data.emailAddress,
-                        username: response.data.username
-                  }
-                    }})
+                  router.push({
+
+                    path:"/#/",
+                    query:{
+                      id : response.data.id,
+                      username : response.data.username,
+                      emailAddress : response.data.emailAddress
+                    }
+                  })
+
                 }
             )
 
 
   })
+
+      .catch((err) =>{
+        console.log(err.message);
+
+        message.error(err.message);
+      })
 
 }
 </script>
