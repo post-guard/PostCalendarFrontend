@@ -74,6 +74,9 @@ const buttonDisable = computed(() => {
 });
 
 function login() {
+
+
+
   let request = new Request();
 
   request.post<IResponse<LoginResponse>>("/api/auth/login", {
@@ -97,6 +100,15 @@ function login() {
         );
   }).catch((err) => {
     console.log(err.message);
+
+    switch (err.message){
+
+      case '用户不存在':
+        message.error('用户不存在');
+        break;
+      default:
+        message.error('未连接服务器\n请检查网络');
+    }
     message.error(err.message);
   });
 }
