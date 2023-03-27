@@ -78,7 +78,7 @@
 
           >
             <a-button
-                :disabled="button_disabled"
+                :disabled="buttonDisabled" :loading="buttonLoading"
                 type="primary" size="large" block style="" id="registerButton" @click="register"
 
             >
@@ -99,6 +99,8 @@ import type {Rule} from "ant-design-vue/es/form";
 import {computed, ref} from "vue";
 import {Request} from "@/networks/Request";
 import type {IResponse} from "@/models/IResponse";
+import {message} from "ant-design-vue";
+import {useRouter} from "vue-router";
 
 const name = ref("")
 const password = ref("")
@@ -111,10 +113,12 @@ const password_is_legal = ref(false);
 const email_is_legal = ref(false);
 const confirm_is_legal = ref(false);
 
+const router = useRouter();
 
-const button_disabled = computed(() => {
+const buttonLoading = ref(false);
+const buttonDisabled = computed(() => {
 
-  return !(name_is_legal.value && password_is_legal.value && email_is_legal.value && confirm_is_legal.value)
+  return !(name_is_legal.value && password_is_legal.value && email_is_legal.value && confirm_is_legal.value) || buttonLoading.value
 
 });
 
@@ -123,16 +127,44 @@ const button_disabled = computed(() => {
 // 点击注册按钮调用这个函数
 function register() {
 
+  buttonLoading.value = true;
+
   let request = new Request();
 
   request.post<IResponse<string>>("/api/auth/register", {
-    "emailAddress": "McDonald@KFC.jing",
+    "emailAddress": "Ayaka@Inazuma.jp",
     "password": password.value,
     "username": name.value,
   }).then((response) => {
     console.log(response.message);
-    console.log(response.data);
+
+
+
+    message.success('注册成功 即将跳转至登录页')
+        .then(
+            () => {
+
+              buttonLoading.value = false;
+
+
+              router.push({
+                path: "/login"
+              });
+            }
+        );
+
+
+
   })
+      .catch((err) => {
+        console.log(err.message);
+
+        buttonLoading.value = false;
+
+        message.error("注册失败");
+
+
+      })
 
 
 

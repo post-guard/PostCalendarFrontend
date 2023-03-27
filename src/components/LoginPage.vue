@@ -36,7 +36,7 @@
           </a-form-item>
 
           <a-form-item>
-            <a-button :disabled="buttonDisable" type="primary" size="large" block style="" id="loginbutton"
+            <a-button :disabled="buttonDisable" :loading="buttonLoading" type="primary" size="large" block style="" id="loginbutton"
                       @click="login">
               登录
             </a-button>
@@ -70,14 +70,20 @@ const password = ref("");
 const router = useRouter();
 
 const buttonDisable = computed(() => {
-  return email.value === "" || password.value === "";
+  return email.value === "" || password.value === "" || buttonLoading.value;
 });
+
+
+const buttonLoading = ref(false);
 
 function login() {
 
 
 
   let request = new Request();
+
+  buttonLoading.value = true;
+
 
   request.post<IResponse<LoginResponse>>("/api/auth/login", {
     "emailAddress": email.value,
@@ -93,6 +99,10 @@ function login() {
     message.success('登录成功')
         .then(
             () => {
+
+              buttonLoading.value = false;
+
+
               router.push({
                 path: "/"
               });
@@ -100,6 +110,9 @@ function login() {
         );
   }).catch((err) => {
     console.log(err.message);
+
+    buttonLoading.value = false;
+
 
     switch (err.message){
 
@@ -109,7 +122,7 @@ function login() {
       default:
         message.error('未连接服务器\n请检查网络');
     }
-    message.error(err.message);
+
   });
 }
 </script>
