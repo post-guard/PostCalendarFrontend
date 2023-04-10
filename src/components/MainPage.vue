@@ -9,23 +9,24 @@
       <a-menu v-model:selectedKeys="selectedKeys"
               theme="dark"
               mode="inline"
+
               @select="menu_selected">
 
-        <a-menu-item key="1">
+        <a-menu-item key="calendar">
           <calendar-outlined />
           <span>
             日程表
           </span>
         </a-menu-item>
 
-        <a-menu-item key="2">
+        <a-menu-item key="map">
           <global-outlined />
           <span>
             地图
           </span>
         </a-menu-item>
 
-        <a-menu-item key="3">
+        <a-menu-item key="home">
           <user-outlined />
           <span>
             个人主页
@@ -67,23 +68,23 @@ import {useRouter} from "vue-router";
 const router = useRouter();
 
 const collapsed = ref(true);
-const selectedKeys = ref(["1"]);
+const selectedKeys = ref(["calendar"]);
 
 function menu_selected(){
 
   console.log(selectedKeys.value)
-  switch (selectedKeys.value){
-    case ["1"] :
+  switch (selectedKeys.value.toString()){
+    case 'calendar' :
 
       router.push({path:"/calendar"});
-      console.log("me!")
+
       break;
 
-    case ["2"]:
+    case 'map':
       router.push({path:"/map"});
       break;
 
-    case ["3"]:
+    case 'home':
       router.push({path:"/home"});
       break;
 
