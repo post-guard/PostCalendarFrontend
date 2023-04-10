@@ -9,6 +9,7 @@ import RegisterPage from "@/components/RegisterPage.vue";
 const routers: RouteRecordRaw[] = [
     {
         path: '/',
+
         component: MainPage
     },
     {
@@ -17,6 +18,7 @@ const routers: RouteRecordRaw[] = [
     },
     {
         path: '/login',
+
         component:LoginPage
     },
     {
