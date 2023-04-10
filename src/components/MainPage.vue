@@ -62,18 +62,30 @@
 
 <script setup lang="ts">
 import {CalendarOutlined,UserOutlined,GlobalOutlined} from "@ant-design/icons-vue";
-import {ref} from "vue";
+import {ref, watch} from "vue";
 import {useRouter} from "vue-router";
 
 const router = useRouter();
 
 const collapsed = ref(true);
-const selectedKeys = ref(["calendar"]);
+//const defSelectedKey = Array(toRaw(router).currentRoute.value.fullPath.substring(1));
+const selectedKeys = ref([""]);
+
+
+watch(()=>router,(newValue)=>{
+      //console.log(newValue.currentRoute.value.fullPath);
+      selectedKeys.value[0] = newValue.currentRoute.value.fullPath.substring(1);
+      //传进来的是子页面的router如/calendar,需要截去第一个字符
+      },
+    { immediate: true ,deep: true}
+    //immediate负责首次监听即触发的功能，deep负责监听对象内部属性发生变化
+);
+
 
 function menu_selected(){
 
-  console.log(selectedKeys.value)
-  switch (selectedKeys.value.toString()){
+  //console.log(selectedKeys.value)
+  switch (selectedKeys.value[0]){
     case 'calendar' :
 
       router.push({path:"/calendar"});
@@ -102,10 +114,5 @@ function menu_selected(){
   background: rgba(255, 255, 255, 0.3);
 }
 
-.site-layout-background {
-  background: #fff;
-}
-.site-layout-background {
-  background: #141414;
-}
+
 </style>
