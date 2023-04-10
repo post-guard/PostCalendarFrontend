@@ -6,9 +6,10 @@
                     :defaultCollapsed = true>
       <div class="logo"/>
 
-      <a-menu v-model:selected-keys="selectedKeys"
+      <a-menu v-model:selectedKeys="selectedKeys"
               theme="dark"
-              mode="inline">
+              mode="inline"
+              @select="menu_selected">
 
         <a-menu-item key="1">
           <calendar-outlined />
@@ -39,7 +40,9 @@
       <a-layout-header style="background: #fff; padding: 0" />
       <a-layout-content style="margin: 0 16px">
 
-        <router-view></router-view>
+        <router-view>
+
+        </router-view>
 
       </a-layout-content>
       <a-layout-footer style="text-align: center">
@@ -59,9 +62,36 @@
 <script setup lang="ts">
 import {CalendarOutlined,UserOutlined,GlobalOutlined} from "@ant-design/icons-vue";
 import {ref} from "vue";
+import {useRouter} from "vue-router";
+
+const router = useRouter();
 
 const collapsed = ref(true);
 const selectedKeys = ref(["1"]);
+
+function menu_selected(){
+
+  console.log(selectedKeys.value)
+  switch (selectedKeys.value){
+    case ["1"] :
+
+      router.push({path:"/calendar"});
+      console.log("me!")
+      break;
+
+    case ["2"]:
+      router.push({path:"/map"});
+      break;
+
+    case ["3"]:
+      router.push({path:"/home"});
+      break;
+
+    default:
+
+      router.push({path:"/calendar"});
+  }
+}
 </script>
 
 <style scoped>
