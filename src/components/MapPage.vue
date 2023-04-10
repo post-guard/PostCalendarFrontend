@@ -1,8 +1,10 @@
 <template>
-<h2>日程</h2>
+<h2>
+  地图页
+</h2>
 </template>
 
-<script lang="ts" setup>
+<script>
 
 </script>
 

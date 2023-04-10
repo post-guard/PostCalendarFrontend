@@ -2,20 +2,35 @@ import {createRouter, createWebHashHistory} from "vue-router";
 import type {RouteRecordRaw} from "vue-router";
 
 import MainPage from "@/components/MainPage.vue";
-import Calendar from "@/components/Calendar.vue";
 import LoginPage from "@/components/LoginPage.vue";
 import RegisterPage from "@/components/RegisterPage.vue";
+import CalendarPage from "@/components/CalendarPage.vue";
+import MapPage from "@/components/MapPage.vue";
+import PersonalPage from "@/components/PersonalPage.vue";
 
 const routers: RouteRecordRaw[] = [
     {
         path: '/',
 
-        component: MainPage
+        component: MainPage,
+
+        children: [
+            {
+                path: '/calendar',
+                component: CalendarPage
+            },
+            {
+                path: '/map',
+                component: MapPage
+            },
+            {
+                path: '/home',
+                component: PersonalPage
+            },
+
+        ]
     },
-    {
-        path: '/calendar',
-        component: Calendar
-    },
+
     {
         path: '/login',
 
