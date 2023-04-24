@@ -1,8 +1,13 @@
 <template>
     <div class="classMap" @wheel="zoom">
-<canvas ref="canvasMap" width="456" height="643.2" >
-  你的浏览器不支持canvas，请升级浏览器版本~
-</canvas>
+        <canvas ref="canvasMap" width="456" height="643.2" >
+          你的浏览器不支持canvas，请升级浏览器版本~
+        </canvas>
+
+        <canvas ref="canvasMap_DoubleBuffer" width="456" height="643.2" style="opacity: 0;">
+        </canvas>
+
+
     </div>
 </template>
 
@@ -11,36 +16,53 @@
 import {nextTick, ref} from "vue";
 
 const canvasMap = ref(); //用ref找到canvas
+const canvasMap_DoubleBuffer = ref();
 
-draw();
+const originScale = {x:456,y:643.2};
+
+const mapBg = new Image(2491,3509);
+mapBg.src= "xtcmap.jpg";
+
+draw(mapBg);
+
 
 function zoom(event:WheelEvent){
 
     event.preventDefault();
 
+    const proportionality = originScale.y/originScale.x; //图片比例
+
   if(event.deltaY < 0){
-      canvasMap.value.width -= 5;
-      canvasMap.value.height -= 5;
+      originScale.x -= 5 ;
+      originScale.y -= 5 * proportionality;
 
   }
   else if(event.deltaY > 0){
-      canvasMap.value.width += 5;
-      canvasMap.value.height += 5;
+      originScale.x += 5 ;
+      originScale.y += 5 * proportionality;
 
   }
-  console.log(canvasMap.value.width+" "+canvasMap.value.height)
-    draw();
+
+    draw(mapBg);
 }
-function draw(){
+
+
+
+function draw(mapBg:HTMLImageElement){
 
   const cPainter = ref(); //创建画笔
+
+  const cPainter_DoubleBuffer = ref(); //创建双缓冲画笔
 
   let ratio = 1;
 
 
-
   nextTick(()=>{//待页面dom加载完毕才去获取ref
     cPainter.value = canvasMap.value.getContext("2d"); //创建画笔
+
+    cPainter_DoubleBuffer.value = canvasMap_DoubleBuffer.value.getContext("2d"); //创建双缓冲画笔
+
+
 
 
       const devicePixelRatio = window.devicePixelRatio || 1;
@@ -58,39 +80,51 @@ function draw(){
 
 
       /*使canvas先放大到当前屏幕大小进行渲染，然后缩小到固定比例放置在界面上，以此解决图片模糊的问题*/
-      canvasMap.value.style.width = canvasMap.value.width+'px';
+      canvasMap.value.style.width = originScale.x+'px';
 
-      canvasMap.value.style.height = canvasMap.value.height+'px';
+      canvasMap.value.style.height = originScale.y+'px';
 
-      console.log("old:"+canvasMap.value.width+" "+canvasMap.value.height)
+      canvasMap.value.width = originScale.x * ratio;
 
-      canvasMap.value.width = canvasMap.value.width * ratio;
+      canvasMap.value.height = originScale.y * ratio;
 
-      canvasMap.value.height = canvasMap.value.height * ratio;
 
-      //TODO:这里会出现重复draw()导致width和height重复乘法变大的情况，需要进行调整
 
-      console.log("new:"+canvasMap.value.width+" "+canvasMap.value.height)
+      canvasMap_DoubleBuffer.value.style.width = originScale.x+'px';
+
+      canvasMap_DoubleBuffer.value.style.height = originScale.y+'px';
+
+      canvasMap_DoubleBuffer.value.width = originScale.x * ratio;
+
+      canvasMap_DoubleBuffer.value.height = originScale.y * ratio;
+
+
+
+
   })
 
 
-  let mapBg = new Image(2491,3509);
-  mapBg.src= "https://www.bupt.edu.cn/images/xtc.jpg";
+  /*let mapBg = new Image(2491,3509);
+  mapBg.src= "xtcmap.jpg";*/
+
 
 
 
 
   mapBg.onload = () => {
 
-    /*cPainter.value.beginPath();
-    cPainter.value.rect(0, 0, 456*ratio, 643.2*ratio)
-      cPainter.value.fill();
-      cPainter.value.closePath()*/
 
 
-      cPainter.value.beginPath();
-    cPainter.value.drawImage(mapBg, 0, 0,canvasMap.value.width,canvasMap.value.height);
-      cPainter.value.closePath()
+      cPainter_DoubleBuffer.value.clearRect(0,0,canvasMap_DoubleBuffer.value.width,canvasMap_DoubleBuffer.value.height)
+      cPainter_DoubleBuffer.value.beginPath();
+      cPainter_DoubleBuffer.value.drawImage(mapBg, 0, 0,canvasMap_DoubleBuffer.value.width,canvasMap_DoubleBuffer.value.height);
+      cPainter_DoubleBuffer.value.closePath();
+
+
+      //cPainter.value.clearRect(0,0,canvasMap.value.width,canvasMap.value.height);
+      //const imageData = cPainter_DoubleBuffer.value.getImageData(0,0,canvasMap_DoubleBuffer.value.width,canvasMap_DoubleBuffer.value.height)
+
+      cPainter.value.drawImage(canvasMap_DoubleBuffer.value,0,0);
   }
 
 }
