@@ -1,6 +1,6 @@
 <template>
-    <div class="classMap" @wheel="zoom">
-        <canvas ref="canvasMap" width="456" height="643.2" >
+    <div class="classMap" @wheel="zoom" style="width: 1350px;height: 648px ">
+        <canvas ref="canvasMap" width="456" height="643.2">
           你的浏览器不支持canvas，请升级浏览器版本~
         </canvas>
 
@@ -18,12 +18,27 @@ import {nextTick, ref} from "vue";
 const canvasMap = ref(); //用ref找到canvas
 const canvasMap_DoubleBuffer = ref();
 
+const cPainter = ref(); //创建画笔
+const cPainter_DoubleBuffer = ref(); //创建双缓冲画笔
+
 const originScale = {x:456,y:643.2};
 
-const mapBg = new Image(2491,3509);
-mapBg.src= "xtcmap.jpg";
+const mapBg = init();
+function init(){
 
-draw(mapBg);
+    const mapBg = new Image(2491,3509);
+    mapBg.src= "xtcmap.jpg";
+
+    nextTick(()=>{
+
+        mapBg.onload = () => {
+            draw(mapBg);
+        }
+    })
+
+    return mapBg;
+}
+
 
 
 function zoom(event:WheelEvent){
@@ -33,16 +48,16 @@ function zoom(event:WheelEvent){
     const proportionality = originScale.y/originScale.x; //图片比例
 
   if(event.deltaY < 0){
-      originScale.x -= 5 ;
-      originScale.y -= 5 * proportionality;
+      originScale.x -= 10 ;
+      originScale.y -= 10 * proportionality;
 
   }
   else if(event.deltaY > 0){
-      originScale.x += 5 ;
-      originScale.y += 5 * proportionality;
+      originScale.x += 10 ;
+      originScale.y += 10 * proportionality;
 
   }
-
+//TODO:需要根据鼠标位置进行鼠标位置为中心的缩放，以及限定渲染范围与缩放范围
     draw(mapBg);
 }
 
@@ -50,9 +65,9 @@ function zoom(event:WheelEvent){
 
 function draw(mapBg:HTMLImageElement){
 
-  const cPainter = ref(); //创建画笔
+  /*const cPainter = ref(); //创建画笔
 
-  const cPainter_DoubleBuffer = ref(); //创建双缓冲画笔
+  const cPainter_DoubleBuffer = ref(); //创建双缓冲画笔*/
 
   let ratio = 1;
 
@@ -99,7 +114,16 @@ function draw(mapBg:HTMLImageElement){
       canvasMap_DoubleBuffer.value.height = originScale.y * ratio;
 
 
+      cPainter_DoubleBuffer.value.clearRect(0,0,canvasMap_DoubleBuffer.value.width,canvasMap_DoubleBuffer.value.height)
+      cPainter_DoubleBuffer.value.beginPath();
+      cPainter_DoubleBuffer.value.drawImage(mapBg, 0, 0,canvasMap_DoubleBuffer.value.width,canvasMap_DoubleBuffer.value.height);
+      cPainter_DoubleBuffer.value.closePath();
 
+
+      //cPainter.value.clearRect(0,0,canvasMap.value.width,canvasMap.value.height);
+      //const imageData = cPainter_DoubleBuffer.value.getImageData(0,0,canvasMap_DoubleBuffer.value.width,canvasMap_DoubleBuffer.value.height)
+
+      cPainter.value.drawImage(canvasMap_DoubleBuffer.value,0,0);
 
   })
 
@@ -111,21 +135,12 @@ function draw(mapBg:HTMLImageElement){
 
 
 
-  mapBg.onload = () => {
+  //mapBg.onload = () => {
 
 
 
-      cPainter_DoubleBuffer.value.clearRect(0,0,canvasMap_DoubleBuffer.value.width,canvasMap_DoubleBuffer.value.height)
-      cPainter_DoubleBuffer.value.beginPath();
-      cPainter_DoubleBuffer.value.drawImage(mapBg, 0, 0,canvasMap_DoubleBuffer.value.width,canvasMap_DoubleBuffer.value.height);
-      cPainter_DoubleBuffer.value.closePath();
 
-
-      //cPainter.value.clearRect(0,0,canvasMap.value.width,canvasMap.value.height);
-      //const imageData = cPainter_DoubleBuffer.value.getImageData(0,0,canvasMap_DoubleBuffer.value.width,canvasMap_DoubleBuffer.value.height)
-
-      cPainter.value.drawImage(canvasMap_DoubleBuffer.value,0,0);
-  }
+  //}
 
 }
 
