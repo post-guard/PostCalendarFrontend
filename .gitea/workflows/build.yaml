@@ -1,0 +1,12 @@
+name: PostCalendarFrontEnd Build & Deploy
+on: [push]
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: export http_proxy="http://127.0.0.1:7890"
+      - run: export https_proxy="http://127.0.0.1:7890"
+      - uses: actions/setup-node@v3
+      - run: npm install
+      - run: npm run build
