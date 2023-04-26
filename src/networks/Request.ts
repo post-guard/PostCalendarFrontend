@@ -1,4 +1,5 @@
 // @ts-ignore
+import type { IResponse } from "@/models/IResponse";
 import axios from "axios";
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
 
@@ -16,45 +17,35 @@ export class Request {
         this.instance = axios.create(config);
     }
 
-    public get<T>(url: string): Promise<T> {
-        return new Promise((resolve, reject) => {
-            this.instance.get<T>(url)
-                .then((response) => {
-                    return resolve(response.data);
-                })
-                .catch((err) => {
-                    return reject(err.response.data);
-                });
-
+    public get<T>(url: string): Promise<IResponse<T>> {
+        return new Promise( async (resolve) => {
+            const response = await this.instance.get<IResponse<T>>(url);
+            
+            resolve(response.data);
         });
     }
 
-    public post<T>(url: string, data: any): Promise<T> {
-        return new Promise<T>((resolve,reject) => {
-            this.instance.post<T>(url, data)
-                .then((response) => {
-                return resolve(response.data);
-            })
-                .catch((err) =>{
-                    return reject(err.response.data);
-                })
+    public post<T>(url: string, data: any): Promise<IResponse<T>> {
+        return new Promise(async (resolve) => {
+            const response = await this.instance.post<IResponse<T>>(url, data);
 
+            resolve(response.data);
         });
     }
 
-    public put<T>(url: string, data: any): Promise<T> {
-        return new Promise<T>((resolve) => {
-            this.instance.put<T>(url, data).then((response) =>{
-                return resolve(response.data);
-            });
-        });
+    public put<T>(url: string, data: any): Promise<IResponse<T>> {
+       return new Promise(async (resolve) => {
+            const response = await this.instance.put<IResponse<T>>(url, data);
+
+            resolve(response.data);
+       });
     }
 
-    public delete<T>(url: string): Promise<T> {
-        return new Promise<T>((resolve) => {
-            this.instance.delete<T>(url).then((response) => {
-                return resolve(response.data);
-            });
+    public delete<T>(url: string): Promise<IResponse<T>> {
+        return new Promise(async (resolve) => {
+            const response = await this.instance.delete<IResponse<T>>(url);
+
+            resolve(response.data);
         });
     }
 

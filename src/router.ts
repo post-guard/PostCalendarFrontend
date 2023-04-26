@@ -1,5 +1,5 @@
-import {createRouter, createWebHashHistory} from "vue-router";
-import type {RouteRecordRaw} from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
+import type { RouteRecordRaw } from "vue-router";
 
 import MainPage from "@/components/MainPage.vue";
 import LoginPage from "@/components/LoginPage.vue";
@@ -30,15 +30,13 @@ const routers: RouteRecordRaw[] = [
 
         ]
     },
-
     {
         path: '/login',
-
-        component:LoginPage
+        component: LoginPage
     },
     {
         path: '/register',
-        component:RegisterPage
+        component: RegisterPage
     }
 ];
 
