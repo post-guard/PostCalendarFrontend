@@ -131,7 +131,7 @@ function register() {
 
   let request = new Request();
 
-  request.post<IResponse<string>>("/api/auth/register", {
+  request.post<IResponse<string>>("/postcalendarapi/auth/register", {
     "emailAddress": "Ayaka@Inazuma.jp",
     "password": password.value,
     "username": name.value,

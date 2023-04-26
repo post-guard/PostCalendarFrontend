@@ -85,7 +85,7 @@ function login() {
   buttonLoading.value = true;
 
 
-  request.post<IResponse<LoginResponse>>("/api/auth/login", {
+  request.post<IResponse<LoginResponse>>("/postcalendarapi/auth/login", {
     "emailAddress": email.value,
     "password": password.value
   }).then((response) => {

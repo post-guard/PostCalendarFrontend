@@ -24,12 +24,13 @@ export default defineConfig({
         base: "./",
         open: false,
         proxy: {
-            '^/api': {
+            '^/postcalendarapi': {
                 target: "http://localhost:8000",
                 changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/api/, "")
+                rewrite: (path) => path.replace(/^\/postcalendarapi/, "")
             }
         },
         hmr: true,
-    }
-})
+    },
+    base: "/postcalendar/"
+});

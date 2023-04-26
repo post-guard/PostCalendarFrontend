@@ -4,7 +4,7 @@
 </h2>
 </template>
 
-<script>
+<script setup lang="ts">
 
 </script>
 
