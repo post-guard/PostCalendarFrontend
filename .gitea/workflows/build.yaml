@@ -1,13 +1,16 @@
 name: PostCalendarFrontEnd Build & Deploy
 on: [push]
-env: 
-  http_proxy: http://192.168.1.10:7890
-  https_proxy: http://192.168.1.10:7890
 jobs:
   Build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
+        env: 
+          http_proxy: http://192.168.1.10:7890
+          https_proxy: http://192.168.1.10:7890
       - run: npm install
+        env: 
+          http_proxy: http://192.168.1.10:7890
+          https_proxy: http://192.168.1.10:7890
       - run: npm run build
