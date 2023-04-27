@@ -1,12 +1,11 @@
 <template>
-
   <div class="loginPage">
     <div class="loginBox">
       <div class="loginBoxBg">
 
       </div>
       <div class="loginElement">
-        <a-form :wrapperCol="{ span: 20, offset: 2 }" :label-col="{span: 4, offset: 0}">
+        <a-form :wrapperCol="{ span: 20, offset: 2 }" :label-col="{ span: 4, offset: 0 }">
           <a-form-item style="text-align: center">
             <h1>
               登录
@@ -16,7 +15,7 @@
           <a-form-item>
             <a-input v-model:value="email" placeholder="Email" size="large">
               <template #prefix>
-                <mail-outlined/>
+                <mail-outlined />
               </template>
             </a-input>
           </a-form-item>
@@ -24,7 +23,7 @@
           <a-form-item>
             <a-input-password v-model:value="password" placeholder="Password" size="large">
               <template #prefix>
-                <LockOutlined/>
+                <LockOutlined />
               </template>
             </a-input-password>
           </a-form-item>
@@ -36,8 +35,8 @@
           </a-form-item>
 
           <a-form-item>
-            <a-button :disabled="buttonDisable" :loading="buttonLoading" type="primary" size="large" block style="" id="loginbutton"
-                      @click="login">
+            <a-button :disabled="buttonDisable" :loading="buttonLoading" type="primary" size="large" block style=""
+              id="loginbutton" @click="login">
               登录
             </a-button>
           </a-form-item>
@@ -46,17 +45,16 @@
       </div>
     </div>
   </div>
-
 </template>
 
 <script setup lang="ts">
-import {MailOutlined, LockOutlined} from "@ant-design/icons-vue";
-import {computed, ref} from "vue";
-import {Request} from "@/networks/Request"
-import type {IResponse} from "@/models/IResponse";
-import {message} from "ant-design-vue";
-import {useRouter} from "vue-router";
-
+import { MailOutlined, LockOutlined } from "@ant-design/icons-vue";
+import { computed, ref } from "vue";
+import { Request } from "@/networks/Request"
+import type { IResponse } from "@/models/IResponse";
+import { message } from "ant-design-vue";
+import { useRouter } from "vue-router";
+import type { AxiosError } from "axios";
 
 interface LoginResponse {
   id: number,
@@ -68,67 +66,58 @@ interface LoginResponse {
 const email = ref("");
 const password = ref("");
 const router = useRouter();
+const request = new Request();
 
 const buttonDisable = computed(() => {
   return email.value === "" || password.value === "" || buttonLoading.value;
 });
-
-
 const buttonLoading = ref(false);
 
-function login() {
-
-
-
-  let request = new Request();
-
+async function login() {
   buttonLoading.value = true;
 
+  try {
+    const response = await request.post<LoginResponse>("/postcalendarapi/auth/login", {
+      "emailAddress": email.value,
+      "password": password.value
+    });
 
-  request.post<IResponse<LoginResponse>>("/postcalendarapi/auth/login", {
-    "emailAddress": email.value,
-    "password": password.value
-  }).then((response) => {
+    console.log(response.data);
 
-    console.log(response.message);
-    console.log(response.data.token);
+    // 这里不用设置request的token
+    // request不是全局共享的
 
-    request.setAuthorization(response.data.token);
+    await message.success("登录成功");
 
+    router.push({
+      path: "/"
+    });
+  } catch(err) {
+    const axiosError = err as AxiosError<IResponse<LoginResponse>>;
+    // 当返回状态码为400系列时
+    // 服务器应当返回错误原因
+    // 注意这里虽然AxiosError中含有status字段的定义
+    // 但是实际上是undefined
+    // 所以需要使用response字段中的status
+    if (axiosError.response?.status != undefined && 
+        axiosError.response.status >= 400 && axiosError.response.status < 500) {
+      let errorMessage = "登录错误";
 
-    message.success('登录成功')
-        .then(
-            () => {
+      if (axiosError.response?.data != undefined) {
+        errorMessage += `: ${axiosError.response.data.message}`;
+      }
 
-              buttonLoading.value = false;
-
-
-              router.push({
-                path: "/"
-              });
-            }
-        );
-  }).catch((err) => {
-    console.log(err.message);
-
-    buttonLoading.value = false;
-
-
-    switch (err.message){
-
-      case '用户不存在':
-        message.error('用户不存在');
-        break;
-      default:
-        message.error('未连接服务器\n请检查网络');
+      message.error(errorMessage);
+    } else {
+      message.error("服务器错误，请联系管理员");
     }
-
-  });
+  } finally {
+    buttonLoading.value = false;
+  }
 }
 </script>
 
 <style scoped>
-
 .loginPage {
   position: absolute;
   width: 100%;
@@ -188,7 +177,8 @@ function login() {
   padding: 10px 0 10px 0;
 }
 
-* { /* CSS Reset */
+* {
+  /* CSS Reset */
   margin: 0;
   padding: 0;
 }
