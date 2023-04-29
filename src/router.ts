@@ -1,12 +1,12 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
 
-import MainPage from "@/components/MainPage.vue";
-import LoginPage from "@/components/LoginPage.vue";
-import RegisterPage from "@/components/RegisterPage.vue";
-import CalendarPage from "@/components/CalendarPage.vue";
-import MapPage from "@/components/MapPage.vue";
-import PersonalPage from "@/components/PersonalPage.vue";
+import MainPage from "@/pages/MainPage.vue";
+import LoginPage from "@/pages/LoginPage.vue";
+import RegisterPage from "@/pages/RegisterPage.vue";
+import CalendarPage from "@/pages/CalendarPage.vue";
+import MapPage from "@/pages/MapPage.vue";
+import PersonalPage from "@/pages/PersonalPage.vue";
 
 const routers: RouteRecordRaw[] = [
     {
