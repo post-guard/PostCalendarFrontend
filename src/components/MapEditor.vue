@@ -37,7 +37,7 @@ onMounted( async () => {
 
 
         background.on('mousewheel',e=>zoom(e,canvas,background));
-//todo：即将完成地图按鼠标为原点缩放，限制拖拽范围，标志点的坐标计算与添加/删除功能
+//todo：即将完成限制拖拽范围，标志点的坐标计算与添加/删除功能
     }
 })
 
@@ -86,6 +86,22 @@ function zoom(event: any,canvas:Canvas,background:Image){
             //这两串神奇的数字问就是手算的
             background.scale(afterScale);
 
+            //console.log(background)
+
+            /*console.log("event.offsetX:"+event.e.offsetX);
+            console.log("event.offsetY:"+event.e.offsetY);
+            console.log("background.getX():"+background.getX());
+            console.log("background.getY():"+background.getY());
+            console.log("preScale:"+preScale);
+            console.log("afterScale:"+afterScale);
+            console.log("scaleRate:"+afterScale/preScale);
+            console.log('left:'+background.getX()+(event.e.offsetX) * afterScale/preScale)
+            console.log('top:'+background.getY()+(event.e.offsetY) * afterScale/preScale)*/
+
+
+            background.set('left',event.e.offsetX - (event.e.offsetX - background.getX()) * afterScale/preScale);
+            background.set('top', event.e.offsetY -(event.e.offsetY - background.getY()) * afterScale/preScale);
+
             canvas.renderAll()
         }
         else if(event.e.deltaY>0){
@@ -95,6 +111,9 @@ function zoom(event: any,canvas:Canvas,background:Image){
             afterScale = proportionLimit(afterScale,0.19093758905671132,0.7509375890567117)
             //这两串神奇的数字问就是手算的
             background.scale(afterScale);
+
+            background.set('left',event.e.offsetX - (event.e.offsetX - background.getX()) * afterScale/preScale);
+            background.set('top', event.e.offsetY -(event.e.offsetY - background.getY()) * afterScale/preScale);
 
             canvas.renderAll()
         }
