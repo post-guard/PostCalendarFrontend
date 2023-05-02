@@ -1,5 +1,5 @@
 <template>
-    <canvas ref="map" width="1350" height="670">
+    <canvas ref="map">
         你的浏览器不支持canvas，请升级浏览器版本~
     </canvas>
 </template>
@@ -15,16 +15,22 @@ const map = ref<HTMLCanvasElement>();
 
 
 
-
-
 onMounted( async () => {
 
     if (map.value != undefined) {
 
+
+        //map.value.style.width = document.getElementsByClassName('ant-layout-content')[0].clientWidth+"px"
+        //map.value.style.height = document.getElementsByClassName('ant-layout-content')[0].clientHeight+"px"
+        map.value.width = document.getElementsByClassName('ant-layout-content')[0].clientWidth
+        map.value.height = document.getElementsByClassName('ant-layout-content')[0].clientHeight
+
+
         const canvas = new Canvas(map.value);
 
-        const background = await Image.fromURL("xtcmap.jpg");
 
+
+        const background = await Image.fromURL("xtcmap.jpg");
 
         background.scale(canvas.height/background.height);
         background.selectable = true;
@@ -33,42 +39,21 @@ onMounted( async () => {
         background.lockRotation = true;
         background.left = Math.abs(canvas.width-background.getScaledWidth())/2;
 
+
+
+
         canvas.add(background);
 
 
         background.on('mousewheel',e=>zoom(e,canvas,background));
 //todo：即将完成限制拖拽范围，标志点的坐标计算与添加/删除功能
+
+
+
     }
 })
 
-async function createMap(){
 
-    /*if (map.value != undefined) {
-        const canvas = new Canvas(map.value);
-
-        const background = await Image.fromURL("xtcmap.jpg");
-
-
-        background.scale(canvas.height/background.height);
-        background.selectable = true;
-        background.hasControls = false;
-        background.hasBorders =  true;
-        background.lockRotation = true;
-        canvas.add(background);
-
-        console.log(canvas)
-        console.log(init)
-
-
-
-        init.value.canvas = canvas;
-        init.value.background = background;
-
-        background.on('mousewheel',e=>zoom(e));
-
-    }*/
-
-}
 
 
 function zoom(event: any,canvas:Canvas,background:Image){
@@ -82,7 +67,7 @@ function zoom(event: any,canvas:Canvas,background:Image){
 
             let afterScale = preScale - 0.01;
 
-            afterScale = proportionLimit(afterScale,0.19093758905671132,0.7509375890567117)
+            afterScale = proportionLimit(afterScale,canvas.height/background.height,4*canvas.height/background.height)
             //这两串神奇的数字问就是手算的
             background.scale(afterScale);
 
@@ -108,7 +93,7 @@ function zoom(event: any,canvas:Canvas,background:Image){
 
             let afterScale = preScale + 0.01;
 
-            afterScale = proportionLimit(afterScale,0.19093758905671132,0.7509375890567117)
+            afterScale = proportionLimit(afterScale,canvas.height/background.height,4*canvas.height/background.height)
             //这两串神奇的数字问就是手算的
             background.scale(afterScale);
 
