@@ -199,12 +199,9 @@ function buttonResize(){
     outsize_background.value.left = Math.abs(outsize_canvas.value.width-outsize_background.value.getScaledWidth())/2;
     outsize_background.value.top = 0
 
-    outsize_background.value.scale(outsize_canvas.value.height/outsize_background.value.height)
-    outsize_background.value.left = Math.abs(outsize_canvas.value.width-outsize_background.value.getScaledWidth())/2;
-    outsize_background.value.top = 0
-
     outsize_canvas.value.renderAll()
     //灵异事件:需要重复一次才能在复位后正常拖动缩放地图,怀疑是焦点问题但懒得解决
+    //灵异事件：这个bug现在不能复现了，恢复为只设置一次
 }
 
 /**
