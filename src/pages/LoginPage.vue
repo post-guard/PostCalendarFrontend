@@ -50,40 +50,42 @@
 <script setup lang="ts">
 import { MailOutlined, LockOutlined } from "@ant-design/icons-vue";
 import { computed, ref } from "vue";
-import { Request } from "@/networks/Request"
+import { Request } from "@/utils/Request"
 import type { IResponse } from "@/models/IResponse";
 import { message } from "ant-design-vue";
 import { useRouter } from "vue-router";
 import type { AxiosError } from "axios";
-
-interface LoginResponse {
-  id: number,
-  username: string,
-  emailAddress: string,
-  token: string
-}
+import type { ILoginToken } from "@/models/ILoginToken";
+import { WebStorage } from "@/utils/Storage";
 
 const email = ref("");
 const password = ref("");
 const router = useRouter();
 const request = new Request();
+const storage = new WebStorage("localStorage");
 
 const buttonDisable = computed(() => {
   return email.value === "" || password.value === "" || buttonLoading.value;
 });
 const buttonLoading = ref(false);
 
+const token = storage.getKey<ILoginToken>("token");
+if (token != null) {
+  message.warn("已经登录，请勿重复登录!");
+
+  router.replace("/");
+}
+
 async function login() {
   buttonLoading.value = true;
 
   try {
-    const response = await request.post<LoginResponse>("/postcalendarapi/auth/login", {
+    const response = await request.post<ILoginToken>("/postcalendarapi/auth/login", {
       "emailAddress": email.value,
       "password": password.value
     });
 
-    console.log(response.data);
-
+    storage.setKey<ILoginToken>("token", response.data);
     // 这里不用设置request的token
     // request不是全局共享的
 
@@ -93,7 +95,7 @@ async function login() {
       path: "/"
     });
   } catch(err) {
-    const axiosError = err as AxiosError<IResponse<LoginResponse>>;
+    const axiosError = err as AxiosError<IResponse<ILoginToken>>;
     // 当返回状态码为400系列时
     // 服务器应当返回错误原因
     // 注意这里虽然AxiosError中含有status字段的定义

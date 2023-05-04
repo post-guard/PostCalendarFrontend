@@ -97,7 +97,7 @@
 import {MailOutlined, LockOutlined, UserOutlined} from "@ant-design/icons-vue";
 import type {Rule} from "ant-design-vue/es/form";
 import {computed, ref} from "vue";
-import {Request} from "@/networks/Request";
+import {Request} from "@/utils/Request";
 import type {IResponse} from "@/models/IResponse";
 import {message} from "ant-design-vue";
 import {useRouter} from "vue-router";
