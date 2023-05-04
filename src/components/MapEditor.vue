@@ -32,7 +32,7 @@
 
     <div class="coordinatePoints">
 
-        <div v-for="value in coordinate_point_list">
+        <div v-for="value in coordinate_point_list" >
 
             <CoordinatePointCom
 
@@ -41,9 +41,9 @@
                 :position-y = value.positionY
                 :name = value.name
                 :place-type = value.placeType
+                :ref="setPointRef"
 
-
-                style="z-index: 100;">
+                style="z-index: 0;">
 
             </CoordinatePointCom>
         </div>
@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { Canvas, Image } from "fabric";
-import {onMounted, reactive, ref} from "vue";
+import {onBeforeUpdate, onMounted, reactive, ref} from "vue";
 import {ReloadOutlined,ZoomInOutlined,ZoomOutOutlined} from "@ant-design/icons-vue";
 import CoordinatePointCom from '@/components/CoordinatePointCom.vue'
 import {CoordinatePoint} from "@/models/CoordinatePoint";
@@ -66,7 +66,13 @@ const outsize_canvas = ref()
 const outsize_background = ref()
 
 const coordinate_point_list: CoordinatePoint[] = reactive([]);
-//谢谢你,reactive,
+//谢谢你,reactive
+
+let coordinate_point_list_ref: any[] = [];
+
+onBeforeUpdate(() => {
+    coordinate_point_list_ref = [];
+})
 
 
 onMounted( async () => {
@@ -103,6 +109,10 @@ onMounted( async () => {
         background.on('mousewheel',e=>zoom(e,canvas,background));
 
         background.on('mousedblclick',e=>addPoint(e));
+
+        background.on('mousewheel',e=>updatePoints(e));
+        background.on('mousedblclick',e=>updatePoints(e));
+        background.on('moving',e=>updatePoints(e));
 //todo：标志点的坐标计算与添加/删除功能
 
 
@@ -111,6 +121,14 @@ onMounted( async () => {
 
     }
 })
+
+
+
+function setPointRef(el: any){
+    if (el) {
+        coordinate_point_list_ref.push(el)
+    }
+}
 
 
 /**
@@ -221,6 +239,24 @@ function buttonZoom(type:string){
     background.set('top', canvas.height/2 -(canvas.height/2 - background.getY()) * afterScale/preScale);
 
     canvas.renderAll()
+}
+
+function getAbsoluteCoords(canvas:Canvas,img:Image) {
+    return {
+        left: img.left + canvas._offset.left,
+        top: img.top + canvas._offset.top
+    };
+}
+
+function updatePoints(event:any){
+
+    console.log("hi")
+    const absCoords = getAbsoluteCoords(outsize_canvas.value,outsize_background.value);
+    for(let a of coordinate_point_list_ref){
+
+        a.updatePos(absCoords.left,absCoords.top)
+
+    }
 }
 
 /**

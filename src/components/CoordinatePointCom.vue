@@ -1,5 +1,5 @@
 <template>
-    <div class="a-popover_temp">
+    <div ref="popoverDom">
   <a-popover title="">
 
       <template #content>
@@ -52,7 +52,7 @@
 <script setup lang="ts">
 
 import {EnvironmentTwoTone,CheckOutlined,CloseOutlined} from "@ant-design/icons-vue";
-import {computed, ref} from "vue";
+import {computed, getCurrentInstance, onMounted, ref} from "vue";
 
 
 const props = defineProps<{
@@ -64,30 +64,30 @@ const props = defineProps<{
 
 }>()
 
+defineExpose({updatePos});
+
 const pointName = ref('')
 const checkoutButton = computed(()=>{
     return pointName.value === '';
 })
 
+const popoverDom = ref()
 
+function updatePos(x:number,y:number){
+    if(popoverDom.value!=undefined){
 
-function init(){
-    const popover = <HTMLElement> document.getElementsByClassName('a-popover_temp')[0]
+        popoverDom.value.style.position = "absolute"
 
-    /*popover.style.left = props.positionX/10 + 'px';
-    popover.style.top = props.positionY/10 + 'px';*/
+        popoverDom.value.style.left = x -18/2 + "px"
+        popoverDom.value.style.top = y -18/2 + "px"
 
-
+        console.log(popoverDom.value.style.left,popoverDom.value.style.top)
+    }
 }
 
-init();
+
 </script>
 
 <style scoped>
-/*.a-popover_temp{
-    position: absolute;
-    left: auto;
-    top: auto;
-}*/
 
 </style>
