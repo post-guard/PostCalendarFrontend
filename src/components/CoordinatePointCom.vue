@@ -52,7 +52,7 @@
 <script setup lang="ts">
 
 import {EnvironmentTwoTone,CheckOutlined,CloseOutlined} from "@ant-design/icons-vue";
-import {computed, getCurrentInstance, onMounted, ref} from "vue";
+import {computed,ref} from "vue";
 
 
 const props = defineProps<{
@@ -73,15 +73,27 @@ const checkoutButton = computed(()=>{
 
 const popoverDom = ref()
 
-function updatePos(x:number,y:number){
+function updatePos(x:number,y:number,scale:number){
+
     if(popoverDom.value!=undefined){
 
         popoverDom.value.style.position = "absolute"
 
-        popoverDom.value.style.left = x -18/2 + "px"
-        popoverDom.value.style.top = y -18/2 + "px"
+        const leftPos = x + props.positionX * scale - 20;
+        const topPos = y + props.positionY * scale - 20;
 
-        console.log(popoverDom.value.style.left,popoverDom.value.style.top)
+        popoverDom.value.style.left = leftPos + "px"
+        popoverDom.value.style.top = topPos + "px"
+        /*坐标点 = 地图的全局left(即x)或全局top(即y) + 在原始地图图片上坐标*地图缩放尺寸
+                  - dom长度(40)的一半(20)*/
+
+        if(leftPos+20 >= window.innerWidth-20 || topPos+20 >= window.innerHeight-20){
+            popoverDom.value.style.display = "none";
+        }
+        else {
+            popoverDom.value.style.display = "inline";
+        }//超出窗口范围隐藏
+
     }
 }
 

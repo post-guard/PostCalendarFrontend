@@ -1,7 +1,8 @@
 <template>
   <div>
-    <a-layout style="min-height: 100vh">
-      <a-layout-sider v-model:collapsed="collapsed" :collapsible=true :defaultCollapsed=true>
+    <a-layout style="min-height: 100vh;">
+      <a-layout-sider v-model:collapsed="collapsed" :collapsible=true :defaultCollapsed=true
+      style="z-index: 5">
         <div class="logo" />
 
         <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline" @select="menu_selected">
@@ -32,7 +33,7 @@
 
 
       <a-layout>
-        <a-layout-header style="background: #fff; padding: 0">
+        <a-layout-header style="background: #fff; padding: 0;z-index: 5">
           <div id="loginStatus">
             <a-button type="primary" @click="loginButtonClicked">
               {{ loginButtonMessage }}
@@ -46,7 +47,7 @@
           </router-view>
 
         </a-layout-content>
-        <a-layout-footer style="text-align: center">
+        <a-layout-footer style="text-align: center;z-index: 5">
           PostCalendar ©2023 Created by PostCalendar Team
         </a-layout-footer>
 
