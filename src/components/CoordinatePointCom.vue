@@ -1,14 +1,22 @@
 <template>
     <div ref="popoverDom">
-  <a-popover title="">
+  <a-popover title="" v-model:visible="popoverVisible">
 
       <template #content>
-
+          <p></p>
           <p>
           <a-input size="middle"
                    v-model:value="pointName"
                    placeholder="地点名称">
           </a-input>
+          </p>
+
+          <p>
+              <a-radio-group v-model:value="placeTyperef"
+              style="z-index: 6">
+                  <a-radio :value="1">建筑物</a-radio>
+                  <a-radio :value="2">十字路口</a-radio>
+              </a-radio-group>
           </p>
 
           <p>X : {{positionX}}</p>
@@ -18,6 +26,7 @@
               <a-button size="middle"
                         style="width: 50%"
                         :disabled = "checkoutButton"
+                        @click="checkoutPoint"
               >
                   <template #icon>
                       <CheckOutlined/>
@@ -27,6 +36,7 @@
               <a-button danger
                         size="middle"
                         style="width: 50%"
+                        @click="deletePoint"
               >
                   <template #icon>
                       <CloseOutlined/>
@@ -42,7 +52,7 @@
 
     <a-button type="link" size="large">
       <template #icon>
-          <EnvironmentTwoTone/>
+          <EnvironmentTwoTone v-model:two-tone-color="iconColor" />
       </template>
     </a-button>
   </a-popover>
@@ -66,12 +76,32 @@ const props = defineProps<{
 
 defineExpose({updatePos});
 
-const pointName = ref('')
+const emit = defineEmits<{
+    (event:'deletePoint',val: {x:number,y:number}):void;
+    (event:'checkoutPoint',val: {
+        name:string,
+        x:number,
+        y:number,
+        placeType:number
+    }):void;
+}>();
+
+
+const pointName = ref(props.name)
 const checkoutButton = computed(()=>{
+    if(pointName.value === ''){
+        iconColor.value="#ff0040";
+    }
     return pointName.value === '';
 })
 
-const popoverDom = ref()
+const popoverDom = ref<HTMLDivElement>()
+
+const popoverVisible = ref (false)
+
+const placeTyperef = ref(props.placeType)
+
+const iconColor = ref("#ff0040")
 
 function updatePos(x:number,y:number,scale:number){
 
@@ -95,8 +125,53 @@ function updatePos(x:number,y:number,scale:number){
         }//超出窗口范围隐藏
 
     }
+
+    pointName.value = props.name
+    placeTyperef.value = props.placeType
+
+    //todo:这里要考虑加入对颜色的修改
 }
 
+
+function checkoutPoint(){
+    /*
+    发送到后端，获取id
+    如果存在对应id，为改变数值
+    如果不存在，赋值id
+     */
+    if(pointName.value!==''){
+
+        iconColor.value = "#1890ff";
+
+
+        emit('checkoutPoint',
+            {name:pointName.value,
+                x:props.positionX,
+                y:props.positionY,
+                placeType:placeTyperef.value})
+    }
+    else {
+
+
+
+        iconColor.value = "#ff0040";
+    }
+
+
+
+    popoverVisible.value = false;
+}
+
+function deletePoint(){
+    /*
+    如果id为-1,说明后端还没有接收,直接在这里删除
+    如果id不为-1，向后端发送删除信息，同时前端进行删除
+     */
+
+    const emitVal = {x:props.positionX,y:props.positionY};
+    emit('deletePoint',emitVal)
+    popoverVisible.value = false;
+}
 
 </script>
 

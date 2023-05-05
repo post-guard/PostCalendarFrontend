@@ -21,7 +21,7 @@
         你的浏览器不支持canvas，请升级浏览器版本~
     </canvas>
 
-    <div class="coordinatePoints" ref="coordinatePoints">
+    <div class="coordinatePoints">
 
         <div v-for="value in coordinate_point_list">
 
@@ -30,6 +30,9 @@
                                 :name=value.name
                                 :place-type=value.placeType
                                 :ref="setPointRef"
+
+                                @deletePoint="deletePoint"
+                                @checkoutPoint="checkoutPoint"
 
                                 style="z-index: 1;">
 
@@ -52,7 +55,7 @@ const map = ref<HTMLCanvasElement>();
 const outsize_canvas = ref();
 const outsize_background = ref();
 
-const coordinatePoints = ref();
+
 
 const coordinate_point_list: CoordinatePoint[] = reactive([]);
 //谢谢你,reactive
@@ -114,6 +117,7 @@ function setPointRef(el: CoordinatePointCom|undefined) {
     if (el) {
         coordinate_point_list_ref.push(el)
         updatePoints();
+
     }
 
 }
@@ -248,7 +252,7 @@ function updatePoints() {
     const scale = scaleX / outsize_background.value.width;//原比例
 
 
-    //console.log(coordinatePoints.value.refs)
+
 
         for (let point of coordinate_point_list_ref) {
 
@@ -276,13 +280,46 @@ function addPoint(event: any) {
     position.y = (event.e.offsetY - background.getY()) / (background.getObjectScaling().x)
     //获取鼠标双击的地图绝对坐标，不会因为尺寸和位置改变
 
-    const point = new CoordinatePoint(position.x, position.y, '', 0);
+    const point = new CoordinatePoint(position.x, position.y, '', 1);
 
     coordinate_point_list.push(point);
 
 
 }
 
+
+function deletePoint(val:{x:number,y:number}){
+
+
+    for(let point of coordinate_point_list){
+        if(point.positionX == val.x && point.positionY == val.y){
+
+            let index = coordinate_point_list.indexOf(point);
+            if(index!=-1){
+                coordinate_point_list.splice(index,1)
+            }
+        }
+    }
+
+
+
+}
+
+function checkoutPoint(val: { name:string,
+                                x:number,
+                                y:number,
+                                placeType:number }){
+
+
+    for(let point of coordinate_point_list){
+        if(point.positionX == val.x && point.positionY == val.y){
+
+            point.name = val.name;
+            point.placeType = val.placeType;
+        }
+    }
+    console.log(coordinate_point_list)
+}
 </script>
 
 <style scoped>
