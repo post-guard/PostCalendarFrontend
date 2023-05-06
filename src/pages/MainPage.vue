@@ -1,8 +1,7 @@
 <template>
   <div>
     <a-layout style="min-height: 100vh;">
-      <a-layout-sider v-model:collapsed="collapsed" :collapsible=true :defaultCollapsed=true
-      style="z-index: 5">
+      <a-layout-sider v-model:collapsed="collapsed" :collapsible=true :defaultCollapsed=true style="z-index: 5">
         <div class="logo" />
 
         <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline" @select="menu_selected">
@@ -66,6 +65,7 @@ import { CalendarOutlined, UserOutlined, GlobalOutlined } from "@ant-design/icon
 import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { WebStorage } from "@/utils/Storage";
+import type { ILoginToken } from "@/models/ILoginToken";
 
 const router = useRouter();
 const storage = new WebStorage("localStorage");
@@ -75,7 +75,7 @@ const collapsed = ref(true);
 const selectedKeys = ref([""]);
 const loginButtonMessage = ref("登录");
 
-const token = storage.getKey("token");
+const token = storage.getKey<ILoginToken>("token");
 if (token == null) {
   // 获得登录token失败
   // TODO: 还需要添加校验token是否失效的逻辑
