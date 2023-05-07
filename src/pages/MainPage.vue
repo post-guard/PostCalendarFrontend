@@ -66,12 +66,13 @@ import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { WebStorage } from "@/utils/Storage";
 import type { ILoginToken } from "@/models/ILoginToken";
+import { Request } from "@/utils/Request";
+import { useUserStore } from "@/stores/UserStore";
 
 const router = useRouter();
 const storage = new WebStorage("localStorage");
 
 const collapsed = ref(true);
-//const defSelectedKey = Array(toRaw(router).currentRoute.value.fullPath.substring(1));
 const selectedKeys = ref([""]);
 const loginButtonMessage = ref("登录");
 
@@ -82,6 +83,10 @@ if (token == null) {
   router.replace("/login");
 } else {
   loginButtonMessage.value = "退出登录";
+  Request.setAuthorizationToken(token.token);
+
+  const userStore = useUserStore();
+  userStore.updateUserInformation(token.id);
 }
 
 
@@ -107,7 +112,7 @@ function menu_selected() {
       break;
 
     case 'home':
-      router.push({ path: "/home" });
+      router.push({ path: "/home" })
       break;
 
     default:
