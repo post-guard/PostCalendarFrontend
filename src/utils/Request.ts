@@ -11,10 +11,26 @@ const defaultConfig: AxiosRequestConfig = {
 };
 
 export class Request {
-    instance: AxiosInstance;
+    private instance: AxiosInstance;
+    public static token: String;
 
     constructor(config: AxiosRequestConfig = defaultConfig) {
         this.instance = axios.create(config);
+
+        this.instance.interceptors.request.use(
+            (config) => {
+                config.headers.Authorization = "Bearer " + Request.token;
+                return config;
+            }
+        )
+    }
+
+    /**
+     * 设置请求的令牌
+     * @param token 请求令牌
+     */
+    public static setAuthorizationToken(token : String) {
+        Request.token = token;
     }
 
     public get<T>(url: string): Promise<IResponse<T>> {
@@ -53,17 +69,5 @@ export class Request {
             resolve(response.data);
         });
     }
-
-    public setAuthorization(token: string): void {
-        this.instance.interceptors.request.use(
-            (config) => {
-                config.headers.Authorization = token;
-
-                return config;
-            }
-        );
-    }
-
-
 }
 
