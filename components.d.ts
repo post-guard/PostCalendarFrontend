@@ -30,6 +30,7 @@ declare module '@vue/runtime-core' {
     ARow: typeof import('ant-design-vue/es')['Row']
     ASelect: typeof import('ant-design-vue/es')['Select']
     ASelectOption: typeof import('ant-design-vue/es')['SelectOption']
+    ATable: typeof import('ant-design-vue/es')['Table']
     CoordinatePoint: typeof import('./src/components/CoordinatePoint.vue')['default']
     CoordinatePointCom: typeof import('./src/components/CoordinatePointCom.vue')['default']
     MapEditor: typeof import('./src/components/MapEditor.vue')['default']
