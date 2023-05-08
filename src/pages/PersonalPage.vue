@@ -12,10 +12,10 @@
 
           <a-divider style="color: white;"></a-divider>
 
-          <div>
-            <MailOutlined style="float: left; margin: 5px; margin-left: 20px;" />
-            <h3 style="float: left;">: {{ userStore.user?.emailAddress }}</h3>
-          </div>
+          <a-space align="center" size="small" style="margin-left: 5px;">
+            <MailOutlined></MailOutlined>
+            <p style="font-size: 16px; margin-top: 12px;">{{ userStore.user?.emailAddress }}</p>
+          </a-space>
         </div>
       </a-col>
 
@@ -33,8 +33,16 @@
         <div>
           <a-table
             :columns="columns"
-            :data-source="groups">
-
+            :data-source="groups"
+            :loading="groupTableLoading">
+            
+            <template #bodyCell="{column, record}">
+              <template v-if="column.key === 'action'">
+                <a-button type="link" @click="leaveGroup(toRaw(record.groupLink))">
+                  退出
+                </a-button>
+              </template>
+            </template>
           </a-table>
         </div>
       </a-col>
@@ -44,12 +52,14 @@
 
 <script setup lang="ts">
 import type { IGroup } from '@/models/IGroup';
+import type { IResponse } from '@/models/IResponse';
 import type { IUserGroupLink } from '@/models/IUserGroupLink';
 import { useUserStore } from '@/stores/UserStore';
 import { Request } from '@/utils/Request';
 import { MailOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
-import { ref } from 'vue';
+import type { AxiosError } from 'axios';
+import { ref, toRaw } from 'vue';
 
 class Column {
   public title: String;
@@ -64,11 +74,13 @@ class Column {
 }
 
 class GroupInformation {
+  public groupLink: IUserGroupLink;
   public name: String;
   public details: String;
   public permission: String;
 
   public constructor(group: IGroup, groupLink: IUserGroupLink) {
+    this.groupLink = groupLink;
     this.name = group.name;
     this.details = group.details;
 
@@ -92,6 +104,7 @@ class GroupInformation {
 const userStore = useUserStore();
 const request = new Request();
 const selectedKeys = ref(['1']);
+const groupTableLoading = ref(false);
 const groups = ref<GroupInformation[]>([]);
 const columns: Column[] = [
   new Column("组织名称", "name"),
@@ -101,6 +114,7 @@ const columns: Column[] = [
 ];
 
 if (userStore.user != undefined) {
+  groupTableLoading.value = true;
   getGroupInformation(userStore.user.id);
 }
 
@@ -116,8 +130,33 @@ async function getGroupInformation(userId: Number) {
       const groupResponse = await request.get<IGroup>(`/postcalendarapi/group/${link.groupId}`);
       groups.value.push(new GroupInformation(groupResponse.data, link));
     }
+    groupTableLoading.value = false;
   } catch(err) {
+    
     message.error("服务器异常，请联系管理员");
+  }
+}
+
+async function leaveGroup(groupLink: IUserGroupLink) {
+  try {
+    console.log(groupLink);
+    await request.delete<IUserGroupLink>(`/groupLink/group/${groupLink.groupId}`);
+    
+    message.info(`退出组织${groupLink.groupId}成功`);
+
+    getGroupInformation(groupLink.userId);
+  } catch(err) {
+    const axiosError = err as AxiosError<IResponse<IUserGroupLink>>;
+
+    let hint = "服务器错误，请联系管理员";
+    if (axiosError.response?.status != undefined
+    && axiosError.response.status >= 400 && axiosError.response.status < 500) {
+      console.log(axiosError.response.data.message);
+      if (axiosError.response.data.message != undefined) {
+        hint = axiosError.response.data.message;
+      }
+    }
+    message.error(hint);
   }
 }
 </script>
