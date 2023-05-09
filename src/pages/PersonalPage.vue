@@ -122,7 +122,7 @@ if (userStore.user != undefined) {
  * 获得用户所在组织的信息
  * @param userId 用户ID
  */
-async function getGroupInformation(userId: Number) {
+async function getGroupInformation(userId: number) {
   try {
     const linkResponse = await request.get<IUserGroupLink[]>(`/postcalendarapi/groupLink/user/${userId}`);
 

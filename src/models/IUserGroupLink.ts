@@ -1,6 +1,6 @@
 export interface IUserGroupLink {
-    id: Number;
-    userId: Number;
-    groupId: Number;
-    permission: Number;
+    id: number;
+    userId: number;
+    groupId: number;
+    permission: number;
 }
