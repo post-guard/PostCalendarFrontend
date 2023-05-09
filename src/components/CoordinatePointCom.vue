@@ -1,5 +1,5 @@
 <template>
-    <div ref="popoverDom" @contextmenu.prevent>
+    <div ref="popoverDom" @contextmenu.prevent="rightMouseDown" @mouseup="e=>rightMouseUp(e)">
   <a-popover title="" v-model:visible="popoverVisible">
 
       <template #content>
@@ -84,10 +84,21 @@ const emit = defineEmits<{
         y:number,
         placeType:number
     }):void;
+    (event:'rightMouseDown',val: {
+        x:number,y:number,rx:number,ry:number
+    }):void;
+    (event:'rightMouseUp',val: {
+        x:number,y:number
+    }):void;
+
 }>();
 
 
 const pointName = ref(props.name)
+
+/**
+ * 根据输入框中是否有内容来调整按钮和颜色状态
+ */
 const checkoutButton = computed(()=>{
     if(pointName.value === ''){
         iconColor.value="#ff0040";
@@ -106,6 +117,12 @@ const placeTyperef = ref(props.placeType)
 
 const iconColor = ref("#ff0040")
 
+/**
+ * 更新组件位置的函数
+ * @param x
+ * @param y
+ * @param scale 当前地图的尺寸
+ */
 function updatePos(x:number,y:number,scale:number){
 
     if(popoverDom.value!=undefined){
@@ -132,10 +149,12 @@ function updatePos(x:number,y:number,scale:number){
     pointName.value = props.name
     placeTyperef.value = props.placeType
 
-    //todo:这里要考虑加入对颜色的修改
+
 }
 
-
+/**
+ * 点击确认按钮事件
+ */
 function checkoutPoint(){
     /*
     发送到后端，获取id
@@ -165,6 +184,9 @@ function checkoutPoint(){
     popoverVisible.value = false;
 }
 
+/**
+ * 点击删除按钮事件
+ */
 function deletePoint(){
     /*
     如果id为-1,说明后端还没有接收,直接在这里删除
@@ -174,6 +196,40 @@ function deletePoint(){
     const emitVal = {x:props.positionX,y:props.positionY};
     emit('deletePoint',emitVal)
     popoverVisible.value = false;
+}
+
+/**
+ * 监测鼠标右键是否在自己身上按下
+ */
+function rightMouseDown(){
+
+    console.log("Start:");
+    console.log(props);
+
+    if(popoverDom.value!=undefined){
+
+        const rx = parseFloat(popoverDom.value.style.left);
+        const ry = parseFloat(popoverDom.value.style.top);
+
+        const emitVal = {x:props.positionX,y:props.positionY, rx:rx+20,ry:ry+20};
+
+        emit('rightMouseDown',emitVal);
+    }
+
+}
+
+function rightMouseUp(event:any){
+    if(event.button==2){//右键在自己身上松开
+        console.log("End:");
+        console.log(props);
+
+
+        const emitVal = {x:props.positionX,y:props.positionY};
+
+        emit('rightMouseUp',emitVal);
+
+
+    }
 }
 
 </script>
