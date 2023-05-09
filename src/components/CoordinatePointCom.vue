@@ -1,5 +1,5 @@
 <template>
-    <div ref="popoverDom">
+    <div ref="popoverDom" @contextmenu.prevent>
   <a-popover title="" v-model:visible="popoverVisible">
 
       <template #content>

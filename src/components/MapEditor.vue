@@ -99,6 +99,8 @@ onMounted(async () => {
 
         background.on('mousedblclick', e => addPoint(e));
 
+        background.on('mousedown',e=>addLine(e));
+
 
         outsize_canvas.value = canvas
         outsize_background.value = background
@@ -319,6 +321,27 @@ function checkoutPoint(val: { name:string,
         }
     }
     console.log(coordinate_point_list)
+}
+
+
+function addLine(event:any){
+    const background = outsize_background.value
+    const canvas = outsize_canvas.value
+    console.log("hi");
+    if(event.e.button == 1){//鼠标右键按住
+
+
+        let position = { x: 0, y: 0 }
+
+        position.x = (event.e.offsetX - background.getX()) / (background.getObjectScaling().x)
+        position.y = (event.e.offsetY - background.getY()) / (background.getObjectScaling().x)
+
+        for(let point of coordinate_point_list){
+            if(Math.abs(point.positionX-position.x)<=30 && Math.abs(point.positionY-position.y)<=30){
+                console.log(point);
+            }
+        }
+    }
 }
 </script>
 
