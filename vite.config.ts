@@ -20,7 +20,7 @@ export default defineConfig({
         }
     },
     server: {
-        port: 3333,
+        port: 8879,
         base: "./",
         open: false,
         proxy: {

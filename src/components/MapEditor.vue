@@ -33,6 +33,7 @@
 
                                 @deletePoint="deletePoint"
                                 @checkoutPoint="checkoutPoint"
+                                @rightMouseDown="addLine"
 
                                 style="z-index: 1;">
 
@@ -42,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { Canvas, Image} from "fabric";
+import {Canvas, Image, Line} from "fabric";
 import { onBeforeUpdate, onMounted, reactive, ref} from "vue";
 import { ReloadOutlined, ZoomInOutlined, ZoomOutOutlined } from "@ant-design/icons-vue";
 import CoordinatePointCom from '@/components/CoordinatePointCom.vue';
@@ -77,7 +78,8 @@ onMounted(async () => {
 
 
         const canvas = new Canvas(map.value);
-        canvas.stopContextMenu = true
+        canvas.stopContextMenu = true;
+        //canvas.fireRightClick = true;
 
 
 
@@ -99,7 +101,7 @@ onMounted(async () => {
 
         background.on('mousedblclick', e => addPoint(e));
 
-        background.on('mousedown',e=>addLine(e));
+        //background.on('mousedown',e=>addLine(e));
 
 
         outsize_canvas.value = canvas
@@ -108,6 +110,10 @@ onMounted(async () => {
         //background.on('mousewheel', e => updatePoints());
         //background.on('mousedblclick', e => updatePoints());
         background.on('moving', e => updatePoints());
+
+
+
+
 
     }
 })
@@ -320,28 +326,54 @@ function checkoutPoint(val: { name:string,
             point.placeType = val.placeType;
         }
     }
-    console.log(coordinate_point_list)
+
 }
 
 
-function addLine(event:any){
+function addLine(val:{x:number,y:number,rx:number,ry:number}){
     const background = outsize_background.value
     const canvas = outsize_canvas.value
-    console.log("hi");
-    if(event.e.button == 1){//鼠标右键按住
 
 
-        let position = { x: 0, y: 0 }
 
-        position.x = (event.e.offsetX - background.getX()) / (background.getObjectScaling().x)
-        position.y = (event.e.offsetY - background.getY()) / (background.getObjectScaling().x)
+    let pointStart:CoordinatePoint|undefined;
+    let pointEnd : CoordinatePoint|undefined;
 
-        for(let point of coordinate_point_list){
-            if(Math.abs(point.positionX-position.x)<=30 && Math.abs(point.positionY-position.y)<=30){
-                console.log(point);
-            }
+    let pointStartPos = {x : 0, y : 0};
+    let pointEndPos = {x : 0, y : 0};
+    let sampleLine = undefined;
+
+    for(let point of coordinate_point_list){
+        if(val.x==point.positionX && val.y==point.positionY){
+            //if(point.id!=-1){
+                    pointStart = point;//找到坐标点列表中的这个坐标点
+
+                    break;
+            //}
         }
     }
+
+    pointStartPos.x = val.rx;
+    pointStartPos.y = val.ry;
+
+
+    //if(pointStart!=undefined){
+
+
+
+        sampleLine = new Line([pointStartPos.x, pointStartPos.y, pointStartPos.x+100, pointStartPos.y+100], {
+            fill: 'green', //填充颜色
+            stroke: 'green', //笔触颜色
+            strokeWidth: 10, //笔触宽度
+        })
+
+        canvas.add(sampleLine);
+
+        console.log(sampleLine)
+
+    //}
+
+
 }
 </script>
 
