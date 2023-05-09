@@ -240,7 +240,7 @@ function buttonZoom(type: string) {
 }
 
 /**
- * 更新当前的组件列表
+ * 更新当前的坐标点组件列表
  */
 function updatePoints() {
 

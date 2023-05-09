@@ -92,6 +92,9 @@ const checkoutButton = computed(()=>{
     if(pointName.value === ''){
         iconColor.value="#ff0040";
     }
+    else{
+        iconColor.value="#1890ff";
+    }
     return pointName.value === '';
 })
 
