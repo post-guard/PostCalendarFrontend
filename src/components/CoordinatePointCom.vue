@@ -1,5 +1,8 @@
 <template>
-    <div ref="popoverDom" @contextmenu.prevent="rightMouseDown" @mouseup="e=>rightMouseUp(e)">
+    <div ref="popoverDom"
+         @contextmenu.prevent
+         @mousedown="rightMouseDown"
+         @mouseup="e=>rightMouseUp(e)">
   <a-popover title="" v-model:visible="popoverVisible">
 
       <template #content>
@@ -64,6 +67,10 @@
 import {EnvironmentTwoTone,CheckOutlined,CloseOutlined} from "@ant-design/icons-vue";
 import {computed,ref} from "vue";
 
+import { Request } from "@/utils/Request"
+import type {AxiosError} from "axios";
+import type {IResponse} from "@/models/IResponse";
+import {message} from "ant-design-vue";
 
 const props = defineProps<{
 
@@ -71,6 +78,7 @@ const props = defineProps<{
       positionY:number,
       name:string,
       placeType:number,
+      id:number
 
 }>()
 
@@ -88,13 +96,15 @@ const emit = defineEmits<{
         x:number,y:number,rx:number,ry:number
     }):void;
     (event:'rightMouseUp',val: {
-        x:number,y:number
+        x:number,y:number,rx:number,ry:number
     }):void;
 
 }>();
 
 
 const pointName = ref(props.name)
+
+const request = new Request();
 
 /**
  * 根据输入框中是否有内容来调整按钮和颜色状态
@@ -136,6 +146,8 @@ function updatePos(x:number,y:number,scale:number){
         popoverDom.value.style.top = topPos + "px"
         /*坐标点 = 地图的全局left(即x)或全局top(即y) + 在原始地图图片上坐标*地图缩放尺寸
                   - dom长度(40)的一半(20)*/
+        console.log(popoverDom.value?.style.left);
+        console.log(popoverDom.value?.style.top);
 
         if(leftPos+20 >= window.innerWidth-20 || topPos+20 >= window.innerHeight-20){
             popoverDom.value.style.display = "none";
@@ -150,17 +162,68 @@ function updatePos(x:number,y:number,scale:number){
     placeTyperef.value = props.placeType
 
 
+
 }
 
 /**
  * 点击确认按钮事件
  */
-function checkoutPoint(){
+async function checkoutPoint(){
     /*
     发送到后端，获取id
     如果存在对应id，为改变数值
     如果不存在，赋值id
      */
+    if(props.id==-1){ //该点没有在数据库中
+        try {
+            const response =  await request.post<any>("/postcalendarapi/place/", {
+
+                "name": pointName.value,
+                "x": props.positionX,
+                "y": props.positionY,
+                "placeType": placeTyperef.value,
+
+            });
+
+            console.log(response);
+            await message.success("添加地点成功");
+
+        }catch (err){
+            const axiosError = err as AxiosError<IResponse<any>>;
+            if (axiosError.response?.status != undefined &&
+                axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+
+                message.error("添加地点失败");
+            }
+        }
+    }
+    else{ //该点在数据库中
+        try {
+            const response =  await request.put<null>("/postcalendarapi/place/"+props.id, {
+
+                "name": pointName.value,
+                "x": props.positionX,
+                "y": props.positionY,
+                "placeType": placeTyperef.value,
+
+            });
+
+            console.log(response.message);
+            await message.success("修改地点成功");
+
+        }catch (err){
+            const axiosError = err as AxiosError<IResponse<null>>;
+            if (axiosError.response?.status != undefined &&
+                axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                let errorMessage = "修改地点失败";
+                message.error(errorMessage);
+            }
+        }
+    }
+
+
     if(pointName.value!==''){
 
         iconColor.value = "#1890ff";
@@ -208,8 +271,11 @@ function rightMouseDown(){
 
     if(popoverDom.value!=undefined){
 
+        //iconColor.value="#27ff00"
+
         const rx = parseFloat(popoverDom.value.style.left);
         const ry = parseFloat(popoverDom.value.style.top);
+
 
         const emitVal = {x:props.positionX,y:props.positionY, rx:rx+20,ry:ry+20};
 
@@ -223,12 +289,17 @@ function rightMouseUp(event:any){
         console.log("End:");
         console.log(props);
 
+        if(popoverDom.value!=undefined) {
 
-        const emitVal = {x:props.positionX,y:props.positionY};
+            const rx = parseFloat(popoverDom.value.style.left);
+            const ry = parseFloat(popoverDom.value.style.top);
 
-        emit('rightMouseUp',emitVal);
 
+            const emitVal = {x: props.positionX, y: props.positionY,rx:rx+20,ry:ry+20};
 
+            emit('rightMouseUp', emitVal);
+
+        }
     }
 }
 

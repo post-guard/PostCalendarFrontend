@@ -30,6 +30,7 @@ declare module '@vue/runtime-core' {
     ARow: typeof import('ant-design-vue/es')['Row']
     ASpace: typeof import('ant-design-vue/es')['Space']
     ATable: typeof import('ant-design-vue/es')['Table']
+    CoordinateLineCom: typeof import('./src/components/CoordinateLineCom.vue')['default']
     CoordinatePointCom: typeof import('./src/components/CoordinatePointCom.vue')['default']
     MapEditor: typeof import('./src/components/MapEditor.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

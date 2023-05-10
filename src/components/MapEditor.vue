@@ -29,11 +29,13 @@
                                 :position-y=value.positionY
                                 :name=value.name
                                 :place-type=value.placeType
+                                :id=value.id
                                 :ref="setPointRef"
 
                                 @deletePoint="deletePoint"
                                 @checkoutPoint="checkoutPoint"
-                                @rightMouseDown="addLine"
+                                @rightMouseDown="addLineStart"
+                                @rightMouseUp="addLineEnd"
 
                                 style="z-index: 1;">
 
@@ -62,6 +64,9 @@ const coordinate_point_list: CoordinatePoint[] = reactive([]);
 //谢谢你,reactive
 
 let coordinate_point_list_ref: CoordinatePointCom [] = reactive([]);
+
+
+const lineSamplePos = ref<{start:{x:number,y:number},end:{x:number,y:number}}>({start:{x:-1,y:-1},end:{x:-1,y:-1}});
 
 onBeforeUpdate(async() => {
     coordinate_point_list_ref = [];
@@ -316,7 +321,8 @@ function deletePoint(val:{x:number,y:number}){
 function checkoutPoint(val: { name:string,
                                 x:number,
                                 y:number,
-                                placeType:number }){
+                                placeType:number,
+                                }){
 
 
     for(let point of coordinate_point_list){
@@ -329,19 +335,25 @@ function checkoutPoint(val: { name:string,
 
 }
 
-
-function addLine(val:{x:number,y:number,rx:number,ry:number}){
+/*
+解释一下加线的行为逻辑，以便理解
+1.给点的组件添加鼠标右键按下和松开的事件，一旦触发，就会返回编辑器这个点的绝对坐标和相对坐标
+2.那么，现在在A点按下右键，鼠标保持按下状态移动到B点上，再松开，就会触发A点的按下事件和B点的松开事件
+3.此时，会给编辑器的lineSamplePos{start,end}分别附上起点和终点的坐标
+4.同时，在松开的处理函数中会根据lineSamplePos{start,end}生成线
+ */
+function addLineStart(val:{x:number,y:number,rx:number,ry:number}){
     const background = outsize_background.value
     const canvas = outsize_canvas.value
 
 
 
     let pointStart:CoordinatePoint|undefined;
-    let pointEnd : CoordinatePoint|undefined;
+
 
     let pointStartPos = {x : 0, y : 0};
-    let pointEndPos = {x : 0, y : 0};
-    let sampleLine = undefined;
+
+
 
     for(let point of coordinate_point_list){
         if(val.x==point.positionX && val.y==point.positionY){
@@ -353,23 +365,66 @@ function addLine(val:{x:number,y:number,rx:number,ry:number}){
         }
     }
 
-    pointStartPos.x = val.rx;
-    pointStartPos.y = val.ry;
+    pointStartPos.x = val.rx - canvas._offset.left;
+    pointStartPos.y = val.ry -  canvas._offset.top;
 
-
+    lineSamplePos.value.start = pointStartPos;
     //if(pointStart!=undefined){
 
 
+    //}
 
-        sampleLine = new Line([pointStartPos.x, pointStartPos.y, pointStartPos.x+100, pointStartPos.y+100], {
-            fill: 'green', //填充颜色
-            stroke: 'green', //笔触颜色
-            strokeWidth: 10, //笔触宽度
-        })
 
-        canvas.add(sampleLine);
+}
 
-        console.log(sampleLine)
+
+
+function addLineEnd(val:{x:number,y:number,rx:number,ry:number}){
+    const background = outsize_background.value
+    const canvas = outsize_canvas.value
+
+
+
+    let pointEnd:CoordinatePoint|undefined;
+
+
+    let pointEndPos = {x : 0, y : 0};
+
+
+
+    for(let point of coordinate_point_list){
+        if(val.x==point.positionX && val.y==point.positionY){
+            //if(point.id!=-1){
+            pointEnd = point;//找到坐标点列表中的这个坐标点
+
+            break;
+            //}
+        }
+    }
+
+    pointEndPos.x = val.rx - canvas._offset.left;
+    pointEndPos.y = val.ry -  canvas._offset.top;
+
+    if(lineSamplePos.value.start!==pointEndPos){//不是同一个点作为起点和终点
+        lineSamplePos.value.end = pointEndPos;
+
+        if(lineSamplePos.value.start.x!=-1 && lineSamplePos.value.start.y!=-1){
+
+        }
+        /*这样做排除以下几种误操作：
+        1.在地图外按下右键，在地图内的组件上松开
+        2.在地图内的组件上按下右键，在地图外松开
+
+        但是，当先做2再做1时，就会发生bug，导致两个点意外用线连起来
+        然而我相信使用者应该不会引出这种问题,所以暂不解决
+         */
+
+    }
+
+
+
+    //if(pointEnd!=undefined){
+
 
     //}
 

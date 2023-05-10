@@ -8,7 +8,7 @@ import { ref } from "vue";
 export const useUserStore = defineStore('user', ()=> {
     const user = ref<User>();
     const request = new Request();
-    const userPermision = ref(0);
+    const userPermission = ref(0);
 
     async function updateUserInformation(id : number) : Promise<void> {
         try {
@@ -30,7 +30,7 @@ export const useUserStore = defineStore('user', ()=> {
             const linkResponse = await request.get<IUserGroupLink[]>(`/postcalendarapi/groupLink/user/${id}`);
             for (const link of linkResponse.data) {
                 if (link.groupId == defaultGroupId) {
-                    userPermision.value = link.permission;
+                    userPermission.value = link.permission;
                     break;
                 }
             }
@@ -40,5 +40,5 @@ export const useUserStore = defineStore('user', ()=> {
         }
     }
 
-    return {user, userPermision, updateUserInformation};
+    return {user, userPermission, updateUserInformation};
 });
