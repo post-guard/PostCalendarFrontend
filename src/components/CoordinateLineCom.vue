@@ -15,8 +15,10 @@
 
 
 
-          <p>X : {{positionX}}</p>
-          <p>Y : {{positionY}}</p>
+          <p>Start : {{startPointId}}</p>
+          <p>End : {{endPointId}}</p>
+          <p>Length : {{length}}</p>
+          <p>Id : {{id}}</p>
 
           <p>
               <a-button size="middle"
@@ -46,7 +48,7 @@
       </template>
 
 
-    <a-button >
+    <a-button style="rotate: 30deg">
 
     </a-button>
   </a-popover>
@@ -76,8 +78,8 @@ const props = defineProps<{
 defineExpose({updatePos});
 
 const emit = defineEmits<{
-    (event:'deletePoint',val: {x:number,y:number}):void;
-    (event:'checkoutPoint',val: {
+    (event:'deleteLine',val: {startPointId:number; endPointId:number;}):void;
+    (event:'checkoutLine',val: {
         startPointId:number;
 
         endPointId:number;
@@ -93,26 +95,26 @@ const emit = defineEmits<{
 }>();
 
 
-const LineName = ref(props.name)
-
+const lineName = ref(props.name)
+const lineId = ref(-1)
 /**
  * 根据输入框中是否有内容来调整按钮和颜色状态
  */
 const checkoutButton = computed(()=>{
-    if(LineName.value === ''){
-        iconColor.value="#ff0040";
+    if(lineName.value === ''){
+
     }
     else{
-        iconColor.value="#1890ff";
+
     }
-    return LineName.value === '';
+    return lineName.value === '';
 })
 
 const popoverDom = ref<HTMLDivElement>()
 
 const popoverVisible = ref (false)
 
-const iconColor = ref("#ff0040")
+
 
 /**
  * 更新组件位置的函数
@@ -145,7 +147,7 @@ function updatePos(x:number,y:number,scale:number){
 
     }
 
-    LineName.value = props.name
+    lineName.value = props.name
 
 
 
@@ -154,28 +156,34 @@ function updatePos(x:number,y:number,scale:number){
 /**
  * 点击确认按钮事件
  */
-function checkoutPoint(){
+function checkoutLine(){
     /*
     发送到后端，获取id
     如果存在对应id，为改变数值
     如果不存在，赋值id
      */
-    if(pointName.value!==''){
-
-        iconColor.value = "#1890ff";
+    if(lineName.value!==''){
 
 
-        emit('checkoutPoint',
-            {name:pointName.value,
-                x:props.positionX,
-                y:props.positionY,
-                placeType:placeTyperef.value})
+
+
+        emit('checkoutLine',
+            {startPointId:props.startPointId,
+
+                endPointId:props.endPointId,
+
+                name:lineName.value,
+
+                length:props.length,
+
+                id:lineId.value
+                })
     }
     else {
 
 
 
-        iconColor.value = "#ff0040";
+
     }
 
 
@@ -186,14 +194,14 @@ function checkoutPoint(){
 /**
  * 点击删除按钮事件
  */
-function deletePoint(){
+function deleteLine(){
     /*
     如果id为-1,说明后端还没有接收,直接在这里删除
     如果id不为-1，向后端发送删除信息，同时前端进行删除
      */
 
     const emitVal = {x:props.positionX,y:props.positionY};
-    emit('deletePoint',emitVal)
+    emit('deleteLine',emitVal)
     popoverVisible.value = false;
 }
 

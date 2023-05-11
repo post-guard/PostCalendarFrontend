@@ -1,7 +1,7 @@
 <template>
     <div ref="popoverDom"
          @contextmenu.prevent
-         @mousedown="rightMouseDown"
+         @mousedown="e=>rightMouseDown(e)"
          @mouseup="e=>rightMouseUp(e)">
   <a-popover title="" v-model:visible="popoverVisible">
 
@@ -304,24 +304,26 @@ async function deletePoint(){
 /**
  * 监测鼠标右键是否在自己身上按下
  */
-function rightMouseDown(){
+function rightMouseDown(event:any){
 
-    console.log("Start:");
-    console.log(props);
+    if(event.button==2) {
 
-    if(popoverDom.value!=undefined){
+        console.log("Start:");
+        console.log(props);
 
-        //iconColor.value="#27ff00"
+        if (popoverDom.value != undefined) {
 
-        const rx = parseFloat(popoverDom.value.style.left);
-        const ry = parseFloat(popoverDom.value.style.top);
+            //iconColor.value="#27ff00"
+
+            const rx = parseFloat(popoverDom.value.style.left);
+            const ry = parseFloat(popoverDom.value.style.top);
 
 
-        const emitVal = {x:props.positionX,y:props.positionY, rx:rx+20,ry:ry+20};
+            const emitVal = {x: props.positionX, y: props.positionY, rx: rx + 20, ry: ry + 20};
 
-        emit('rightMouseDown',emitVal);
+            emit('rightMouseDown', emitVal);
+        }
     }
-
 }
 
 function rightMouseUp(event:any){

@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import {Canvas, Image} from "fabric";
+import {Canvas, Image, Line} from "fabric";
 import { onBeforeUpdate, onMounted, reactive, ref} from "vue";
 import { ReloadOutlined, ZoomInOutlined, ZoomOutOutlined } from "@ant-design/icons-vue";
 import CoordinatePointCom from '@/components/CoordinatePointCom.vue';
@@ -94,7 +94,7 @@ onMounted(async () => {
 
         const canvas = new Canvas(map.value);
         canvas.stopContextMenu = true;
-        //canvas.fireRightClick = true;
+        canvas.fireRightClick = true;
 
 
 
@@ -116,7 +116,8 @@ onMounted(async () => {
 
         background.on('mousedblclick', e => addPoint(e));
 
-        //background.on('mousedown',e=>addLine(e));
+        background.on('mousedown',e=>resetLineSamplePos(e));
+        background.on('mouseup',e=>resetLineSamplePos(e));
 
 
         outsize_canvas.value = canvas
@@ -441,6 +442,29 @@ function addLineEnd(val:{x:number,y:number,rx:number,ry:number}){
 
         if(lineSamplePos.value.start.x!=-1 && lineSamplePos.value.start.y!=-1){
 
+
+            const rot = getAngle(lineSamplePos.value.start,lineSamplePos.value.end);
+            const width = 6;
+
+            const line = new Line(
+                [lineSamplePos.value.start.x,
+                        lineSamplePos.value.start.y,
+                        lineSamplePos.value.end.x,
+                        lineSamplePos.value.end.y],
+                {
+                    fill:"#ffe15d",
+                    stroke:"#ffffff",
+                    strokeWidth:6,
+                    cornerStyle:"circle",
+                    hasBorders :false,
+                    perPixelTargetFind:true,
+                    hasControls :false,
+                    hasRotatingPoint: false,
+                    selectable:false
+                });
+
+            canvas.add(line);
+
         }
         /*这样做排除以下几种误操作：
         1.在地图外按下右键，在地图内的组件上松开
@@ -461,6 +485,28 @@ function addLineEnd(val:{x:number,y:number,rx:number,ry:number}){
 
 
 }
+
+/**
+ * 鼠标右键一旦在地图空白处放开，就会触发该函数重置lineSamplePos
+ * @param event
+ */
+function resetLineSamplePos(event:any){
+
+    if(event.e.button==2){
+        lineSamplePos.value.start={x:-1,y:-1};
+        lineSamplePos.value.end={x:-1,y:-1};
+    }
+}
+
+
+
+function getAngle(start:{x:number,y:number},end:{x:number,y:number}) {
+    const diff_x = end.x - start.x,
+        diff_y = end.y - start.y;
+    //返回角度，不是弧度
+    return 360*Math.atan(diff_y/diff_x)/(2*Math.PI);
+}
+
 </script>
 
 <style scoped>
