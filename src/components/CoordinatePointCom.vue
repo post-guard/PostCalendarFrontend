@@ -15,7 +15,7 @@
           </p>
 
           <p>
-              <a-radio-group v-model:value="placeTyperef"
+              <a-radio-group v-model:value="placeTypeRef"
               style="z-index: 6">
                   <a-radio :value="1">建筑物</a-radio>
                   <a-radio :value="2">十字路口</a-radio>
@@ -24,6 +24,7 @@
 
           <p>X : {{positionX}}</p>
           <p>Y : {{positionY}}</p>
+          <p>id : {{id}}</p>
 
           <p>
               <a-button size="middle"
@@ -71,6 +72,7 @@ import { Request } from "@/utils/Request"
 import type {AxiosError} from "axios";
 import type {IResponse} from "@/models/IResponse";
 import {message} from "ant-design-vue";
+import type {IMapPoint} from "@/models/IMapPoint";
 
 const props = defineProps<{
 
@@ -90,7 +92,8 @@ const emit = defineEmits<{
         name:string,
         x:number,
         y:number,
-        placeType:number
+        placeType:number,
+        id:number
     }):void;
     (event:'rightMouseDown',val: {
         x:number,y:number,rx:number,ry:number
@@ -103,8 +106,10 @@ const emit = defineEmits<{
 
 
 const pointName = ref(props.name)
+const pointId = ref(-1)
 
 const request = new Request();
+
 
 /**
  * 根据输入框中是否有内容来调整按钮和颜色状态
@@ -123,9 +128,20 @@ const popoverDom = ref<HTMLDivElement>()
 
 const popoverVisible = ref (false)
 
-const placeTyperef = ref(props.placeType)
+const placeTypeRef = ref(props.placeType)
 
 const iconColor = ref("#ff0040")
+
+
+function init(){
+    if(pointName.value === ''){
+        iconColor.value="#ff0040";
+    }
+    else{
+        iconColor.value="#1890ff";
+    }
+}
+init();
 
 /**
  * 更新组件位置的函数
@@ -159,7 +175,7 @@ function updatePos(x:number,y:number,scale:number){
     }
 
     pointName.value = props.name
-    placeTyperef.value = props.placeType
+    placeTypeRef.value = props.placeType
 
 
 
@@ -176,20 +192,22 @@ async function checkoutPoint(){
      */
     if(props.id==-1){ //该点没有在数据库中
         try {
-            const response =  await request.post<any>("/postcalendarapi/place/", {
+            const response =  await request.post<IMapPoint>("/postcalendarapi/place/", {
 
                 "name": pointName.value,
                 "x": props.positionX,
                 "y": props.positionY,
-                "placeType": placeTyperef.value,
+                "placeType": placeTypeRef.value,
 
             });
 
             console.log(response);
-            await message.success("添加地点成功");
+            message.success("添加地点成功");
+
+            pointId.value = response.data.id;
 
         }catch (err){
-            const axiosError = err as AxiosError<IResponse<any>>;
+            const axiosError = err as AxiosError<IResponse<IMapPoint>>;
             if (axiosError.response?.status != undefined &&
                 axiosError.response.status >= 400 && axiosError.response.status < 500) {
 
@@ -205,12 +223,13 @@ async function checkoutPoint(){
                 "name": pointName.value,
                 "x": props.positionX,
                 "y": props.positionY,
-                "placeType": placeTyperef.value,
+                "placeType": placeTypeRef.value,
+                "id": props.id
 
             });
 
             console.log(response.message);
-            await message.success("修改地点成功");
+            message.success("修改地点成功");
 
         }catch (err){
             const axiosError = err as AxiosError<IResponse<null>>;
@@ -224,6 +243,7 @@ async function checkoutPoint(){
     }
 
 
+
     if(pointName.value!==''){
 
         iconColor.value = "#1890ff";
@@ -233,7 +253,8 @@ async function checkoutPoint(){
             {name:pointName.value,
                 x:props.positionX,
                 y:props.positionY,
-                placeType:placeTyperef.value})
+                placeType:placeTypeRef.value,
+                id:pointId.value})
     }
     else {
 
@@ -250,11 +271,30 @@ async function checkoutPoint(){
 /**
  * 点击删除按钮事件
  */
-function deletePoint(){
+async function deletePoint(){
     /*
     如果id为-1,说明后端还没有接收,直接在这里删除
     如果id不为-1，向后端发送删除信息，同时前端进行删除
      */
+    if(props.id!=-1){//该点在数据库中,向后端发送删除请求
+        try {
+            const response =  await request.delete<any>("/postcalendarapi/place/"+props.id);
+
+            console.log(response);
+            message.success("删除地点成功");
+
+
+        }catch (err){
+            const axiosError = err as AxiosError<IResponse<any>>;
+            if (axiosError.response?.status != undefined &&
+                axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+
+                message.error("删除地点失败");
+            }
+        }
+    }
+
 
     const emitVal = {x:props.positionX,y:props.positionY};
     emit('deletePoint',emitVal)

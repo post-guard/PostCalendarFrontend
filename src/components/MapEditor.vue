@@ -45,13 +45,19 @@
 </template>
 
 <script setup lang="ts">
-import {Canvas, Image, Line} from "fabric";
+import {Canvas, Image} from "fabric";
 import { onBeforeUpdate, onMounted, reactive, ref} from "vue";
 import { ReloadOutlined, ZoomInOutlined, ZoomOutOutlined } from "@ant-design/icons-vue";
 import CoordinatePointCom from '@/components/CoordinatePointCom.vue';
 import { CoordinatePoint } from "@/models/CoordinatePoint";
+import type {IMapPoint} from "@/models/IMapPoint";
+import {message} from "ant-design-vue";
+import type {AxiosError} from "axios";
+import type {IResponse} from "@/models/IResponse";
+import { Request } from "@/utils/Request"
 
 
+const request = new Request();
 
 const map = ref<HTMLCanvasElement>();
 
@@ -80,6 +86,10 @@ onMounted(async () => {
 
         map.value.width = document.getElementsByClassName('ant-layout-content')[0].clientWidth
         map.value.height = document.getElementsByClassName('ant-layout-content')[0].clientHeight
+
+
+
+
 
 
         const canvas = new Canvas(map.value);
@@ -117,7 +127,26 @@ onMounted(async () => {
         background.on('moving', e => updatePoints());
 
 
+        try {
+            const response =  await request.get<IMapPoint[]>("/postcalendarapi/place/");
 
+            console.log(response);
+            message.success("获取地点列表成功");
+            for(let pointAlready of response.data){
+                const point = new CoordinatePoint(pointAlready.x, pointAlready.y, pointAlready.name, pointAlready.placeType);
+                point.id = pointAlready.id;
+                coordinate_point_list.push(point);
+            }
+
+        }catch (err){
+            const axiosError = err as AxiosError<IResponse<IMapPoint[]>>;
+            if (axiosError.response?.status != undefined &&
+                axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                let errorMessage = "获取地点列表失败";
+                message.error(errorMessage);
+            }
+        }
 
 
     }
@@ -322,6 +351,7 @@ function checkoutPoint(val: { name:string,
                                 x:number,
                                 y:number,
                                 placeType:number,
+                                id:number
                                 }){
 
 
@@ -330,6 +360,7 @@ function checkoutPoint(val: { name:string,
 
             point.name = val.name;
             point.placeType = val.placeType;
+            point.id = val.id;
         }
     }
 
