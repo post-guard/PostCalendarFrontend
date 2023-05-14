@@ -8,7 +8,7 @@
           <p></p>
           <p>
           <a-input size="middle"
-                   v-model:value="LineName"
+                   v-model:value="lineName"
                    placeholder="道路名称">
           </a-input>
           </p>
@@ -48,8 +48,8 @@
       </template>
 
 
-    <a-button style="rotate: 30deg">
-
+    <a-button block size="small" type="text">
+    `
     </a-button>
   </a-popover>
   </div>
@@ -59,6 +59,12 @@
 
 import {CheckOutlined,CloseOutlined} from "@ant-design/icons-vue";
 import {computed,ref} from "vue";
+import {getAngle} from "@/models/MathMethods";
+import {message} from "ant-design-vue";
+import type {AxiosError} from "axios";
+import type {IResponse} from "@/models/IResponse";
+import {Request} from "@/utils/Request";
+import type {IMapRoad} from "@/models/IMapRoad";
 
 
 const props = defineProps<{
@@ -75,10 +81,19 @@ const props = defineProps<{
 
 }>()
 
-defineExpose({updatePos});
+const lineName = ref(props.name)
+const lineId = ref(-1)
+const startPointId = ref(props.startPointId)
+const endPointId = ref(props.endPointId)
+const request= new Request();
+
+
+defineExpose({updateStatus,
+    startPointId,endPointId //ref类型在父组件会被自动解包，不需要使用.value
+    });
 
 const emit = defineEmits<{
-    (event:'deleteLine',val: {startPointId:number; endPointId:number;}):void;
+    (event:'deleteLine',val: {startPointId:number; endPointId:number}):void;
     (event:'checkoutLine',val: {
         startPointId:number;
 
@@ -95,18 +110,10 @@ const emit = defineEmits<{
 }>();
 
 
-const lineName = ref(props.name)
-const lineId = ref(-1)
-/**
- * 根据输入框中是否有内容来调整按钮和颜色状态
- */
+
+
 const checkoutButton = computed(()=>{
-    if(lineName.value === ''){
 
-    }
-    else{
-
-    }
     return lineName.value === '';
 })
 
@@ -118,73 +125,127 @@ const popoverVisible = ref (false)
 
 /**
  * 更新组件位置的函数
- * @param x
- * @param y
+ * @param startPoint
+ * @param endPoint
  * @param scale 当前地图的尺寸
+ * @param offsetX
+ * @param offsetY
  */
-function updatePos(x:number,y:number,scale:number){
+function updateStatus(startPoint: { x:number,y:number },endPoint:{ x:number,y:number },scale:number,offsetX:number,offsetY:number){
 
     if(popoverDom.value!=undefined){
 
         popoverDom.value.style.position = "absolute"
 
-        const leftPos = x + props.positionX * scale - 20;
-        const topPos = y + props.positionY * scale - 20;
+        let leftPos,topPos,rot;
+
+
+        if(startPoint.x<endPoint.x){
+            rot = getAngle(startPoint,endPoint);
+            leftPos = offsetX + startPoint.x * scale
+            topPos = offsetY + startPoint.y * scale - 6 / 2
+
+        }
+        else {
+            rot = getAngle(endPoint,startPoint);
+            leftPos = offsetX + endPoint.x * scale
+            topPos = offsetY + endPoint.y * scale - 6 / 2
+
+        }
+
 
         popoverDom.value.style.left = leftPos + "px"
         popoverDom.value.style.top = topPos + "px"
-        /*坐标点 = 地图的全局left(即x)或全局top(即y) + 在原始地图图片上坐标*地图缩放尺寸
-                  - dom长度(40)的一半(20)*/
+        popoverDom.value.style.transform = "rotate("+rot+"deg)";
+        popoverDom.value.style.transformOrigin="0 3px";
+        popoverDom.value.style.width = props.length*scale+"px";
+        popoverDom.value.style.height = 6+"px";
+
         console.log(popoverDom.value?.style.left);
         console.log(popoverDom.value?.style.top);
 
-        if(leftPos+20 >= window.innerWidth-20 || topPos+20 >= window.innerHeight-20){
-            popoverDom.value.style.display = "none";
-        }
-        else {
-            popoverDom.value.style.display = "inline";
-        }//超出窗口范围隐藏
+
 
     }
 
     lineName.value = props.name
-
-
 
 }
 
 /**
  * 点击确认按钮事件
  */
-function checkoutLine(){
+async function checkoutLine(){
     /*
     发送到后端，获取id
     如果存在对应id，为改变数值
     如果不存在，赋值id
      */
+
+    if(props.id==-1){ //该路没有在数据库中
+        try {
+            const response =  await request.post<IMapRoad>("/postcalendarapi/road/", {
+
+                "name": lineName.value,
+                "startPlaceId": props.startPointId,
+                "endPlaceId": props.endPointId,
+                "length": props.length,
+
+            });
+
+            //console.log(response);
+            message.success("添加道路成功");
+
+            lineId.value = response.data.id;
+
+        }catch (err){
+            const axiosError = err as AxiosError<IResponse<IMapRoad>>;
+            if (axiosError.response?.status != undefined &&
+                axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+
+                message.error("添加道路失败");
+            }
+        }
+    }
+    else{ //该路在数据库中
+        try {
+            const response =  await request.put<null>("/postcalendarapi/road/"+props.id, {
+
+                "name": lineName.value,
+                "startPlaceId": props.startPointId,
+                "endPlaceId": props.endPointId,
+                "length": props.length,
+                "id": props.id
+
+            });
+
+            message.success("修改道路成功");
+
+        }catch (err){
+            const axiosError = err as AxiosError<IResponse<null>>;
+            if (axiosError.response?.status != undefined &&
+                axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                let errorMessage = "修改道路失败";
+                message.error(errorMessage);
+            }
+        }
+    }
+
+
+
     if(lineName.value!==''){
 
 
-
-
         emit('checkoutLine',
-            {startPointId:props.startPointId,
-
+            {name:lineName.value,
+                startPointId:props.startPointId,
                 endPointId:props.endPointId,
-
-                name:lineName.value,
-
                 length:props.length,
-
-                id:lineId.value
-                })
+                id:lineId.value});
     }
-    else {
 
-
-
-
-    }
 
 
 
@@ -194,13 +255,33 @@ function checkoutLine(){
 /**
  * 点击删除按钮事件
  */
-function deleteLine(){
+async function deleteLine(){
     /*
     如果id为-1,说明后端还没有接收,直接在这里删除
     如果id不为-1，向后端发送删除信息，同时前端进行删除
      */
 
-    const emitVal = {x:props.positionX,y:props.positionY};
+    if(props.id!=-1){//该点在数据库中,向后端发送删除请求
+        try {
+            const response =  await request.delete<any>("/postcalendarapi/road/"+props.id);
+
+            //console.log(response);
+            message.success("删除道路成功");
+
+
+        }catch (err){
+            const axiosError = err as AxiosError<IResponse<any>>;
+            if (axiosError.response?.status != undefined &&
+                axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+
+                message.error("删除道路失败");
+            }
+        }
+    }
+
+
+    const emitVal = {startPointId:props.startPointId,endPointId:props.endPointId};
     emit('deleteLine',emitVal)
     popoverVisible.value = false;
 }

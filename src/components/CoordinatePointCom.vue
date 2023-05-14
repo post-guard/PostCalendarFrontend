@@ -162,8 +162,8 @@ function updatePos(x:number,y:number,scale:number){
         popoverDom.value.style.top = topPos + "px"
         /*坐标点 = 地图的全局left(即x)或全局top(即y) + 在原始地图图片上坐标*地图缩放尺寸
                   - dom长度(40)的一半(20)*/
-        console.log(popoverDom.value?.style.left);
-        console.log(popoverDom.value?.style.top);
+        //console.log(popoverDom.value?.style.left);
+        //console.log(popoverDom.value?.style.top);
 
         if(leftPos+20 >= window.innerWidth-20 || topPos+20 >= window.innerHeight-20){
             popoverDom.value.style.display = "none";
@@ -201,7 +201,7 @@ async function checkoutPoint(){
 
             });
 
-            console.log(response);
+            //console.log(response);
             message.success("添加地点成功");
 
             pointId.value = response.data.id;
@@ -228,7 +228,7 @@ async function checkoutPoint(){
 
             });
 
-            console.log(response.message);
+            //console.log(response.message);
             message.success("修改地点成功");
 
         }catch (err){
@@ -280,7 +280,7 @@ async function deletePoint(){
         try {
             const response =  await request.delete<any>("/postcalendarapi/place/"+props.id);
 
-            console.log(response);
+            //console.log(response);
             message.success("删除地点成功");
 
 
@@ -308,8 +308,8 @@ function rightMouseDown(event:any){
 
     if(event.button==2) {
 
-        console.log("Start:");
-        console.log(props);
+        //console.log("Start:");
+        //console.log(props);
 
         if (popoverDom.value != undefined) {
 
@@ -328,8 +328,8 @@ function rightMouseDown(event:any){
 
 function rightMouseUp(event:any){
     if(event.button==2){//右键在自己身上松开
-        console.log("End:");
-        console.log(props);
+        //console.log("End:");
+        //console.log(props);
 
         if(popoverDom.value!=undefined) {
 

@@ -1,3 +1,5 @@
+
+
 export class CoordinatePoint{
 
     public positionX:number;
