@@ -536,8 +536,6 @@ function deletePoint(val:{x:number,y:number}){
                         if(index!=-1){
                             outsize_canvas.value.remove(line.react_image);
                             coordinate_line_list.splice(index,1);
-                            //delete coordinate_line_list[index];
-
                         }
                     }
                 }
@@ -549,7 +547,6 @@ function deletePoint(val:{x:number,y:number}){
             }
         }
     }
-
 
 
 }

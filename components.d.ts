@@ -10,7 +10,9 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AButton: typeof import('ant-design-vue/es')['Button']
+    ACalendar: typeof import('ant-design-vue/es')['Calendar']
     ACol: typeof import('ant-design-vue/es')['Col']
+    AConfigProvider: typeof import('ant-design-vue/es')['ConfigProvider']
     ADivider: typeof import('ant-design-vue/es')['Divider']
     AForm: typeof import('ant-design-vue/es')['Form']
     AFormItem: typeof import('ant-design-vue/es')['FormItem']
@@ -30,6 +32,7 @@ declare module '@vue/runtime-core' {
     ARow: typeof import('ant-design-vue/es')['Row']
     ASpace: typeof import('ant-design-vue/es')['Space']
     ATable: typeof import('ant-design-vue/es')['Table']
+    CalendarTimePeriod: typeof import('./src/components/CalendarTimePeriod.vue')['default']
     CoordinateLineCom: typeof import('./src/components/CoordinateLineCom.vue')['default']
     CoordinatePointCom: typeof import('./src/components/CoordinatePointCom.vue')['default']
     MapEditor: typeof import('./src/components/MapEditor.vue')['default']
