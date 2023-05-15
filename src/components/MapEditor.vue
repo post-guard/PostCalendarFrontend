@@ -232,7 +232,7 @@ onMounted(async () => {
         }
 
 
-        await navigationOneDest(19,30);
+        await navigationOneDest(19,32);
 
     }
 })
@@ -498,36 +498,47 @@ function deletePoint(val:{x:number,y:number}){
 
     for(let point of coordinate_point_list){
         if(point.positionX == val.x && point.positionY == val.y){
-
+            const lineToDelete : number[] = [];
             //如果这个点还绑定了线，把这条线也删除
             for(let line of coordinate_line_list){
                 if(line.startPointId==point.id||line.endPointId==point.id){
                     if(line.id!=-1)//数据库中有线
                     {
+                        lineToDelete.push(line.id);
 
-                        try {
-                            const response =   request.delete<any>("/postcalendarapi/road/"+line.id);
-
-                            //console.log(response);
-                            message.success("删除道路成功");
-
-
-                        }catch (err){
-                            const axiosError = err as AxiosError<IResponse<any>>;
-                            if (axiosError.response?.status != undefined &&
-                                axiosError.response.status >= 400 && axiosError.response.status < 500) {
-
-
-                                message.error("删除道路失败");
-                            }
-                        }
                     }
 
-                    let index = coordinate_line_list.indexOf(line);
-                    if(index!=-1){
-                        outsize_canvas.value.remove(line.react_image);
-                        coordinate_line_list.splice(index,1);
+                }
+            }
 
+            console.log(lineToDelete);
+            for(let lineId of lineToDelete){
+                try {
+                    const response =  request.delete<any>("/postcalendarapi/road/"+lineId);
+
+                    //console.log(response);
+                    message.success("删除道路成功");
+
+
+                }catch (err){
+                    const axiosError = err as AxiosError<IResponse<any>>;
+                    if (axiosError.response?.status != undefined &&
+                        axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+
+                        message.error("删除道路失败");
+                    }
+                }
+                for(let line of coordinate_line_list){
+
+                    if(line.id == lineId){
+                        let index = coordinate_line_list.indexOf(line);
+                        if(index!=-1){
+                            outsize_canvas.value.remove(line.react_image);
+                            coordinate_line_list.splice(index,1);
+                            //delete coordinate_line_list[index];
+
+                        }
                     }
                 }
             }
@@ -763,12 +774,12 @@ async function navigationOneDest(startPointId:number,endPointId:number){
 
 
         message.success("添加导航成功");
-
+        console.log(startPointId,endPointId);
         console.log(response.data);
 
         for(let lineRes of response.data.roads){
 
-            console.log(lineRes);
+
             for(let line of coordinate_line_list){
 
 
