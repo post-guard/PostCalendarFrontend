@@ -1,6 +1,6 @@
 // @ts-ignore
 import type { IResponse } from "@/models/IResponse";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
 
 const defaultConfig: AxiosRequestConfig = {
@@ -12,7 +12,7 @@ const defaultConfig: AxiosRequestConfig = {
 
 export class Request {
     private instance: AxiosInstance;
-    public static token: String;
+    public static token: string;
 
     constructor(config: AxiosRequestConfig = defaultConfig) {
         this.instance = axios.create(config);
@@ -29,7 +29,7 @@ export class Request {
      * 设置请求的令牌
      * @param token 请求令牌
      */
-    public static setAuthorizationToken(token : String) {
+    public static setAuthorizationToken(token : string) {
         Request.token = token;
     }
 
@@ -73,5 +73,23 @@ export class Request {
             }
         });
     }
+}
+
+/**
+ * 从Axios中提取服务器返回的错误信息
+ * @param error 收到的错误
+ */
+export function axiosErrorHandler<T>(error: any): string {
+    const axiosError = error as AxiosError<IResponse<T>>;
+
+    if (error.response?.status != undefined
+        && error.response.status >= 400 && error.response.status < 500) {
+            // 返回了有效的错误码
+            if (error.response.data.message != undefined) {
+                return error.response.data.message;
+            }
+        }
+    
+    return "服务器错误，请联系管理员";
 }
 
