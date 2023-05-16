@@ -1,5 +1,5 @@
 export interface IGroup {
     id: number;
-    name: String;
-    details: String;
+    name: string;
+    details: string;
 }

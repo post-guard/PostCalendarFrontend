@@ -12,7 +12,7 @@ const defaultConfig: AxiosRequestConfig = {
 
 export class Request {
     private instance: AxiosInstance;
-    public static token: String;
+    public static token: string;
 
     constructor(config: AxiosRequestConfig = defaultConfig) {
         this.instance = axios.create(config);
@@ -29,7 +29,7 @@ export class Request {
      * 设置请求的令牌
      * @param token 请求令牌
      */
-    public static setAuthorizationToken(token : String) {
+    public static setAuthorizationToken(token : string) {
         Request.token = token;
     }
 

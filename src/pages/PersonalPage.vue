@@ -20,30 +20,34 @@
       </a-col>
 
       <a-col :span="16">
-        <a-menu
-          v-model:selectedKeys="selectedKeys"
-          mode="horizontal"
-          style="line-height: 64px;"
-        >
-          <a-menu-item key="1">所在组织</a-menu-item>
-        </a-menu>
+        <a-space align="end" size="middle" style="background-color: white;">
+          <a-button type="primary">
+            创建组织
+          </a-button>
+        </a-space>
 
         <div style="height: 20px;"></div>
 
         <div>
-          <a-table
-            :columns="columns"
-            :data-source="groups"
-            :loading="groupTableLoading">
-            
-            <template #bodyCell="{column, record}">
+          <a-table :columns="columns" :data-source="groups" :loading="groupTableLoading">
+
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'action' && record.groupLink.permission >= 1">
+                <a-button type="link">
+                  管理组织
+                </a-button>
+              </template>
               <template v-if="column.key === 'action'">
-                <a-button type="link" @click="leaveGroup(toRaw(record.groupLink))">
-                  退出
+                <a-button type="link" @click="leaveGroupButtonClicked(toRaw(record.groupLink))">
+                  退出组织
                 </a-button>
               </template>
             </template>
           </a-table>
+        </div>
+
+        <div>
+
         </div>
       </a-col>
     </a-row>
@@ -53,7 +57,7 @@
 <script setup lang="ts">
 import type { IGroup } from '@/models/IGroup';
 import type { IResponse } from '@/models/IResponse';
-import type { IUserGroupLink } from '@/models/IUserGroupLink';
+import { getPermissionName, type IUserGroupLink } from '@/models/IUserGroupLink';
 import { useUserStore } from '@/stores/UserStore';
 import { Request } from '@/utils/Request';
 import { MailOutlined } from '@ant-design/icons-vue';
@@ -62,54 +66,42 @@ import type { AxiosError } from 'axios';
 import { ref, toRaw } from 'vue';
 
 class Column {
-  public title: String;
-  public key: String;
-  public dataIndex: String;
+  public title: string;
+  public key: string;
+  public dataIndex: string;
 
-  constructor(title: String, key: String) {
+  constructor(title: string, key: string) {
     this.title = title;
     this.key = key;
     this.dataIndex = key;
   }
 }
 
+/**
+ * 组织在用户中的信息
+ */
 class GroupInformation {
   public groupLink: IUserGroupLink;
-  public name: String;
-  public details: String;
-  public permission: String;
+  public name: string;
+  public details: string;
+  public permissionName: string;
 
   public constructor(group: IGroup, groupLink: IUserGroupLink) {
     this.groupLink = groupLink;
     this.name = group.name;
     this.details = group.details;
-
-    switch (groupLink.permission) {
-      case 0:
-        this.permission = "用户";
-        break;
-      case 1:
-        this.permission = "管理员";
-        break;
-      case 2:
-        this.permission = "超级管理员";
-        break;
-      default:
-        this.permission = "????";
-        break;
-    }
+    this.permissionName = getPermissionName(groupLink.permission);
   }
 }
 
 const userStore = useUserStore();
 const request = new Request();
-const selectedKeys = ref(['1']);
 const groupTableLoading = ref(false);
 const groups = ref<GroupInformation[]>([]);
 const columns: Column[] = [
   new Column("组织名称", "name"),
   new Column("组织介绍", "details"),
-  new Column("权限", "permission"),
+  new Column("权限", "permissionName"),
   new Column("操作", "action")
 ];
 
@@ -131,26 +123,29 @@ async function getGroupInformation(userId: number) {
       groups.value.push(new GroupInformation(groupResponse.data, link));
     }
     groupTableLoading.value = false;
-  } catch(err) {
-    
+  } catch (err) {
     message.error("服务器异常，请联系管理员");
   }
 }
 
-async function leaveGroup(groupLink: IUserGroupLink) {
+/**
+ * 点击离开组织按钮调用的方法
+ * @param groupLink 需要离开的组织信息
+ */
+async function leaveGroupButtonClicked(groupLink: IUserGroupLink) {
   try {
     console.log(groupLink);
     await request.delete<IUserGroupLink>(`/groupLink/group/${groupLink.groupId}`);
-    
+
     message.info(`退出组织${groupLink.groupId}成功`);
 
     getGroupInformation(groupLink.userId);
-  } catch(err) {
+  } catch (err) {
     const axiosError = err as AxiosError<IResponse<IUserGroupLink>>;
 
     let hint = "服务器错误，请联系管理员";
     if (axiosError.response?.status != undefined
-    && axiosError.response.status >= 400 && axiosError.response.status < 500) {
+      && axiosError.response.status >= 400 && axiosError.response.status < 500) {
       console.log(axiosError.response.data.message);
       if (axiosError.response.data.message != undefined) {
         hint = axiosError.response.data.message;
@@ -159,6 +154,8 @@ async function leaveGroup(groupLink: IUserGroupLink) {
     message.error(hint);
   }
 }
+
+
 </script>
 
 <style scoped>
