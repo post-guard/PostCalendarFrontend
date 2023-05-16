@@ -21,15 +21,45 @@
 
       <a-col :span="16">
         <a-space align="end" size="middle" style="background-color: white;">
-          <a-button type="primary">
-            创建组织
-          </a-button>
+          <a-popover title="创建新的组织" trigger="click" placement="bottom" v-model:visible="addGroupVisable">
+            <template #content>
+              <div style="height: 4px;"></div>
+              <p>你会自动称为新成立组织的超级管理员。</p>
+
+              <p>
+                <a-input size="middle" placeholder="组织名称" v-model:value="addGroupName">
+                </a-input>
+              </p>
+
+              <p>
+                <a-input size="middle" placeholder="组织简介" v-model:value="addGroupDetail">
+                </a-input>
+              </p>
+
+              <p>
+                <a-button type="primary" size="middle" style="width: 50%;" :disabled="addButtonEnable"
+                  @click="addGroupConfirmButtonClicked">
+                  <template #icon>
+                    <CheckOutlined />
+                  </template>
+                </a-button>
+
+                <a-button type="danger" size="middle" style="width: 50%;" @click="addGroupCancelButtonClicked">
+                  <template #icon>
+                    <CloseOutlined />
+                  </template>
+                </a-button>
+              </p>
+
+            </template>
+            <a-button>创建组织</a-button>
+          </a-popover>
         </a-space>
 
         <div style="height: 20px;"></div>
 
         <div>
-          <a-table :columns="columns" :data-source="groups" :loading="groupTableLoading">
+          <a-table :columns="groupTableColumns" :data-source="groups" :loading="groupTableLoading">
 
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'action' && record.groupLink.permission >= 1">
@@ -58,12 +88,13 @@
 import type { IGroup } from '@/models/IGroup';
 import type { IResponse } from '@/models/IResponse';
 import { getPermissionName, type IUserGroupLink } from '@/models/IUserGroupLink';
+import type { User } from '@/models/User';
 import { useUserStore } from '@/stores/UserStore';
 import { Request } from '@/utils/Request';
-import { MailOutlined } from '@ant-design/icons-vue';
+import { MailOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import type { AxiosError } from 'axios';
-import { ref, toRaw } from 'vue';
+import { computed, ref, toRaw } from 'vue';
 
 class Column {
   public title: string;
@@ -94,37 +125,63 @@ class GroupInformation {
   }
 }
 
+/**
+ * 用户在组织中的信息
+ */
+class UserInformation {
+  public groupLink: IUserGroupLink;
+  public name: String;
+  public emailAddress: String;
+  public permissionName;
+
+  public constructor(user: User, groupLink: IUserGroupLink) {
+    this.groupLink = groupLink;
+    this.name = user.username;
+    this.emailAddress = user.emailAddress;
+    this.permissionName = getPermissionName(groupLink.permission);
+  }
+}
+
 const userStore = useUserStore();
 const request = new Request();
 const groupTableLoading = ref(false);
 const groups = ref<GroupInformation[]>([]);
-const columns: Column[] = [
+const addGroupName = ref("");
+const addGroupDetail = ref("");
+const addGroupVisable = ref(false);
+const groupTableColumns: Column[] = [
   new Column("组织名称", "name"),
   new Column("组织介绍", "details"),
   new Column("权限", "permissionName"),
   new Column("操作", "action")
 ];
 
-if (userStore.user != undefined) {
-  groupTableLoading.value = true;
-  getGroupInformation(userStore.user.id);
-}
+// 确认添加组织按钮按下式输入内容合法
+const addButtonEnable = computed(() => {
+  return addGroupName.value.length == 0 || addGroupDetail.value.length == 0;
+});
+
+refreshGroupTable();
 
 /**
- * 获得用户所在组织的信息
- * @param userId 用户ID
+ * 刷新当前用户所在组织的列表
  */
-async function getGroupInformation(userId: number) {
-  try {
-    const linkResponse = await request.get<IUserGroupLink[]>(`/postcalendarapi/groupLink/user/${userId}`);
-
-    for (const link of linkResponse.data) {
-      const groupResponse = await request.get<IGroup>(`/postcalendarapi/group/${link.groupId}`);
-      groups.value.push(new GroupInformation(groupResponse.data, link));
-    }
+async function refreshGroupTable() {
+  if (userStore.user != undefined) {
     groupTableLoading.value = false;
-  } catch (err) {
-    message.error("服务器异常，请联系管理员");
+    groups.value.length = 0;
+
+    try {
+      const linkResponse = await request.get<IUserGroupLink[]>(`/postcalendarapi/groupLink/user/${userStore.user.id}`);
+
+      for (const link of linkResponse.data) {
+        const groupResponse = await request.get<IGroup>(`/postcalendarapi/group/${link.groupId}`);
+        groups.value.push(new GroupInformation(groupResponse.data, link));
+      }
+      groupTableLoading.value = false;
+    } catch (err) {
+      message.error("服务器异常，请联系管理员");
+    }
   }
 }
 
@@ -134,25 +191,66 @@ async function getGroupInformation(userId: number) {
  */
 async function leaveGroupButtonClicked(groupLink: IUserGroupLink) {
   try {
-    console.log(groupLink);
-    await request.delete<IUserGroupLink>(`/groupLink/group/${groupLink.groupId}`);
+    await request.delete<IUserGroupLink>(`/postcalendarapi/groupLink/group/${groupLink.groupId}`);
 
     message.info(`退出组织${groupLink.groupId}成功`);
 
-    getGroupInformation(groupLink.userId);
+    refreshGroupTable();
   } catch (err) {
     const axiosError = err as AxiosError<IResponse<IUserGroupLink>>;
 
     let hint = "服务器错误，请联系管理员";
     if (axiosError.response?.status != undefined
       && axiosError.response.status >= 400 && axiosError.response.status < 500) {
-      console.log(axiosError.response.data.message);
       if (axiosError.response.data.message != undefined) {
         hint = axiosError.response.data.message;
       }
     }
     message.error(hint);
   }
+}
+
+/**
+ * 点击添加按钮调用的方法
+ */
+async function addGroupConfirmButtonClicked() {
+  addGroupVisable.value = false;
+
+  try {
+    await request.post<IGroup>("/postcalendarapi/group/", {
+      name: addGroupName.value,
+      details: addGroupDetail.value
+    });
+
+    message.info("创建组织成功");
+
+    addGroupName.value = "";
+    addGroupDetail.value = "";
+
+    refreshGroupTable();
+  } catch (err) {
+    const axiosError = err as AxiosError<IResponse<IGroup>>;
+    let hint = "服务器错误， 请联系管理员";
+    console.log(err);
+
+    if (axiosError.response?.status != undefined
+      && axiosError.response.status >= 400 && axiosError.response.status < 500) {
+      if (axiosError.response.data.message != undefined) {
+        hint = axiosError.response.data.message;
+      }
+    }
+
+    message.error(hint);
+  }
+
+}
+
+function addGroupCancelButtonClicked() {
+  // 清空输入栏中的文字
+  addGroupName.value = "";
+  addGroupDetail.value = "";
+
+  addGroupVisable.value = false;
 }
 
 
