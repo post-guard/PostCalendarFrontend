@@ -20,12 +20,12 @@ export default defineConfig({
         }
     },
     server: {
-        port: 6677,
+        port: 10086,
         base: "./",
         open: false,
         proxy: {
             '^/postcalendarapi': {
-                target: "http://localhost:6680",
+                target: "http://localhost:10088",
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/postcalendarapi/, "")
             }

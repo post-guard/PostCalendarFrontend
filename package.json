@@ -13,6 +13,7 @@
     "@ant-design/icons-vue": "^6.1.0",
     "ant-design-vue": "^3.2.15",
     "axios": "^1.3.4",
+    "dayjs": "^1.11.7",
     "fabric": "6.0.0-beta3",
     "pinia": "^2.0.35",
     "vue": "^3.2.47",
