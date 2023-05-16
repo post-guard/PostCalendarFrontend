@@ -1,5 +1,10 @@
 <template>
     <div class="calendarPage">
+        <div class="timeDisplayPart">
+            <time-display-com>
+
+            </time-display-com>
+        </div>
         <div class="calendarPart">
             <calendar-time-period>
 
@@ -11,6 +16,7 @@
 <script lang="ts" setup>
 
 import CalendarTimePeriod from "@/components/CalendarTimePeriod.vue";
+import TimeDisplayCom from "@/components/TimeDisplayCom.vue";
 </script>
 
 <style scoped>
@@ -18,12 +24,12 @@ import CalendarTimePeriod from "@/components/CalendarTimePeriod.vue";
     position: fixed;
 }
 .calendarPart{
-    position: absolute;
-    left: 5px;
-    top: 100px;
-    width: 300px;
+    position: relative;
+    top:  20px;
+    left: 400px;
+}
 
-
+.timeDisplayPart{
 
 }
 </style>

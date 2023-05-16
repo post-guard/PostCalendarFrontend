@@ -11,6 +11,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AButton: typeof import('ant-design-vue/es')['Button']
     ACalendar: typeof import('ant-design-vue/es')['Calendar']
+    ACard: typeof import('ant-design-vue/es')['Card']
     ACol: typeof import('ant-design-vue/es')['Col']
     AConfigProvider: typeof import('ant-design-vue/es')['ConfigProvider']
     ADivider: typeof import('ant-design-vue/es')['Divider']
@@ -38,5 +39,6 @@ declare module '@vue/runtime-core' {
     MapEditor: typeof import('./src/components/MapEditor.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    TimeDisplayCom: typeof import('./src/components/TimeDisplayCom.vue')['default']
   }
 }
