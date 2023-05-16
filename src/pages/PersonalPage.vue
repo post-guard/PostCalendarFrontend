@@ -116,14 +116,12 @@
 
 <script setup lang="ts">
 import type { IGroup } from '@/models/IGroup';
-import type { IResponse } from '@/models/IResponse';
 import { getPermissionName, type IUserGroupLink } from '@/models/IUserGroupLink';
 import type { User } from '@/models/User';
 import { useUserStore } from '@/stores/UserStore';
-import { Request } from '@/utils/Request';
+import { axiosErrorHandler, Request } from '@/utils/Request';
 import { MailOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
-import type { AxiosError } from 'axios';
 import { computed, ref, toRaw } from 'vue';
 
 class Column {
@@ -220,7 +218,7 @@ async function refreshGroupTable() {
       }
       groupTableLoading.value = false;
     } catch (err) {
-      message.error("服务器异常，请联系管理员");
+      message.error(axiosErrorHandler(err));
     }
   }
 }
@@ -239,7 +237,7 @@ async function refreshGroupManageTable(groupId:number) {
 
     manageTableLoading.value = false;
   } catch(err) {
-    message.error("服务器异常，请联系管理员");
+    message.error(axiosErrorHandler(err));
   }
 }
 
@@ -255,16 +253,7 @@ async function leaveGroupButtonClicked(groupLink: IUserGroupLink) {
 
     refreshGroupTable();
   } catch (err) {
-    const axiosError = err as AxiosError<IResponse<IUserGroupLink>>;
-
-    let hint = "服务器错误，请联系管理员";
-    if (axiosError.response?.status != undefined
-      && axiosError.response.status >= 400 && axiosError.response.status < 500) {
-      if (axiosError.response.data.message != undefined) {
-        hint = axiosError.response.data.message;
-      }
-    }
-    message.error(hint);
+    message.error(axiosErrorHandler(err));
   }
 }
 
@@ -287,18 +276,7 @@ async function addGroupConfirmButtonClicked() {
 
     refreshGroupTable();
   } catch (err) {
-    const axiosError = err as AxiosError<IResponse<IGroup>>;
-    let hint = "服务器错误， 请联系管理员";
-    console.log(err);
-
-    if (axiosError.response?.status != undefined
-      && axiosError.response.status >= 400 && axiosError.response.status < 500) {
-      if (axiosError.response.data.message != undefined) {
-        hint = axiosError.response.data.message;
-      }
-    }
-
-    message.error(hint);
+    message.error(axiosErrorHandler(err));
   }
 }
 
