@@ -84,9 +84,37 @@
               关闭管理面板
             </a-button>
 
-            <a-button type="primary">
-              添加新用户
-            </a-button>
+            <a-popover title="添加新用户到组织" trigger="click" v-model:visible="addUserVisable">
+              <template #content>
+                <div style="height: 4px;"></div>
+                <p>输入用户名称搜索用户</p>
+
+
+                <p>
+                  <a-button type="primary" size="middle" style="width: 50%;" :disabled="addButtonEnable"
+                    >
+                    <template #icon>
+                      <CheckOutlined />
+                    </template>
+                  </a-button>
+
+                  <a-button type="danger" size="middle" style="width: 50%;" @click="addUserCloseButtonClicked">
+                    <template #icon>
+                      <CloseOutlined />
+                    </template>
+                  </a-button>
+                </p>
+
+                <a-select>
+
+                </a-select>
+
+              </template>
+
+              <a-button type="primary">
+                添加用户
+              </a-button>
+            </a-popover>
 
             <a-button type="danger">
               删除组织
@@ -179,6 +207,7 @@ const addGroupDetail = ref("");
 const addGroupVisable = ref(false);
 const manageTableVisable = ref(false);
 const manageTableLoading = ref(false);
+const addUserVisable = ref(false);
 const manageGroupUsers = ref<UserInformation[]>([]);
 
 const groupTableColumns: Column[] = [
@@ -223,7 +252,7 @@ async function refreshGroupTable() {
   }
 }
 
-async function refreshGroupManageTable(groupId:number) {
+async function refreshGroupManageTable(groupId: number) {
   manageGroupUsers.value.length = 0;
   manageTableLoading.value = true
 
@@ -236,7 +265,7 @@ async function refreshGroupManageTable(groupId:number) {
     }
 
     manageTableLoading.value = false;
-  } catch(err) {
+  } catch (err) {
     message.error(axiosErrorHandler(err));
   }
 }
@@ -280,6 +309,9 @@ async function addGroupConfirmButtonClicked() {
   }
 }
 
+/**
+ * 取消创建新组织
+ */
 function addGroupCancelButtonClicked() {
   // 清空输入栏中的文字
   addGroupName.value = "";
@@ -296,6 +328,10 @@ function manageGoupButtonClicked(groupId: number) {
 
 function manageGroupCloseButtonClicked() {
   manageTableVisable.value = false;
+}
+
+function addUserCloseButtonClicked() {
+  addUserVisable.value = false;
 }
 
 
