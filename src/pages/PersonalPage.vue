@@ -56,14 +56,14 @@
           </a-popover>
         </a-space>
 
-        <div style="height: 20px;"></div>
+        <div style="height: 15px;"></div>
 
         <div>
           <a-table :columns="groupTableColumns" :data-source="groups" :loading="groupTableLoading">
 
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'action' && record.groupLink.permission >= 1">
-                <a-button type="link">
+                <a-button type="link" @click="manageGoupButtonClicked(record.groupLink.groupId)">
                   管理组织
                 </a-button>
               </template>
@@ -76,8 +76,38 @@
           </a-table>
         </div>
 
-        <div>
+        <div style="height: 30px;"></div>
 
+        <div v-if="manageTableVisable">
+          <a-space align="end" size="middle" style="background-color: white;">
+            <a-button type="primary" @click="manageGroupCloseButtonClicked">
+              关闭管理面板
+            </a-button>
+
+            <a-button type="primary">
+              添加新用户
+            </a-button>
+
+            <a-button type="danger">
+              删除组织
+            </a-button>
+          </a-space>
+
+          <div style="height: 15px;"></div>
+
+          <a-table :columns="mangerGroupColumns" :data-source="manageGroupUsers" :loading="manageTableLoading">
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.key == 'action'">
+                <a-button type="link">
+                  修改用户权限
+                </a-button>
+
+                <a-button type="link">
+                  删除用户
+                </a-button>
+              </template>
+            </template>
+          </a-table>
         </div>
       </a-col>
     </a-row>
@@ -149,12 +179,22 @@ const groups = ref<GroupInformation[]>([]);
 const addGroupName = ref("");
 const addGroupDetail = ref("");
 const addGroupVisable = ref(false);
+const manageTableVisable = ref(false);
+const manageTableLoading = ref(false);
+const manageGroupUsers = ref<UserInformation[]>([]);
+
 const groupTableColumns: Column[] = [
   new Column("组织名称", "name"),
   new Column("组织介绍", "details"),
   new Column("权限", "permissionName"),
   new Column("操作", "action")
 ];
+const mangerGroupColumns: Column[] = [
+  new Column("用户名称", "name"),
+  new Column("电子邮件地址", "emailAddress"),
+  new Column("权限", "permissionName"),
+  new Column("操作", "action")
+]
 
 // 确认添加组织按钮按下式输入内容合法
 const addButtonEnable = computed(() => {
@@ -182,6 +222,24 @@ async function refreshGroupTable() {
     } catch (err) {
       message.error("服务器异常，请联系管理员");
     }
+  }
+}
+
+async function refreshGroupManageTable(groupId:number) {
+  manageGroupUsers.value.length = 0;
+  manageTableLoading.value = true
+
+  try {
+    const linkResponse = await request.get<IUserGroupLink[]>(`/postcalendarapi/groupLink/group/${groupId}`);
+
+    for (const link of linkResponse.data) {
+      const userResponse = await request.get<User>(`/postcalendarapi/user/${link.userId}`);
+      manageGroupUsers.value.push(new UserInformation(userResponse.data, link));
+    }
+
+    manageTableLoading.value = false;
+  } catch(err) {
+    message.error("服务器异常，请联系管理员");
   }
 }
 
@@ -242,7 +300,6 @@ async function addGroupConfirmButtonClicked() {
 
     message.error(hint);
   }
-
 }
 
 function addGroupCancelButtonClicked() {
@@ -251,6 +308,16 @@ function addGroupCancelButtonClicked() {
   addGroupDetail.value = "";
 
   addGroupVisable.value = false;
+}
+
+function manageGoupButtonClicked(groupId: number) {
+  manageTableVisable.value = true;
+
+  refreshGroupManageTable(groupId);
+}
+
+function manageGroupCloseButtonClicked() {
+  manageTableVisable.value = false;
 }
 
 
