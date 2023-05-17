@@ -8,7 +8,7 @@
             </div>
             <br>
 
-            <div class="currentTime" style="font-size: xxx-large;margin-left:auto">
+            <div class="currentTime">
                 {{date.getHours()/10>=1?date.getHours():"0"+date.getHours()}}
                 :
                 {{date.getMinutes()/10>=1?date.getMinutes():"0"+date.getMinutes()}}
@@ -38,7 +38,7 @@ setInterval(getCurrentTimeF,1000);
 <style scoped>
 .timeShower{
     position: absolute;
-    width: 300px;
+    width: 380px;
     top: 20px;
 
 }
@@ -47,5 +47,7 @@ setInterval(getCurrentTimeF,1000);
 
     display: flex;
     justify-content: center;
+    font-size: 40px;
+    margin-left:auto
 }
 </style>
