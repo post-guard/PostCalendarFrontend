@@ -13,7 +13,21 @@
             </span>
           </a-menu-item>
 
-          <a-menu-item key="map">
+          <a-menu-item key="ddl">
+                <schedule-outlined />
+                <span>
+              DDL
+            </span>
+          </a-menu-item>
+
+          <a-menu-item key="alarm">
+                <bell-outlined />
+                <span>
+              闹钟
+            </span>
+          </a-menu-item>
+
+            <a-menu-item key="map">
             <global-outlined />
             <span>
               地图
@@ -61,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { CalendarOutlined, UserOutlined, GlobalOutlined } from "@ant-design/icons-vue";
+import { CalendarOutlined, UserOutlined, GlobalOutlined ,BellOutlined,ScheduleOutlined} from "@ant-design/icons-vue";
 import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { WebStorage } from "@/utils/Storage";
@@ -105,6 +119,15 @@ function menu_selected() {
 
       router.push({ path: "/calendar" });
 
+      break;
+
+
+    case 'ddl':
+          router.push({ path: "/deadline" });
+      break;
+
+    case 'alarm':
+          router.push({ path: "/alarm" });
       break;
 
     case 'map':

@@ -39,7 +39,7 @@ setInterval(getCurrentTimeF,1000);
 .timeShower{
     position: absolute;
     width: 380px;
-    top: 20px;
+    top: 0;
 
 }
 
