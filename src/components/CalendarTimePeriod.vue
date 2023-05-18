@@ -2,11 +2,11 @@
     <a-config-provider :locale="zhCN">
         <div class = "calendar">
             <div class = "calendarBackground">
-                <a-table :columns="columns"
+                <a-table v-model:value="tableTimePeriod"
+                     :columns="columns"
                      :data-source="data"
                      :pagination="{ pageSize: 24 , hideOnSinglePage: true}"
                      :scroll="{ y: 610 }"
-
                 >
 
 
@@ -14,7 +14,15 @@
             </div>
 
             <div class="colorBars">
-                <calendar-color-bar>
+                <calendar-color-bar
+                    ref = "colorBarTest"
+                                :start-time="'12:00:00'"
+                                :end-time="'13:30:00'"
+                                :event-name="'发病'"
+                                :location="'学五宿舍'"
+                                :day="2"
+                                :periodicity="'临时'"
+                                :type="'个人'">
 
                 </calendar-color-bar>
             </div>
@@ -27,8 +35,21 @@ import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import CalendarColorBar from "@/components/CalendarColorBar.vue";
+import {onMounted, ref} from "vue";
 
 dayjs.locale('zh-cn');
+
+const tableTimePeriod = ref();
+
+
+onMounted(()=>{
+   const temp:  Element | null = document.getElementsByClassName("calendarBackground")[0].querySelector(".ant-table-body")
+    if(temp!==null){
+        temp.addEventListener("scroll",()=>{updateColorBars(temp.scrollTop)});
+
+    }
+
+})
 
 
 const columns = [
@@ -152,6 +173,15 @@ const data = [
         time: "23:00~24:00",
     },
 ]
+
+
+const colorBarTest = ref();
+function updateColorBars(scrollNum:number){
+    console.log(scrollNum)
+
+    colorBarTest.value.updateColorBar(scrollNum);
+
+}
 </script>
 
 <style scoped>
