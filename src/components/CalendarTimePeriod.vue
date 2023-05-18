@@ -1,20 +1,23 @@
 <template>
     <a-config-provider :locale="zhCN">
         <div class = "calendar">
-
-            <a-table :columns="columns"
+            <div class = "calendarBackground">
+                <a-table :columns="columns"
                      :data-source="data"
                      :pagination="{ pageSize: 24 , hideOnSinglePage: true}"
-                     :scroll="{ y: 620 }">
-                <template #bodycell="{columns,data}">
-                    <template v-if="columns.key=== 'time'">
-                        <a>
-                            {{data.time}}
-                        </a>
+                     :scroll="{ y: 610 }"
 
-                    </template>
-                </template>
-            </a-table>
+                >
+
+
+                </a-table>
+            </div>
+
+            <div class="colorBars">
+                <calendar-color-bar>
+
+                </calendar-color-bar>
+            </div>
         </div>
     </a-config-provider>
 </template>
@@ -23,12 +26,12 @@
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import {ref} from "vue";
+import CalendarColorBar from "@/components/CalendarColorBar.vue";
 
 dayjs.locale('zh-cn');
 
 
-const columns =ref( [
+const columns = [
     { title: '时间', width: 100, dataIndex: 'time', key: 'time', fixed: 'left' ,
         align:'center'
     },
@@ -48,10 +51,10 @@ const columns =ref( [
     { title: '星期日', dataIndex: 'Sunday', key: 'Sunday', width: 100 ,
         align:'center'},
 
-]);
+];
 
 
-const data  = ref([
+const data = [
     {
         key: '0',
         time: "00:00~01:00",
@@ -148,11 +151,36 @@ const data  = ref([
         key: '23',
         time: "23:00~24:00",
     },
-])
+]
 </script>
 
 <style scoped>
 .calendar{
     height: 670px;
 }
+
+.calendarBackground{
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+}
+
+.colorBars{
+    position: absolute;
+    top: 55px;
+    left: 167px;
+    width: 1168px;
+    height: 610px;
+    //z-index: 4;
+    overflow: hidden;
+}
+
+
+
+:deep(.ant-table-row-level-0){
+        height: 100px;
+        overflow-wrap: break-word;
+}
+
 </style>

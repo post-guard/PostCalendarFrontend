@@ -33,6 +33,7 @@ declare module '@vue/runtime-core' {
     ASelect: typeof import('ant-design-vue/es')['Select']
     ASpace: typeof import('ant-design-vue/es')['Space']
     ATable: typeof import('ant-design-vue/es')['Table']
+    CalendarColorBar: typeof import('./src/components/CalendarColorBar.vue')['default']
     CalendarTimePeriod: typeof import('./src/components/CalendarTimePeriod.vue')['default']
     CoordinateLineCom: typeof import('./src/components/CoordinateLineCom.vue')['default']
     CoordinatePointCom: typeof import('./src/components/CoordinatePointCom.vue')['default']

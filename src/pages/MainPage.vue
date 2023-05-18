@@ -13,7 +13,7 @@
             </span>
           </a-menu-item>
 
-          <a-menu-item key="ddl">
+          <a-menu-item key="deadline">
                 <schedule-outlined />
                 <span>
               DDL
@@ -122,7 +122,7 @@ function menu_selected() {
       break;
 
 
-    case 'ddl':
+    case 'deadline':
           router.push({ path: "/deadline" });
       break;
 
