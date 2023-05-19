@@ -20,12 +20,7 @@
             </span>
           </a-menu-item>
 
-          <a-menu-item key="alarm">
-                <bell-outlined />
-                <span>
-              闹钟
-            </span>
-          </a-menu-item>
+
 
             <a-menu-item key="map">
             <global-outlined />
@@ -75,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { CalendarOutlined, UserOutlined, GlobalOutlined ,BellOutlined,ScheduleOutlined} from "@ant-design/icons-vue";
+import { CalendarOutlined, UserOutlined, GlobalOutlined ,ScheduleOutlined} from "@ant-design/icons-vue";
 import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { WebStorage } from "@/utils/Storage";
@@ -126,9 +121,6 @@ function menu_selected() {
           router.push({ path: "/deadline" });
       break;
 
-    case 'alarm':
-          router.push({ path: "/alarm" });
-      break;
 
     case 'map':
       router.push({ path: "/map" });

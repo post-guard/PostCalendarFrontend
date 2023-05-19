@@ -8,7 +8,7 @@ import CalendarPage from "@/pages/CalendarPage.vue";
 import MapPage from "@/pages/MapPage.vue";
 import PersonalPage from "@/pages/PersonalPage.vue";
 import DDLPage from "@/pages/DDLPage.vue";
-import AlarmPage from "@/pages/AlarmPage.vue";
+
 
 const routers: RouteRecordRaw[] = [
     {
@@ -25,10 +25,7 @@ const routers: RouteRecordRaw[] = [
                 path: '/deadline',
                 component: DDLPage
             },
-            {
-                path: '/alarm',
-                component: AlarmPage
-            },
+
             {
                 path: '/map',
                 component: MapPage
