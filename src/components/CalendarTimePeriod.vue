@@ -2,7 +2,7 @@
     <a-config-provider :locale="zhCN">
         <div class = "calendar">
             <div class = "calendarBackground">
-                <a-table v-model:value="tableTimePeriod"
+                <a-table
                      :columns="columns"
                      :data-source="data"
                      :pagination="{ pageSize: 24 , hideOnSinglePage: true}"
@@ -14,17 +14,18 @@
             </div>
 
             <div class="colorBars">
-                <calendar-color-bar
-                    ref = "colorBarTest"
-                                :start-time="'12:00:00'"
-                                :end-time="'13:30:00'"
-                                :event-name="'发病'"
-                                :location="'学五宿舍'"
-                                :day="2"
-                                :periodicity="'临时'"
-                                :type="'个人'">
+                <div v-for="bar in colorBarList">
+                    <calendar-color-bar
+                                :ref = "setColorBarRef"
+                                :start-time=bar.beginDateTime
+                                :end-time=bar.endDateTime
+                                :event-name=bar.name
+                                :details = bar.details
+                                :location=bar.placeId.toString()
+                                :type=bar.userId.toString()>
 
-                </calendar-color-bar>
+                    </calendar-color-bar>
+                </div>
             </div>
         </div>
     </a-config-provider>
@@ -32,21 +33,74 @@
 
 <script setup lang="ts">
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
-import dayjs from 'dayjs';
+
 import 'dayjs/locale/zh-cn';
 import CalendarColorBar from "@/components/CalendarColorBar.vue";
-import {onMounted, ref} from "vue";
+import {onBeforeUpdate, onMounted, reactive, ref} from "vue";
+import type {CalendarTimePeriod} from "@/models/CalendarTimePeriod";
+import {message} from "ant-design-vue";
+import {Request} from "@/utils/Request";
+import type {AxiosError} from "axios";
+import type {IResponse} from "@/models/IResponse";
+import {useUserStore} from "@/stores/UserStore";
 
-dayjs.locale('zh-cn');
+const colorBarList : CalendarTimePeriod[] = reactive([]);
 
-const tableTimePeriod = ref();
+let colorBarListRef : CalendarColorBar[] = reactive([]);
+//听我说,谢谢你,reactive
+
+const request = new Request();
+
+const currentUser = useUserStore();
+
+onBeforeUpdate(async() => {
+    colorBarListRef = [];
+})
 
 
-onMounted(()=>{
+onMounted(async ()=>{
    const temp:  Element | null = document.getElementsByClassName("calendarBackground")[0].querySelector(".ant-table-body")
     if(temp!==null){
         temp.addEventListener("scroll",()=>{updateColorBars(temp.scrollTop)});
 
+    }
+
+
+    if(currentUser.user!==undefined){
+        try {
+
+
+
+
+            const response =  await request.get<CalendarTimePeriod[]>(`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}?begin=1683993600&end=1684598399`);
+
+
+            message.success("获取时间段日程成功");
+            for(let barAlready of response.data){
+                const bar : CalendarTimePeriod = {
+                    id: barAlready.id,
+                    name : barAlready.name,
+                    details: barAlready.details,
+                    userId: barAlready.userId,
+                    groupId: barAlready.groupId,
+                    placeId: barAlready.placeId,
+                    beginDateTime: barAlready.beginDateTime,
+                    endDateTime: barAlready.endDateTime
+                }
+
+
+                colorBarList.push(bar);
+            }
+
+        }catch (err){//TODO:待更改为新方法
+            const axiosError = err as AxiosError<IResponse<CalendarTimePeriod[]>>;
+            if (axiosError.response?.status != undefined &&
+                axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                let errorMessage = "获取时间段日程失败";
+                message.error(errorMessage);
+            }
+        }
     }
 
 })
@@ -175,11 +229,20 @@ const data = [
 ]
 
 
-const colorBarTest = ref();
-function updateColorBars(scrollNum:number){
-    console.log(scrollNum)
+function setColorBarRef(el: CalendarColorBar|undefined){
+    if (el) {
 
-    colorBarTest.value.updateColorBar(scrollNum);
+        colorBarListRef.push(el)
+
+    }
+}
+
+function updateColorBars(scrollNum:number){
+
+    for(let bar of colorBarListRef){
+        bar.updateColorBar(scrollNum);
+    }
+
 
 }
 </script>
