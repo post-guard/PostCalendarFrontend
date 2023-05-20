@@ -1,14 +1,19 @@
 <template>
     <a-config-provider :locale="zhCN">
+
         <div class = "calendar">
             <div class = "calendarBackground">
                 <a-table
                      :columns="columns"
                      :data-source="data"
                      :pagination="{ pageSize: 24 , hideOnSinglePage: true}"
-                     :scroll="{ y: 610 }"
+                     :scroll="{ y: 556 }"
                 >
-
+                <template #title>
+                    <a-date-picker  v-model:value="datePickerRef"
+                                    picker="week"
+                                    @change="datePickerChange"/>
+                </template>
 
                 </a-table>
             </div>
@@ -27,7 +32,9 @@
                     </calendar-color-bar>
                 </div>
             </div>
+
         </div>
+
     </a-config-provider>
 </template>
 
@@ -35,6 +42,8 @@
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 
 import 'dayjs/locale/zh-cn';
+import dayjs from "dayjs";
+dayjs.locale("zh-cn");
 import CalendarColorBar from "@/components/CalendarColorBar.vue";
 import {onBeforeUpdate, onMounted, reactive, ref} from "vue";
 import type {CalendarTimePeriod} from "@/models/CalendarTimePeriod";
@@ -43,6 +52,10 @@ import {Request} from "@/utils/Request";
 import type {AxiosError} from "axios";
 import type {IResponse} from "@/models/IResponse";
 import {useUserStore} from "@/stores/UserStore";
+import {Dayjs} from "dayjs";
+import weekOfYear from "dayjs/plugin/weekOfYear"
+
+dayjs.extend(weekOfYear)
 
 const colorBarList : CalendarTimePeriod[] = reactive([]);
 
@@ -53,17 +66,21 @@ const request = new Request();
 
 const currentUser = useUserStore();
 
+
+const datePickerRef = ref<Dayjs>();
+
 onBeforeUpdate(async() => {
     colorBarListRef = [];
 })
 
 
 onMounted(async ()=>{
-   const temp:  Element | null = document.getElementsByClassName("calendarBackground")[0].querySelector(".ant-table-body")
+    const temp:  Element | null = document.getElementsByClassName("calendarBackground")[0].querySelector(".ant-table-body")
     if(temp!==null){
         temp.addEventListener("scroll",()=>{updateColorBars(temp.scrollTop)});
 
     }
+
 
 
     if(currentUser.user!==undefined){
@@ -103,7 +120,12 @@ onMounted(async ()=>{
         }
     }
 
+
+
+
 })
+
+
 
 
 const columns = [
@@ -245,6 +267,23 @@ function updateColorBars(scrollNum:number){
 
 
 }
+
+
+
+function datePickerChange(){
+
+    if(datePickerRef.value!==undefined){
+
+        const currentTime = datePickerRef.value.year()+"-"
+        +(datePickerRef.value.month()+1)+"-"
+        +datePickerRef.value.date();
+
+        const currentWeek = dayjs(currentTime).week();
+
+        console.log(currentWeek);
+    }
+
+}
 </script>
 
 <style scoped>
@@ -261,10 +300,10 @@ function updateColorBars(scrollNum:number){
 
 .colorBars{
     position: absolute;
-    top: 55px;
+    top: 118px;
     left: 167px;
     width: 1168px;
-    height: 610px;
+    height: 556px;
     //z-index: 4;
     overflow: hidden;
 }

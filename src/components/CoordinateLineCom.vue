@@ -48,8 +48,8 @@
       </template>
 
 
-    <a-button block size="small" type="text">
-    `
+    <a-button block size="small" type="text" style="opacity: 0">
+        .
     </a-button>
   </a-popover>
   </div>
@@ -161,8 +161,8 @@ function updateStatus(startPoint: { x:number,y:number },endPoint:{ x:number,y:nu
         popoverDom.value.style.width = props.length*scale+"px";
         popoverDom.value.style.height = 6+"px";
 
-        console.log(popoverDom.value?.style.left);
-        console.log(popoverDom.value?.style.top);
+        //console.log(popoverDom.value?.style.left);
+        //console.log(popoverDom.value?.style.top);
 
 
 

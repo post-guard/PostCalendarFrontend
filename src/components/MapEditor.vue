@@ -232,7 +232,7 @@ onMounted(async () => {
         }
 
 
-        await navigationComplex([19,32,34,37]);
+        await navigationOneDest(73,104);
 
     }
 })
@@ -756,7 +756,11 @@ function checkoutLine(val: {
 }
 
 
-
+/**
+ * 点对点导航
+ * @param startPointId 起始点id
+ * @param endPointId 终点id
+ */
 async function navigationOneDest(startPointId:number,endPointId:number){
     try {
 
@@ -770,9 +774,9 @@ async function navigationOneDest(startPointId:number,endPointId:number){
             `/postcalendarapi/navigation/oneDestination?startPlaceId=${startPointId}&endPlaceId=${endPointId}`);
 
 
-        message.success("添加导航成功");
-        console.log(startPointId,endPointId);
-        console.log(response.data);
+        message.success("导航成功");
+        //console.log(startPointId,endPointId);
+        //console.log(response.data);
 
         for(let lineRes of response.data.roads){
 
@@ -798,10 +802,13 @@ async function navigationOneDest(startPointId:number,endPointId:number){
             axiosError.response.status >= 400 && axiosError.response.status < 500) {
 
 
-            message.error("添加导航失败");
+            message.error("导航失败");
         }
     }
 }
+
+
+
 
 
 
