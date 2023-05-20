@@ -43,6 +43,8 @@ const props= defineProps<{
     location: string,
     type: string,
 
+    initScroll:number
+
 
 }>()
 
@@ -55,7 +57,7 @@ const endTimeTransform = dayjs.tz(props.endTime);
 
 
 onMounted(()=>{
-    updateColorBar(0);
+    updateColorBar(props.initScroll);
 
 
     //设置随机颜色，根据开始时间和结束时间定
@@ -84,14 +86,21 @@ onMounted(()=>{
 function updateColorBar(offsetY:number){
     const startTime = startTimeTransform.hour()*3600+startTimeTransform.minute()*60+startTimeTransform.second();
     const endTime = endTimeTransform.hour()*3600+endTimeTransform.minute()*60+endTimeTransform.second()
-    const day = startTimeTransform.weekday()//props.day;
+    const day = startTimeTransform.day()//props.day;
 
 
 
     if(colorBarDivRef.value!==undefined){
 
         colorBarDivRef.value.style.top = startTime/36-offsetY + "px";
-        colorBarDivRef.value.style.left = 167 * day+"px";
+
+        if(day==0){
+            colorBarDivRef.value.style.left = 167 * 6+"px";
+        }
+        else{
+            colorBarDivRef.value.style.left = 167 * (day-1)+"px";
+        }
+
         colorBarDivRef.value.style.height = (endTime-startTime)/36 + "px";
     }
 

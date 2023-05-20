@@ -9,6 +9,16 @@
                      :pagination="{ pageSize: 24 , hideOnSinglePage: true}"
                      :scroll="{ y: 556 }"
                 >
+
+                    <template #headerCell="{ column }">
+                        <template v-if="column.key !== 'time'">
+                            <span>
+                                {{calendarColumns(column.key)}}
+                            </span>
+                        </template>
+                    </template>
+
+
                 <template #title>
                     <a-date-picker  v-model:value="datePickerRef"
                                     picker="week"
@@ -27,7 +37,9 @@
                                 :event-name=bar.name
                                 :details = bar.details
                                 :location=bar.placeId.toString()
-                                :type=bar.userId.toString()>
+                                :type=bar.userId.toString()
+                                :init-scroll=currentScroll
+                    >
 
                     </calendar-color-bar>
                 </div>
@@ -57,9 +69,9 @@ import weekOfYear from "dayjs/plugin/weekOfYear"
 
 dayjs.extend(weekOfYear)
 
-const colorBarList : CalendarTimePeriod[] = reactive([]);
+let colorBarList = ref<CalendarTimePeriod[]>([]);
 
-let colorBarListRef : CalendarColorBar[] = reactive([]);
+let colorBarListRef = ref<CalendarColorBar[]>([]);
 //听我说,谢谢你,reactive
 
 const request = new Request();
@@ -69,18 +81,79 @@ const currentUser = useUserStore();
 
 const datePickerRef = ref<Dayjs>();
 
+const currentTime = new Date();
+
+const currentScroll = ref(0);//当前表格滑动条的位置
+
+const calendarPeriod = ref({//控制日历显示的日期
+
+    start: dayjs(getCalendarPeriod(currentTime.getFullYear()
+        +"-"+(currentTime.getMonth()+1)
+        +"-"+currentTime.getDate()).start), //获得当前时间戳
+
+
+    end: dayjs(getCalendarPeriod(currentTime.getFullYear()
+    +"-"+(currentTime.getMonth()+1)
+    +"-"+currentTime.getDate()).end)
+});
+
+
+
+function calendarColumns(columnDay:string){
+
+    let day = 0;
+
+    switch (columnDay){//我谔谔，你呃呃
+        case "Monday":
+            day = 1;
+            break;
+        case "Tuesday":
+            day = 2;
+            break;
+        case "Wednesday":
+            day = 3;
+            break;
+        case "Thursday":
+            day = 4;
+            break;
+        case "Friday":
+            day = 5;
+            break;
+        case "Saturday":
+            day = 6;
+            break;
+        case "Sunday":
+            day = 7;
+            break;
+
+    }
+
+    let result = "星期"+"空一二三四五六日".charAt(day)+" ";
+    if(day!=0){
+        result+=(calendarPeriod.value.start.add(day-1,'d').month()+1)+"-"+(calendarPeriod.value.start.add(day-1,'d').date())
+    }
+    else{
+        result+=(calendarPeriod.value.start.add(6,'d').month()+1)+"-"+(calendarPeriod.value.start.add(6,'d').date())
+    }
+
+    return result;
+
+}
+
 onBeforeUpdate(async() => {
-    colorBarListRef = [];
+    colorBarListRef.value = [];
 })
 
 
 onMounted(async ()=>{
-    const temp:  Element | null = document.getElementsByClassName("calendarBackground")[0].querySelector(".ant-table-body")
-    if(temp!==null){
-        temp.addEventListener("scroll",()=>{updateColorBars(temp.scrollTop)});
+    await currentUser.updateUserInformation();
+
+    const scrollElement:  Element | null = document.getElementsByClassName("calendarBackground")[0].querySelector(".ant-table-body")
+    if(scrollElement!==null){
+        currentScroll.value = scrollElement.scrollTop;
+        scrollElement.addEventListener("scroll",()=>{updateColorBars(scrollElement.scrollTop)});
 
     }
-
 
 
     if(currentUser.user!==undefined){
@@ -89,7 +162,12 @@ onMounted(async ()=>{
 
 
 
-            const response =  await request.get<CalendarTimePeriod[]>(`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}?begin=1683993600&end=1684598399`);
+            const response =  await request.get<CalendarTimePeriod[]>
+            (`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}
+            ?begin=${calendarPeriod.value.start.unix()}
+            &end=${calendarPeriod.value.end.unix()}`);
+
+
 
 
             message.success("获取时间段日程成功");
@@ -106,7 +184,7 @@ onMounted(async ()=>{
                 }
 
 
-                colorBarList.push(bar);
+                colorBarList.value.push(bar);
             }
 
         }catch (err){//TODO:待更改为新方法
@@ -122,33 +200,39 @@ onMounted(async ()=>{
 
 
 
-
 })
 
 
 
 
-const columns = [
+const columns = ref([
     { title: '时间', width: 100, dataIndex: 'time', key: 'time', fixed: 'left' ,
         align:'center'
     },
 
-    { title: '星期一', dataIndex: 'Monday', key: 'Monday', width: 100 ,
-        align:'center'},
-    { title: '星期二', dataIndex: 'Tuesday', key: 'Tuesday', width: 100 ,
-        align:'center'},
-    { title: '星期三', dataIndex: 'Wednesday', key: 'Wednesday', width: 100 ,
-        align:'center'},
-    { title: '星期四', dataIndex: 'Thursday', key: 'Thursday', width: 100 ,
-        align:'center'},
-    { title: '星期五', dataIndex: 'Friday', key: 'Friday', width: 100 ,
-        align:'center'},
-    { title: '星期六', dataIndex: 'Saturday', key: 'Saturday', width: 100 ,
-        align:'center'},
-    { title: '星期日', dataIndex: 'Sunday', key: 'Sunday', width: 100 ,
-        align:'center'},
+    { //title: calendarColumns.value[0],
+        dataIndex: 'Monday', key: 'Monday', width: 100 , align:'center'},
 
-];
+
+    { //title: calendarColumns.value[1],
+        dataIndex: 'Tuesday', key: 'Tuesday', width: 100 , align:'center'},
+
+    { //title: calendarColumns.value[2],
+        dataIndex: 'Wednesday', key: 'Wednesday', width: 100 , align:'center'},
+
+    { //title: calendarColumns.value[3],
+        dataIndex: 'Thursday', key: 'Thursday', width: 100 , align:'center'},
+
+    { //title: calendarColumns.value[4],
+        dataIndex: 'Friday', key: 'Friday', width: 100 , align:'center'},
+
+    { //title: calendarColumns.value[5],
+        dataIndex: 'Saturday', key: 'Saturday', width: 100 , align:'center'},
+
+    { //title: calendarColumns.value[6],
+        dataIndex: 'Sunday', key: 'Sunday', width: 100 , align:'center'},
+
+]);
 
 
 const data = [
@@ -254,14 +338,14 @@ const data = [
 function setColorBarRef(el: CalendarColorBar|undefined){
     if (el) {
 
-        colorBarListRef.push(el)
+        colorBarListRef.value.push(el)
 
     }
 }
 
 function updateColorBars(scrollNum:number){
 
-    for(let bar of colorBarListRef){
+    for(let bar of colorBarListRef.value){
         bar.updateColorBar(scrollNum);
     }
 
@@ -270,7 +354,7 @@ function updateColorBars(scrollNum:number){
 
 
 
-function datePickerChange(){
+async function datePickerChange(){
 
     if(datePickerRef.value!==undefined){
 
@@ -278,11 +362,97 @@ function datePickerChange(){
         +(datePickerRef.value.month()+1)+"-"
         +datePickerRef.value.date();
 
-        const currentWeek = dayjs(currentTime).week();
 
-        console.log(currentWeek);
+
+        calendarPeriod.value.start = getCalendarPeriod(currentTime).start
+        calendarPeriod.value.end = getCalendarPeriod(currentTime).end
+
+
+        colorBarList.value = [];
+        colorBarListRef.value = [];
+
+
+        if(currentUser.user!==undefined){
+            try {
+
+                console.log(calendarPeriod.value.start.unix())
+                console.log(calendarPeriod.value.end.unix())
+
+
+                const response =  await request.get<CalendarTimePeriod[]>
+                (`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}
+            ?begin=${calendarPeriod.value.start.unix()}
+            &end=${calendarPeriod.value.end.unix()}`);
+
+
+
+
+                message.success("获取时间段日程成功");
+                for(let barAlready of response.data){
+                    const bar : CalendarTimePeriod = {
+                        id: barAlready.id,
+                        name : barAlready.name,
+                        details: barAlready.details,
+                        userId: barAlready.userId,
+                        groupId: barAlready.groupId,
+                        placeId: barAlready.placeId,
+                        beginDateTime: barAlready.beginDateTime,
+                        endDateTime: barAlready.endDateTime
+                    }
+
+
+                    colorBarList.value.push(bar);
+                }
+
+            }catch (err){//TODO:待更改为新方法
+                const axiosError = err as AxiosError<IResponse<CalendarTimePeriod[]>>;
+                if (axiosError.response?.status != undefined &&
+                    axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                    let errorMessage = "获取时间段日程失败";
+                    message.error(errorMessage);
+                }
+            }
+        }
+
+
+        console.log(colorBarList.value)
+        console.log(colorBarListRef.value)
     }
 
+}
+
+/**
+ * 获得所选日期所在这一周的起始日期（星期一）和结束日期（星期天）
+ * @param today 形如yyyy-mm-dd格式的日期字符串
+ */
+function getCalendarPeriod(today:string):({start:Dayjs,end:Dayjs}){
+
+    const currentWeek = dayjs(today).week();
+    const currentDay = dayjs(today).day();
+
+    let startDate,endDate;
+
+    /*注意，day指的是星期，范围是星期天0-星期六6，但是由于课程表是星期一到星期天，
+         所以需要以下操作*/
+
+    if(currentDay!=0){
+        //向前找currentDay-1天,向后找7-currentDay天
+        startDate = dayjs(today).subtract(currentDay-1, 'day')
+        endDate = dayjs(today).add(7-currentDay, 'day')
+    }
+    else{//是星期天就向前找6天
+        startDate = dayjs(today).subtract(6, 'day')
+        endDate = dayjs(today)
+    }
+
+    endDate = dayjs(endDate).add(23, 'hour')
+        .add(59,'minute').add(59,'second');
+
+
+    //console.log(currentDay)
+
+    return {start:startDate,end:endDate};
 }
 </script>
 
