@@ -73,6 +73,21 @@ export class Request {
             }
         });
     }
+
+    public deleteWithBody<T>(url: string, data: any): Promise<IResponse<T>> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const response = await this.instance.request<IResponse<T>>({
+                    url: url,
+                    method: "delete",
+                    data: data,
+                });
+                resolve(response.data);
+            } catch(err) {
+                reject(err);
+            }
+        });
+    }
 }
 
 /**

@@ -89,10 +89,15 @@
                 <div style="height: 4px;"></div>
                 <p>输入用户名称搜索用户</p>
 
+                <a-select show-search :options="addUserOpions" :filter-option="addUserSearchFilter" placeholder="输入名称搜索用户"
+                  @change="addUserSelected">
+                </a-select>
+
+                <div style="height: 4px"></div>
 
                 <p>
-                  <a-button type="primary" size="middle" style="width: 50%;" :disabled="addButtonEnable"
-                    >
+                  <a-button type="primary" size="middle" style="width: 50%;" :disabled="addUserButtonDisable"
+                    @click="addUserButtonClicked">
                     <template #icon>
                       <CheckOutlined />
                     </template>
@@ -104,11 +109,6 @@
                     </template>
                   </a-button>
                 </p>
-
-                <a-select>
-
-                </a-select>
-
               </template>
 
               <a-button type="primary">
@@ -129,8 +129,8 @@
                 <a-button type="link">
                   修改用户权限
                 </a-button>
-
-                <a-button type="link">
+                
+                <a-button type="link" @click="deleteUserButtonClicked(record)">
                   删除用户
                 </a-button>
               </template>
@@ -150,6 +150,7 @@ import { useUserStore } from '@/stores/UserStore';
 import { axiosErrorHandler, Request } from '@/utils/Request';
 import { MailOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
+import type { SelectProps } from 'ant-design-vue/lib/vc-select';
 import { computed, ref, toRaw } from 'vue';
 
 class Column {
@@ -209,6 +210,10 @@ const manageTableVisable = ref(false);
 const manageTableLoading = ref(false);
 const addUserVisable = ref(false);
 const manageGroupUsers = ref<UserInformation[]>([]);
+const manageGroupId = ref(0);
+const addUserOpions = ref<SelectProps['options']>([]);
+const selectedAddUserId = ref(0);
+const addUserButtonDisable = ref(true);
 
 const groupTableColumns: Column[] = [
   new Column("组织名称", "name"),
@@ -234,6 +239,8 @@ refreshGroupTable();
  * 刷新当前用户所在组织的列表
  */
 async function refreshGroupTable() {
+  await userStore.updateUserInformation();
+
   if (userStore.user != undefined) {
     groupTableLoading.value = false;
     groups.value.length = 0;
@@ -255,6 +262,8 @@ async function refreshGroupTable() {
 async function refreshGroupManageTable(groupId: number) {
   manageGroupUsers.value.length = 0;
   manageTableLoading.value = true
+  manageGroupId.value = groupId;
+  const usersInGroup: number[] = [];
 
   try {
     const linkResponse = await request.get<IUserGroupLink[]>(`/postcalendarapi/groupLink/group/${groupId}`);
@@ -262,6 +271,24 @@ async function refreshGroupManageTable(groupId: number) {
     for (const link of linkResponse.data) {
       const userResponse = await request.get<User>(`/postcalendarapi/user/${link.userId}`);
       manageGroupUsers.value.push(new UserInformation(userResponse.data, link));
+      usersInGroup.push(link.userId);
+    }
+
+    const userResponse = await request.get<User[]>("/postcalendarapi/user/");
+
+    if (addUserOpions.value != undefined) {
+      addUserOpions.value.length = 0;
+
+      for (const user of userResponse.data) {
+        if (!usersInGroup.includes(user.id)) {
+          // 如果在组织中没有这位同学
+          // 添加到候选列表中
+          addUserOpions.value.push({
+            value: user.id,
+            label: user.username
+          });
+        }
+      }
     }
 
     manageTableLoading.value = false;
@@ -328,13 +355,56 @@ function manageGoupButtonClicked(groupId: number) {
 
 function manageGroupCloseButtonClicked() {
   manageTableVisable.value = false;
+
+  manageGroupId.value = 0;
 }
 
 function addUserCloseButtonClicked() {
   addUserVisable.value = false;
 }
 
+/**
+ * 添加用户时筛选函数
+ */
+function addUserSearchFilter(input: string, option: any): boolean {
+  return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+}
 
+function addUserSelected(value: number) {
+  addUserButtonDisable.value = false;
+  selectedAddUserId.value = value;
+}
+
+async function addUserButtonClicked() {
+  if (selectedAddUserId.value != 0 && manageGroupId.value != 0) {
+    addUserVisable.value = false;
+    addUserButtonDisable.value = true;
+    try {
+      await request.post<IUserGroupLink>(`/postcalendarapi/groupLink/group/${manageGroupId.value}`, {
+        userId: selectedAddUserId.value,
+        groupId: manageGroupId.value,
+        permission: 0
+      });
+
+      refreshGroupManageTable(manageGroupId.value);
+    } catch (err) {
+      message.error(axiosErrorHandler(err));
+    }
+  }
+}
+
+async function deleteUserButtonClicked(user: UserInformation) {
+  if (selectedAddUserId.value != 0 && manageGroupId.value != 0) {
+    try {
+      await request.deleteWithBody<IUserGroupLink>(
+        `/postcalendarapi/groupLink/group/${user.groupLink.groupId}`, user.groupLink);
+
+      refreshGroupManageTable(manageGroupId.value);
+    } catch (err) {
+      message.error(axiosErrorHandler(err));
+    }
+  }
+}
 </script>
 
 <style scoped>
