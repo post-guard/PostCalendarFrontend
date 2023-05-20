@@ -232,7 +232,7 @@ onMounted(async () => {
         }
 
 
-        await navigationOneDest(19,32);
+        await navigationComplex([19,32,34,37]);
 
     }
 })
@@ -804,6 +804,51 @@ async function navigationOneDest(startPointId:number,endPointId:number){
 }
 
 
+
+async function navigationComplex(pointIdList:number[]){
+    try {
+
+        for(let line of coordinate_line_list){
+            line.react_image.set({"stroke":"#00e7ff"});
+            line.react_image.set({"fill":"#62dfff"});
+        }
+
+
+        const response =  await request.post<IMapNavigation>(
+            "/postcalendarapi/navigation/manyDestination",pointIdList);
+
+
+        message.success("多点导航成功");
+
+
+        for(let lineRes of response.data.roads){
+
+
+            for(let line of coordinate_line_list){
+
+
+                if(line.id==lineRes.id){
+
+                    line.react_image.set({"stroke":"#30ff37"});
+                    line.react_image.set({"fill":"#a9ffb6"});
+
+                }
+            }
+
+        }
+        outsize_canvas.value.renderAll();
+
+
+    }catch (err){
+        const axiosError = err as AxiosError<IResponse<IMapRoad>>;
+        if (axiosError.response?.status != undefined &&
+            axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+
+            message.error("多点导航失败");
+        }
+    }
+}
 </script>
 
 <style scoped>
