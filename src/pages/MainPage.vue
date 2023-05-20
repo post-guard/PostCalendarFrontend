@@ -74,8 +74,6 @@ import { CalendarOutlined, UserOutlined, GlobalOutlined ,ScheduleOutlined} from 
 import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { WebStorage } from "@/utils/Storage";
-import type { ILoginToken } from "@/models/ILoginToken";
-import { Request } from "@/utils/Request";
 import { useUserStore } from "@/stores/UserStore";
 
 const router = useRouter();
@@ -85,19 +83,9 @@ const collapsed = ref(true);
 const selectedKeys = ref([""]);
 const loginButtonMessage = ref("登录");
 
-const token = storage.getKey<ILoginToken>("token");
-if (token == null) {
-  // 获得登录token失败
-  // TODO: 还需要添加校验token是否失效的逻辑
-  router.replace("/login");
-} else {
-  loginButtonMessage.value = "退出登录";
-  Request.setAuthorizationToken(token.token);
+const userStore = useUserStore();
 
-  const userStore = useUserStore();
-  userStore.updateUserInformation(token.id);
-}
-
+init();
 
 watch(() => router, (newValue) => {
   //console.log(newValue.currentRoute.value.fullPath);
@@ -137,12 +125,19 @@ function menu_selected() {
 }
 
 function loginButtonClicked() {
-  if (token != null) {
-    // 如果在登录状态就清除token
-    storage.remove("token");
-  }
-
+  storage.remove("token");
   router.replace("/login");
+}
+
+async function init() {
+  await userStore.updateUserInformation();
+
+  if (userStore.user == undefined) {
+    // 没有登录
+    router.replace("/login");
+  } else {
+    loginButtonMessage.value = "退出登录";
+  }
 }
 </script>
 
