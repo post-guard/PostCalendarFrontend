@@ -116,7 +116,7 @@
               </a-button>
             </a-popover>
 
-            <a-button type="danger">
+            <a-button type="danger" @click="deleteGroupButtonClicked">
               删除组织
             </a-button>
           </a-space>
@@ -126,11 +126,8 @@
           <a-table :columns="mangerGroupColumns" :data-source="manageGroupUsers" :loading="manageTableLoading">
             <template #bodyCell="{ column, record }">
               <template v-if="column.key == 'action'">
-                <a-button type="link">
-                  修改用户权限
-                </a-button>
                 
-                <a-button type="link" @click="deleteUserButtonClicked(record)">
+                <a-button type="link" @click="deleteUserButtonClicked(toRaw(record))">
                   删除用户
                 </a-button>
               </template>
@@ -247,6 +244,7 @@ async function refreshGroupTable() {
 
     try {
       const linkResponse = await request.get<IUserGroupLink[]>(`/postcalendarapi/groupLink/user/${userStore.user.id}`);
+      console.log(linkResponse.data);
 
       for (const link of linkResponse.data) {
         const groupResponse = await request.get<IGroup>(`/postcalendarapi/group/${link.groupId}`);
@@ -385,6 +383,7 @@ async function addUserButtonClicked() {
         groupId: manageGroupId.value,
         permission: 0
       });
+      message.info("添加用户成功");
 
       refreshGroupManageTable(manageGroupId.value);
     } catch (err) {
@@ -394,13 +393,29 @@ async function addUserButtonClicked() {
 }
 
 async function deleteUserButtonClicked(user: UserInformation) {
-  if (selectedAddUserId.value != 0 && manageGroupId.value != 0) {
+  if ( manageGroupId.value != 0) {
     try {
       await request.deleteWithBody<IUserGroupLink>(
         `/postcalendarapi/groupLink/group/${user.groupLink.groupId}`, user.groupLink);
 
+      message.info("删除用户成功");
+
       refreshGroupManageTable(manageGroupId.value);
     } catch (err) {
+      message.error(axiosErrorHandler(err));
+    }
+  }
+}
+
+async function deleteGroupButtonClicked() {
+  if (manageGroupId.value != 0) {
+    try {
+      await request.delete(`/postcalendarapi/group/${manageGroupId.value}`);
+
+      manageTableVisable.value = false;
+      refreshGroupTable();
+      message.info("删除组织成功");
+    } catch(err) {
       message.error(axiosErrorHandler(err));
     }
   }
