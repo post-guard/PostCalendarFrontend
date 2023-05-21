@@ -38,7 +38,7 @@
                                 :details = bar.details
                                 :location=bar.placeId.toString()
                                 :type=bar.userId.toString()
-                                :init-scroll=currentScroll
+                                :init-scroll=currentScroll()
                     >
 
                     </calendar-color-bar>
@@ -83,7 +83,14 @@ const datePickerRef = ref<Dayjs>();
 
 const currentTime = new Date();
 
-const currentScroll = ref(0);//当前表格滑动条的位置
+const currentScroll = ()=>{
+    let scrollElement : Element|null = document.getElementsByClassName("calendarBackground")[0].querySelector(".ant-table-body")
+
+    if(scrollElement!==null){
+        return scrollElement.scrollTop;
+    }//当前表格滑动条的位置
+    else return 0;
+}
 
 const calendarPeriod = ref({//控制日历显示的日期
 
@@ -150,7 +157,7 @@ onMounted(async ()=>{
 
     const scrollElement:  Element | null = document.getElementsByClassName("calendarBackground")[0].querySelector(".ant-table-body")
     if(scrollElement!==null){
-        currentScroll.value = scrollElement.scrollTop;
+
         scrollElement.addEventListener("scroll",()=>{updateColorBars(scrollElement.scrollTop)});
 
     }
@@ -163,9 +170,7 @@ onMounted(async ()=>{
 
 
             const response =  await request.get<CalendarTimePeriod[]>
-            (`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}
-            ?begin=${calendarPeriod.value.start.unix()}
-            &end=${calendarPeriod.value.end.unix()}`);
+            (`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}?begin=${calendarPeriod.value.start.unix()}&end=${calendarPeriod.value.end.unix()}`);
 
 
 
@@ -380,9 +385,7 @@ async function datePickerChange(){
 
 
                 const response =  await request.get<CalendarTimePeriod[]>
-                (`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}
-            ?begin=${calendarPeriod.value.start.unix()}
-            &end=${calendarPeriod.value.end.unix()}`);
+                (`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}?begin=${calendarPeriod.value.start.unix()}&end=${calendarPeriod.value.end.unix()}`);
 
 
 
