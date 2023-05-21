@@ -10,17 +10,24 @@
           </h3>
           <p>
               <b>
-              {{ location }}
+              {{ currentLocation }}
               </b>
           </p>
           <p>
               <b>
-              {{ type }}
+              {{ currentType }}
               </b>
           </p>
       </a-card>
 
-      <time-period-event-modify ref="eventModel">
+      <time-period-event-modify ref="eventModel"
+                                :name = props.eventName
+                                :details = props.details
+                                :location-id = props.locationId
+                                :user-id = props.userId
+                                :group-id = props.groupId
+                                :start-time = props.startTime
+                                :end-time = props.endTime>
 
       </time-period-event-modify>
     </div>
@@ -34,6 +41,11 @@ import weekday from "dayjs/plugin/weekday";
 import utc from "dayjs/plugin/utc"
 import timezone from "dayjs/plugin/timezone";
 import TimePeriodEventModify from "@/components/TimePeriodEventModify.vue";
+import {Request} from "@/utils/Request";
+import type {AxiosError} from "axios";
+import type {IResponse} from "@/models/IResponse";
+import type {IMapPoint} from "@/models/IMapPoint";
+import type {IGroup} from "@/models/IGroup";
 
 // config dayjs
 dayjs.extend(weekday);
@@ -47,25 +59,41 @@ const props= defineProps<{
     endTime: string,
     details:string,
     eventName: string,
-    location: string,
-    type: string,
+    locationId: number,
+    userId: number,
+    groupId: number,
 
     initScroll:number
 
 
 }>()
+const request = new Request();
 
 const colorBarDivRef = ref()
 const colorBarRef = ref()
+
+const currentWindow = ref({width:0,height:0})
+const currentWidth = ref(0);
 
 const startTimeTransform = dayjs.tz(props.startTime);
 const endTimeTransform = dayjs.tz(props.endTime);
 
 const eventModel = ref()
 
-onMounted(()=>{
-    updateColorBar(props.initScroll);
+const currentLocation = ref("未标明地点");
+const currentType = ref("【个人】");
 
+
+onMounted(async ()=>{
+
+    currentWindow.value.width = document.getElementsByClassName('ant-layout-content')[0].clientWidth
+    currentWindow.value.height = document.getElementsByClassName('ant-layout-content')[0].clientHeight
+
+    currentWidth.value = (currentWindow.value.width - 14) / 8;
+
+
+
+    updateColorBar(props.initScroll);
 
     //设置随机颜色，根据开始时间和结束时间定
     const setBackgroundColor = {
@@ -85,6 +113,57 @@ onMounted(()=>{
 
 
 
+
+    //const changeDiv = colorBarDivRef.value.getElementsByClassName("colorBarDiv")[0];
+
+    colorBarDivRef.value.style.width = currentWidth.value + "px"
+
+
+
+    try {
+
+        const response =  await request.get<IMapPoint>(`/postcalendarapi/place/${props.locationId}`);
+
+        currentLocation.value = response.data.name;
+        //message.success("获取时间段日程成功");
+
+
+    }catch (err){//TODO:待更改为新方法
+        const axiosError = err as AxiosError<IResponse<IMapPoint>>;
+        if (axiosError.response?.status != undefined &&
+            axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+            //let errorMessage = "获取时间段日程失败";
+            //message.error(errorMessage);
+        }
+    }
+
+
+
+    if(props.userId==0){
+        try {
+
+            const response =  await request.get<IGroup>(`/postcalendarapi/group/${props.groupId}`);
+
+            currentType.value = "【集体】" + response.data.name;
+            //message.success("获取时间段日程成功");
+
+
+        }catch (err){//TODO:待更改为新方法
+            const axiosError = err as AxiosError<IResponse<IGroup>>;
+            if (axiosError.response?.status != undefined &&
+                axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                //let errorMessage = "获取时间段日程失败";
+                //message.error(errorMessage);
+            }
+        }
+    }
+    else{
+        currentType.value = "【个人】"
+    }
+
+
 })
 /**
  * 设置滚动表格时彩条的位置
@@ -102,10 +181,10 @@ function updateColorBar(offsetY:number){
         colorBarDivRef.value.style.top = startTime/36-offsetY + "px";
 
         if(day==0){
-            colorBarDivRef.value.style.left = 167 * 6+"px";
+            colorBarDivRef.value.style.left = currentWidth.value * 6+"px";
         }
         else{
-            colorBarDivRef.value.style.left = 167 * (day-1)+"px";
+            colorBarDivRef.value.style.left = currentWidth.value * (day-1)+"px";
         }
 
         colorBarDivRef.value.style.height = (endTime-startTime)/36 + "px";

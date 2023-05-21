@@ -7,7 +7,7 @@
                      :columns="columns"
                      :data-source="data"
                      :pagination="{ pageSize: 24 , hideOnSinglePage: true}"
-                     :scroll="{ y: 556 }"
+                     :scroll="{ y: currentWindow.height-114 }"
                 >
 
                     <template #headerCell="{ column }">
@@ -36,8 +36,9 @@
                                 :end-time=bar.endDateTime
                                 :event-name=bar.name
                                 :details = bar.details
-                                :location=bar.placeId.toString()
-                                :type=bar.userId.toString()
+                                :locationId=bar.placeId
+                                :user-id=bar.userId
+                                :group-id = bar.groupId
                                 :init-scroll=currentScroll()
                     >
 
@@ -77,6 +78,8 @@ let colorBarListRef = ref<CalendarColorBar[]>([]);
 const request = new Request();
 
 const currentUser = useUserStore();
+
+const currentWindow = ref({width:0,height:0})
 
 
 const datePickerRef = ref<Dayjs>();
@@ -154,6 +157,18 @@ onBeforeUpdate(async() => {
 
 onMounted(async ()=>{
     await currentUser.updateUserInformation();
+
+    currentWindow.value.width = document.getElementsByClassName('ant-layout-content')[0].clientWidth
+    currentWindow.value.height = document.getElementsByClassName('ant-layout-content')[0].clientHeight
+
+    const colorBarsElement:  HTMLElement | null = document.getElementsByClassName("colorBars")[0]
+    if(colorBarsElement!==null){
+
+        colorBarsElement.style.height = (currentWindow.value.height - 114) + "px"
+
+    }
+
+
 
     const scrollElement:  Element | null = document.getElementsByClassName("calendarBackground")[0].querySelector(".ant-table-body")
     if(scrollElement!==null){
@@ -461,22 +476,32 @@ function getCalendarPeriod(today:string):({start:Dayjs,end:Dayjs}){
 
 <style scoped>
 .calendar{
-    height: 670px;
+    //height: 670px;
+    height: 100%;
 }
 
 .calendarBackground{
     position: absolute;
     top: 0;
     left: 0;
+    width: 100%;
+    height: 100%;
     z-index: 3;
 }
 
 .colorBars{
     position: absolute;
     top: 118px;
-    left: 167px;
+    /*left: 167px;
     width: 1168px;
-    height: 556px;
+    height: 556px;*/
+
+    //top: 17.612%;
+    left: 12.361%;
+    width: 86.454%;
+    //height: 82.985%;
+
+
     //z-index: 4;
     overflow: hidden;
 }
