@@ -1,6 +1,8 @@
 <template>
     <div class="colorBarDiv" ref="colorBarDivRef">
-      <a-card class="colorBar" ref="colorBarRef" :bordered="false">
+      <a-card class="colorBar" ref="colorBarRef"
+              :bordered="false"
+      @click="showEventModel">
           <h3>
               <b>
               {{ eventName }}
@@ -17,6 +19,10 @@
               </b>
           </p>
       </a-card>
+
+      <time-period-event-modify ref="eventModel">
+
+      </time-period-event-modify>
     </div>
 </template>
 
@@ -27,6 +33,7 @@ import dayjs from "dayjs";
 import weekday from "dayjs/plugin/weekday";
 import utc from "dayjs/plugin/utc"
 import timezone from "dayjs/plugin/timezone";
+import TimePeriodEventModify from "@/components/TimePeriodEventModify.vue";
 
 // config dayjs
 dayjs.extend(weekday);
@@ -54,7 +61,7 @@ const colorBarRef = ref()
 const startTimeTransform = dayjs.tz(props.startTime);
 const endTimeTransform = dayjs.tz(props.endTime);
 
-
+const eventModel = ref()
 
 onMounted(()=>{
     updateColorBar(props.initScroll);
@@ -110,6 +117,10 @@ function updateColorBar(offsetY:number){
 
 defineExpose({updateColorBar});
 
+
+function showEventModel(){
+    eventModel.value.visible = true
+}
 
 </script>
 

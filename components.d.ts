@@ -27,6 +27,7 @@ declare module '@vue/runtime-core' {
     ALayoutSider: typeof import('ant-design-vue/es')['LayoutSider']
     AMenu: typeof import('ant-design-vue/es')['Menu']
     AMenuItem: typeof import('ant-design-vue/es')['MenuItem']
+    AModal: typeof import('ant-design-vue/es')['Modal']
     APopover: typeof import('ant-design-vue/es')['Popover']
     ARadio: typeof import('ant-design-vue/es')['Radio']
     ARadioGroup: typeof import('ant-design-vue/es')['RadioGroup']
@@ -42,5 +43,6 @@ declare module '@vue/runtime-core' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TimeDisplayCom: typeof import('./src/components/TimeDisplayCom.vue')['default']
+    TimePeriodEventModify: typeof import('./src/components/TimePeriodEventModify.vue')['default']
   }
 }
