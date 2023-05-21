@@ -57,12 +57,14 @@ import { useRouter } from "vue-router";
 import type { AxiosError } from "axios";
 import type { ILoginToken } from "@/models/ILoginToken";
 import { WebStorage } from "@/utils/Storage";
+import { useUserStore } from "@/stores/UserStore";
 
 const email = ref("");
 const password = ref("");
 const router = useRouter();
 const request = new Request();
 const storage = new WebStorage("localStorage");
+const userStore = useUserStore();
 
 const buttonDisable = computed(() => {
   return email.value === "" || password.value === "" || buttonLoading.value;
@@ -89,7 +91,8 @@ async function login() {
     // 这里不用设置request的token
     // request不是全局共享的
 
-    await message.success("登录成功");
+    userStore.updateUserInformation();
+    await message.success("登录成功", 1);
 
     router.push({
       path: "/"
