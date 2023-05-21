@@ -112,10 +112,6 @@ onMounted(async ()=>{
         +setBackgroundColor.A+")"
 
 
-
-
-    //const changeDiv = colorBarDivRef.value.getElementsByClassName("colorBarDiv")[0];
-
     colorBarDivRef.value.style.width = currentWidth.value + "px"
 
 
