@@ -19,6 +19,8 @@
                   type="primary"
                   style="
                   position: relative;width: 20%"
+                  :disabled = "submitButtonDisabled"
+                  @click = "submitEvent"
                   >
 
             <template #icon>
@@ -96,7 +98,7 @@
 
 <script setup lang="ts">
 
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import type {IGroup} from "@/models/IGroup";
 import type{AxiosError} from "axios";
 import type{IResponse} from "@/models/IResponse";
@@ -106,11 +108,15 @@ import type {IUserGroupLink} from "@/models/IUserGroupLink";
 import type {IMapPoint} from "@/models/IMapPoint";
 import dayjs, {Dayjs} from "dayjs";
 import {DeleteOutlined,CheckOutlined} from "@ant-design/icons-vue";
+import utc from "dayjs/plugin/utc";
 
+dayjs.extend(utc)
 const request = new Request();
 
 const visible = ref(false);
+
 const props = defineProps<{
+    id:number,
     name:string,
     details:string,
     locationId:number,
@@ -123,6 +129,20 @@ const props = defineProps<{
 defineExpose({
     visible
 })
+
+const emit = defineEmits<{
+    (event:'submitEvent',
+     val: {
+        id:number,
+         name:string,
+         details:string,
+         userId:number,
+         groupId:number,
+         placeId:number,
+         beginDateTime:Dayjs,
+         endDateTime:Dayjs
+    }):void;
+}>()
 
 const eventRef = ref({
     name:props.name,
@@ -148,6 +168,19 @@ const currentUser = useUserStore();
 const locationOptions = ref<{ value:number,label:string }[]>([]);
 const groupOptions = ref<{ value:number,label:string }[]>([]);
 const currentTime = ref<Dayjs[]>([]);
+
+const submitButtonDisabled = computed(()=>{
+
+    if(eventRef.value.name!=='' && eventRef.value.details!==''){
+        if(eventRef.value.type==='2'){
+            return eventRef.value.groupId === 0;
+        }
+        else return false;
+    }
+    else {
+        return true;
+    }
+})
 
 onMounted(async()=>{
     await currentUser.updateUserInformation();
@@ -219,14 +252,51 @@ onMounted(async()=>{
 
 
 function eventTypeChange(){
-    if(eventRef.value.type=='2'){
-        eventRef.value.groupSelectDisabled = false;
-    }
-    else{
-        eventRef.value.groupSelectDisabled = true;
-    }
+    eventRef.value.groupSelectDisabled = eventRef.value.type != '2';
 }
 
+
+function submitEvent(){
+    //进行事件的修改
+
+    const submitStartTime = eventRef.value.currentDate
+        .add(currentTime.value[0].hour(),'hour')
+        .add(currentTime.value[0].minute(),'minute')
+        .add(currentTime.value[0].second(),'second')
+
+    const submitEndTime = eventRef.value.currentDate
+        .add(currentTime.value[1].hour(),'hour')
+        .add(currentTime.value[1].minute(),'minute')
+        .add(currentTime.value[1].second(),'second')
+
+
+    if(eventRef.value.type=='1'){
+        eventRef.value.groupId = 0;
+    }
+    else {//TODO:这里会导致个人和组织的事件修改失败
+        eventRef.value.userId = 0;
+    }
+
+    const emitval={
+        id:props.id,
+        name:eventRef.value.name,
+        details:eventRef.value.details,
+        userId:eventRef.value.userId,
+        groupId:eventRef.value.groupId,
+        placeId:eventRef.value.locationId,
+        beginDateTime:submitStartTime,
+        endDateTime:submitEndTime
+    }
+
+
+    emit('submitEvent',emitval);
+
+    visible.value = false
+    //console.log(submitStartTime,submitStartTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'))
+
+
+
+}
 </script>
 
 <style scoped>

@@ -21,13 +21,17 @@
       </a-card>
 
       <time-period-event-modify ref="eventModel"
+                                :id = props.id
                                 :name = props.eventName
                                 :details = props.details
                                 :location-id = props.locationId
                                 :user-id = props.userId
                                 :group-id = props.groupId
                                 :start-time = props.startTime
-                                :end-time = props.endTime>
+                                :end-time = props.endTime
+                                @submitEvent = "submitEvent"
+      >
+
 
       </time-period-event-modify>
     </div>
@@ -36,7 +40,7 @@
 <script setup lang="ts">
 
 import {onMounted, ref} from "vue";
-import dayjs from "dayjs";
+import dayjs, {Dayjs} from "dayjs";
 import weekday from "dayjs/plugin/weekday";
 import utc from "dayjs/plugin/utc"
 import timezone from "dayjs/plugin/timezone";
@@ -55,6 +59,7 @@ dayjs.locale('zh-cn')
 
 const props= defineProps<{
 
+    id:number,
     startTime: string,
     endTime: string,
     details:string,
@@ -67,6 +72,22 @@ const props= defineProps<{
 
 
 }>()
+
+const emit = defineEmits<{
+    (event:'submitEvent',
+     val: {
+         id:number,
+         name:string,
+         details:string,
+         userId:number,
+         groupId:number,
+         placeId:number,
+         beginDateTime:Dayjs,
+         endDateTime:Dayjs
+     }):void;
+}>();
+
+
 const request = new Request();
 
 const colorBarDivRef = ref()
@@ -197,6 +218,19 @@ function showEventModel(){
     eventModel.value.visible = true
 }
 
+
+function submitEvent(val:{
+    id:number,
+    name:string,
+    details:string,
+    userId:number,
+    groupId:number,
+    placeId:number,
+    beginDateTime:Dayjs,
+    endDateTime:Dayjs
+}){
+    emit("submitEvent",val);
+}
 </script>
 
 <style scoped>

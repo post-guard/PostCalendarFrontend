@@ -32,6 +32,8 @@
                 <div v-for="bar in colorBarList">
                     <calendar-color-bar
                                 :ref = "setColorBarRef"
+
+                                :id=bar.id
                                 :start-time=bar.beginDateTime
                                 :end-time=bar.endDateTime
                                 :event-name=bar.name
@@ -40,6 +42,8 @@
                                 :user-id=bar.userId
                                 :group-id = bar.groupId
                                 :init-scroll=currentScroll()
+
+                                @submitEvent = "changeEvent"
                     >
 
                     </calendar-color-bar>
@@ -471,6 +475,51 @@ function getCalendarPeriod(today:string):({start:Dayjs,end:Dayjs}){
     //console.log(currentDay)
 
     return {start:startDate,end:endDate};
+}
+
+
+
+async function changeEvent(val:{
+        id:number,
+        name:string,
+        details:string,
+        userId:number,
+        groupId:number,
+        placeId:number,
+        beginDateTime:Dayjs,
+        endDateTime:Dayjs
+}){
+
+    if(currentUser.user!==undefined){
+        try {
+
+            const response =  await request.put<CalendarTimePeriod>
+            (`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}`,{
+                id:val.id,
+                name:val.name,
+                details:val.details,
+                userId:val.userId,
+                groupId:val.groupId,
+                placeId:val.placeId,
+                beginDateTime:val.beginDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'),
+                endDateTime:val.endDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]')
+            });
+
+
+            message.success("修改日程成功");
+
+            await datePickerChange();
+
+        }catch (err){//TODO:待更改为新方法
+            const axiosError = err as AxiosError<IResponse<CalendarTimePeriod>>;
+            if (axiosError.response?.status != undefined &&
+                axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                let errorMessage = "修改日程失败";
+                message.error(errorMessage);
+            }
+        }
+    }
 }
 </script>
 
