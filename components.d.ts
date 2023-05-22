@@ -46,6 +46,7 @@ declare module '@vue/runtime-core' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TimeDisplayCom: typeof import('./src/components/TimeDisplayCom.vue')['default']
+    TimePeriodEventAdd: typeof import('./src/components/TimePeriodEventAdd.vue')['default']
     TimePeriodEventModify: typeof import('./src/components/TimePeriodEventModify.vue')['default']
   }
 }

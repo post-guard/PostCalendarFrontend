@@ -1,7 +1,13 @@
 <template>
     <a-config-provider :locale="zhCN">
 
+        <TimePeriodEventAdd ref="eventModel"
+                            @submitEvent="addEvent">
+        </TimePeriodEventAdd>
+
         <div class = "calendar">
+
+
             <div class = "calendarBackground">
                 <a-table
                      :columns="columns"
@@ -23,9 +29,20 @@
                     <a-date-picker  v-model:value="datePickerRef"
                                     picker="week"
                                     @change="datePickerChange"/>
+
+                    <a-button type="primary"
+
+                              @click="()=>{eventModel.visible = true}">
+                        <template #icon>
+                            <PlusOutlined/>
+                        </template>
+                    </a-button>
+
                 </template>
 
                 </a-table>
+
+
             </div>
 
             <div class="colorBars">
@@ -44,6 +61,7 @@
                                 :init-scroll=currentScroll()
 
                                 @submitEvent = "changeEvent"
+                                @deleteEvent = "deleteEvent"
                     >
 
                     </calendar-color-bar>
@@ -62,7 +80,7 @@ import 'dayjs/locale/zh-cn';
 import dayjs from "dayjs";
 dayjs.locale("zh-cn");
 import CalendarColorBar from "@/components/CalendarColorBar.vue";
-import {onBeforeUpdate, onMounted, reactive, ref} from "vue";
+import {onBeforeUpdate, onMounted,  ref} from "vue";
 import type {CalendarTimePeriod} from "@/models/CalendarTimePeriod";
 import {message} from "ant-design-vue";
 import {Request} from "@/utils/Request";
@@ -71,7 +89,9 @@ import type {IResponse} from "@/models/IResponse";
 import {useUserStore} from "@/stores/UserStore";
 import {Dayjs} from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear"
+import {PlusOutlined} from "@ant-design/icons-vue";
 
+import TimePeriodEventAdd from "@/components/TimePeriodEventAdd.vue";
 dayjs.extend(weekOfYear)
 
 let colorBarList = ref<CalendarTimePeriod[]>([]);
@@ -112,6 +132,7 @@ const calendarPeriod = ref({//控制日历显示的日期
 });
 
 
+const eventModel = ref();
 
 function calendarColumns(columnDay:string){
 
@@ -223,7 +244,7 @@ onMounted(async ()=>{
     }
 
 
-
+    datePickerRef.value = calendarPeriod.value.start //设置左上角日期选择框的默认周数
 })
 
 
@@ -450,7 +471,7 @@ async function datePickerChange(){
  */
 function getCalendarPeriod(today:string):({start:Dayjs,end:Dayjs}){
 
-    const currentWeek = dayjs(today).week();
+    //const currentWeek = dayjs(today).week();
     const currentDay = dayjs(today).day();
 
     let startDate,endDate;
@@ -490,12 +511,167 @@ async function changeEvent(val:{
         endDateTime:Dayjs
 }){
 
-    if(currentUser.user!==undefined){
+    if(val.userId==0){//组织事件修改
+
+            try {
+
+                const response =  await request.put<CalendarTimePeriod>
+                (`/postcalendarapi/timeSpanEvent/group/${val.groupId}`,{
+                    id:val.id,
+                    name:val.name,
+                    details:val.details,
+                    userId:val.userId,
+                    groupId:val.groupId,
+                    placeId:val.placeId,
+                    beginDateTime:val.beginDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'),
+                    endDateTime:val.endDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]')
+                });
+
+
+                message.success("修改组织日程成功");
+
+                await datePickerChange();
+
+            }catch (err){
+                const axiosError = err as AxiosError<IResponse<CalendarTimePeriod>>;
+                if (axiosError.response?.status != undefined &&
+                    axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                    let errorMessage = "修改组织日程失败";
+                    message.error(errorMessage);
+                }
+            }
+
+    }
+    else{//个人事件修改
+        if(currentUser.user!==undefined){
+            try {
+
+                const response =  await request.put<CalendarTimePeriod>
+                (`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}`,{
+                    id:val.id,
+                    name:val.name,
+                    details:val.details,
+                    userId:val.userId,
+                    groupId:val.groupId,
+                    placeId:val.placeId,
+                    beginDateTime:val.beginDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'),
+                    endDateTime:val.endDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]')
+                });
+
+
+                message.success("修改个人日程成功");
+
+                await datePickerChange();
+
+            }catch (err){
+                const axiosError = err as AxiosError<IResponse<CalendarTimePeriod>>;
+                if (axiosError.response?.status != undefined &&
+                    axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                    let errorMessage = "修改个人日程失败";
+                    message.error(errorMessage);
+                }
+            }
+        }
+    }
+
+}
+
+
+async function deleteEvent(val:{
+    id:number,
+    name:string,
+    details:string,
+    userId:number,
+    groupId:number,
+    placeId:number,
+    beginDateTime:string,
+    endDateTime:string
+}){
+
+    if(val.userId==0){//删除组织事件
+
+            try {
+
+                const response =  await request.deleteWithBody<CalendarTimePeriod>
+                (`/postcalendarapi/timeSpanEvent/group/${val.groupId}`,{
+                    id:val.id,
+                    name:val.name,
+                    details:val.details,
+                    userId:val.userId,
+                    groupId:val.groupId,
+                    placeId:val.placeId,
+                    beginDateTime:val.beginDateTime,
+                    endDateTime:val.endDateTime
+                });
+
+
+                message.success("删除组织日程成功");
+
+                await datePickerChange();
+
+            }catch (err){
+                const axiosError = err as AxiosError<IResponse<CalendarTimePeriod>>;
+                if (axiosError.response?.status != undefined &&
+                    axiosError.response.status >= 400 && axiosError.response.status < 500) {
+                    let errorMessage = "删除组织日程失败";
+                    message.error(errorMessage);
+                }
+            }
+
+    }
+    else{//删除个人事件
+        if(currentUser.user!==undefined){
+            try {
+
+                const response =  await request.deleteWithBody<CalendarTimePeriod>
+                (`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}`,{
+                    id:val.id,
+                    name:val.name,
+                    details:val.details,
+                    userId:val.userId,
+                    groupId:val.groupId,
+                    placeId:val.placeId,
+                    beginDateTime:val.beginDateTime,
+                    endDateTime:val.endDateTime
+                });
+
+
+                message.success("删除个人日程成功");
+
+                await datePickerChange();
+
+            }catch (err){
+                const axiosError = err as AxiosError<IResponse<CalendarTimePeriod>>;
+                if (axiosError.response?.status != undefined &&
+                    axiosError.response.status >= 400 && axiosError.response.status < 500) {
+                    console.log(axiosError.response.data)
+                    let errorMessage = "删除个人日程失败";
+                    message.error(errorMessage);
+                }
+            }
+        }
+    }
+
+}
+
+async function addEvent(val:{
+    name:string,
+    details:string,
+    userId:number,
+    groupId:number,
+    placeId:number,
+    beginDateTime:Dayjs,
+    endDateTime:Dayjs
+}){
+    if(val.userId==0){//组织事件添加
+
         try {
 
-            const response =  await request.put<CalendarTimePeriod>
-            (`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}`,{
-                id:val.id,
+            const response =  await request.post<CalendarTimePeriod>
+            (`/postcalendarapi/timeSpanEvent/group/${val.groupId}`,{
+
                 name:val.name,
                 details:val.details,
                 userId:val.userId,
@@ -506,7 +682,7 @@ async function changeEvent(val:{
             });
 
 
-            message.success("修改日程成功");
+            message.success("添加组织日程成功");
 
             await datePickerChange();
 
@@ -515,8 +691,41 @@ async function changeEvent(val:{
             if (axiosError.response?.status != undefined &&
                 axiosError.response.status >= 400 && axiosError.response.status < 500) {
 
-                let errorMessage = "修改日程失败";
+                let errorMessage = "添加组织日程失败";
                 message.error(errorMessage);
+            }
+        }
+
+    }
+    else{//个人事件添加
+        if(currentUser.user!==undefined){
+            try {
+
+                const response =  await request.post<CalendarTimePeriod>
+                (`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}`,{
+
+                    name:val.name,
+                    details:val.details,
+                    userId:val.userId,
+                    groupId:val.groupId,
+                    placeId:val.placeId,
+                    beginDateTime:val.beginDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'),
+                    endDateTime:val.endDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]')
+                });
+
+
+                message.success("添加个人日程成功");
+
+                await datePickerChange();
+
+            }catch (err){
+                const axiosError = err as AxiosError<IResponse<CalendarTimePeriod>>;
+                if (axiosError.response?.status != undefined &&
+                    axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                    let errorMessage = "添加个人日程失败";
+                    message.error(errorMessage);
+                }
             }
         }
     }

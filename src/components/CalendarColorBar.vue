@@ -30,6 +30,7 @@
                                 :start-time = props.startTime
                                 :end-time = props.endTime
                                 @submitEvent = "submitEvent"
+                                @deleteEvent = "deleteEvent"
       >
 
 
@@ -84,6 +85,18 @@ const emit = defineEmits<{
          placeId:number,
          beginDateTime:Dayjs,
          endDateTime:Dayjs
+     }):void;
+
+    (event:'deleteEvent',
+     val: {
+         id:number,
+         name:string,
+         details:string,
+         userId:number,
+         groupId:number,
+         placeId:number,
+         beginDateTime:string,
+         endDateTime:string
      }):void;
 }>();
 
@@ -230,6 +243,20 @@ function submitEvent(val:{
     endDateTime:Dayjs
 }){
     emit("submitEvent",val);
+}
+
+
+function deleteEvent(val:{
+    id:number,
+    name:string,
+    details:string,
+    userId:number,
+    groupId:number,
+    placeId:number,
+    beginDateTime:string,
+    endDateTime:string
+}){
+    emit("deleteEvent",val);
 }
 </script>
 
