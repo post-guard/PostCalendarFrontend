@@ -83,6 +83,31 @@
             ></a-select>
         </a-form-item>
 
+        <a-form-item>
+            <p>
+
+            </p>
+            周期&nbsp&nbsp
+
+            <a-switch
+                v-model:checked=eventRef.periodic
+                >
+            </a-switch>
+            &nbsp&nbsp
+            每
+            <a-input-number
+                v-model:value=eventRef.periodicInterval
+                :min="1"
+                :max="30"
+                :disabled="!eventRef.periodic"/>
+            天
+            &nbsp&nbsp
+            至
+            <a-date-picker v-model:value=eventRef.periodEndTime
+                           :disabled="!eventRef.periodic"
+                           :disabled-date="periodicEventDisabledDate"/>
+        </a-form-item>
+
     </a-form>
 </a-modal>
 </template>
@@ -121,7 +146,11 @@ const emit = defineEmits<{
          groupId:number,
          placeId:number,
          beginDateTime:Dayjs,
-         endDateTime:Dayjs
+         endDateTime:Dayjs,
+         periodicInterval:number,
+         periodicTimes:number//关于周期添加:只会提供要循环的次数和间隔
+
+
     }):void;
 }>()
 
@@ -140,8 +169,12 @@ const eventRef = ref({
         +(currentDate.getMonth()+1)+"-"+(currentDate.getDate())),
 
     startTime: dayjs('00:00:00','HH:mm:ss'),
-    endTime: dayjs('01:00:00','HH:mm:ss')
+    endTime: dayjs('01:00:00','HH:mm:ss'),
 
+    periodic:false,
+    periodicInterval:1,
+    periodEndTime:dayjs(currentDate.getFullYear()+"-"
+        +(currentDate.getMonth()+1)+"-"+(currentDate.getDate())).add(1,'day')
 
 })
 
@@ -152,17 +185,32 @@ const groupOptions = ref<{ value:number,label:string }[]>([]);
 const currentTime = ref<Dayjs[]>([]);
 
 const submitButtonDisabled = computed(()=>{
-
-    if(eventRef.value.name!=='' && eventRef.value.details!=='' && eventRef.value.locationId!==0){
-        if(eventRef.value.type==='2'){
-            return eventRef.value.groupId === 0;
+//天啊，粪啊，不想改啊
+    if(eventRef.value.name!=='' && eventRef.value.details!==''){
+        if(!eventRef.value.periodic || (eventRef.value.periodic
+            && eventRef.value.periodicInterval!=undefined)){
+            if(eventRef.value.type==='2'){
+                return eventRef.value.groupId === 0;
+            }
+            else {
+                return false;
+            }
         }
-        else return false;
+        else {
+            return true;
+        }
     }
     else {
         return true;
     }
 })
+
+
+const periodicEventDisabledDate = (day:Dayjs)=>{
+    // Can not select days before today and today
+
+    return day &&  day < dayjs(eventRef.value.currentDate).endOf('day');
+}
 
 onMounted(async()=>{
     await currentUser.updateUserInformation();
@@ -196,6 +244,8 @@ onMounted(async()=>{
     }
 
     //加载地点列表
+    locationOptions.value.push({ value: 0, label: '网络空间' })
+
     try {
 
         const locationResponse =  await request.get<IMapPoint[]>(`/postcalendarapi/place/`);
@@ -254,6 +304,23 @@ function submitEvent(){
         }
     }
 
+    //关于周期添加:只会提供要循环的次数和间隔 不是周期时，两者均为0
+    const periodicIntervalNum:number = eventRef.value.periodic?eventRef.value.periodicInterval:0;
+
+    const periodicTimes = () =>{
+        const interval = eventRef.value.periodEndTime.diff(eventRef.value.currentDate,'day');
+        //获取周期截止日期和当前事件开始日期的间隔时间(天)
+
+        if(!eventRef.value.periodic){
+            return 0;
+        }
+        else{
+            return Math.floor(interval/periodicIntervalNum)+1;
+        }
+
+    }
+
+
 
     const emitval={
         name:eventRef.value.name,
@@ -262,7 +329,9 @@ function submitEvent(){
         groupId:eventRef.value.groupId,
         placeId:eventRef.value.locationId,
         beginDateTime:submitStartTime,
-        endDateTime:submitEndTime
+        endDateTime:submitEndTime,
+        periodicInterval:periodicIntervalNum,
+        periodicTimes:periodicTimes()
     }
 
 

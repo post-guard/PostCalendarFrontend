@@ -207,6 +207,7 @@ onMounted(async()=>{
 
 
     //加载地点列表
+    locationOptions.value.push({ value: 0, label: '网络空间' })
     try {
 
         const locationResponse =  await request.get<IMapPoint[]>(`/postcalendarapi/place/`);

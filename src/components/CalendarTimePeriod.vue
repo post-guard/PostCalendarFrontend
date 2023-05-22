@@ -663,46 +663,17 @@ async function addEvent(val:{
     groupId:number,
     placeId:number,
     beginDateTime:Dayjs,
-    endDateTime:Dayjs
+    endDateTime:Dayjs,
+    periodicInterval:number,
+    periodicTimes:number
 }){
     if(val.userId==0){//组织事件添加
 
-        try {
-
-            const response =  await request.post<CalendarTimePeriod>
-            (`/postcalendarapi/timeSpanEvent/group/${val.groupId}`,{
-
-                name:val.name,
-                details:val.details,
-                userId:val.userId,
-                groupId:val.groupId,
-                placeId:val.placeId,
-                beginDateTime:val.beginDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'),
-                endDateTime:val.endDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]')
-            });
-
-
-            message.success("添加组织日程成功");
-
-            await datePickerChange();
-
-        }catch (err){//TODO:待更改为新方法
-            const axiosError = err as AxiosError<IResponse<CalendarTimePeriod>>;
-            if (axiosError.response?.status != undefined &&
-                axiosError.response.status >= 400 && axiosError.response.status < 500) {
-
-                let errorMessage = "添加组织日程失败";
-                message.error(errorMessage);
-            }
-        }
-
-    }
-    else{//个人事件添加
-        if(currentUser.user!==undefined){
+        if(val.periodicInterval===0 && val.periodicTimes===0){//非周期事件
             try {
 
                 const response =  await request.post<CalendarTimePeriod>
-                (`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}`,{
+                (`/postcalendarapi/timeSpanEvent/group/${val.groupId}`,{
 
                     name:val.name,
                     details:val.details,
@@ -714,7 +685,7 @@ async function addEvent(val:{
                 });
 
 
-                message.success("添加个人日程成功");
+                message.success("添加组织日程成功");
 
                 await datePickerChange();
 
@@ -723,9 +694,112 @@ async function addEvent(val:{
                 if (axiosError.response?.status != undefined &&
                     axiosError.response.status >= 400 && axiosError.response.status < 500) {
 
-                    let errorMessage = "添加个人日程失败";
+                    let errorMessage = "添加组织日程失败";
                     message.error(errorMessage);
                 }
+            }
+        }
+        else{//周期事件
+            for(let time = 0; time < val.periodicTimes; time++){
+                try {
+
+                    const response =  await request.post<CalendarTimePeriod>
+                    (`/postcalendarapi/timeSpanEvent/group/${val.groupId}`,{
+
+                        name:val.name,
+                        details:val.details,
+                        userId:val.userId,
+                        groupId:val.groupId,
+                        placeId:val.placeId,
+                        beginDateTime:val.beginDateTime.add(time*val.periodicInterval,'day').utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'),
+                        endDateTime:val.endDateTime.add(time*val.periodicInterval,'day').utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]')
+                    });
+
+
+                    message.success("添加组织日程成功");
+
+
+
+                }catch (err){
+                    const axiosError = err as AxiosError<IResponse<CalendarTimePeriod>>;
+                    if (axiosError.response?.status != undefined &&
+                        axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                        let errorMessage = "添加组织日程失败";
+                        message.error(errorMessage);
+                    }
+                }
+            }
+            await datePickerChange();
+        }
+
+
+    }
+    else{//个人事件添加
+        if(currentUser.user!==undefined){
+
+            if(val.periodicInterval===0 && val.periodicTimes===0) {//非周期事件
+                try {
+
+                    const response = await request.post<CalendarTimePeriod>
+                    (`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}`, {
+
+                        name: val.name,
+                        details: val.details,
+                        userId: val.userId,
+                        groupId: val.groupId,
+                        placeId: val.placeId,
+                        beginDateTime: val.beginDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'),
+                        endDateTime: val.endDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]')
+                    });
+
+
+                    message.success("添加个人日程成功");
+
+                    await datePickerChange();
+
+                } catch (err) {
+                    const axiosError = err as AxiosError<IResponse<CalendarTimePeriod>>;
+                    if (axiosError.response?.status != undefined &&
+                        axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                        let errorMessage = "添加个人日程失败";
+                        message.error(errorMessage);
+                    }
+                }
+            }
+            else{//非周期事件
+                for(let time = 0; time < val.periodicTimes; time++) {
+                    try {
+
+                        const response = await request.post<CalendarTimePeriod>
+                        (`/postcalendarapi/timeSpanEvent/user/${currentUser.user.id}`, {
+
+                            name: val.name,
+                            details: val.details,
+                            userId: val.userId,
+                            groupId: val.groupId,
+                            placeId: val.placeId,
+                            beginDateTime: val.beginDateTime.add(time*val.periodicInterval,'day').utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'),
+                            endDateTime: val.endDateTime.add(time*val.periodicInterval,'day').utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]')
+                        });
+
+
+                        message.success("添加个人日程成功");
+
+
+
+                    } catch (err) {
+                        const axiosError = err as AxiosError<IResponse<CalendarTimePeriod>>;
+                        if (axiosError.response?.status != undefined &&
+                            axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                            let errorMessage = "添加个人日程失败";
+                            message.error(errorMessage);
+                        }
+                    }
+                }
+                await datePickerChange();
             }
         }
     }
