@@ -1,15 +1,19 @@
 <template>
-<h2>
-    ddl页
-</h2>
+    <div class="DDLPage">
+        <CalendarTimePoint>
+        </CalendarTimePoint>
+    </div>
 </template>
 
-<script>
-export default {
-    name: "DDLPage"
-}
+<script setup lang="ts">
+
+import CalendarTimePoint from "@/components/CalendarTimePoint.vue";
 </script>
 
 <style scoped>
-
+.DDLPage{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
 </style>

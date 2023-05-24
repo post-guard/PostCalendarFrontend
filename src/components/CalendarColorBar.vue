@@ -152,9 +152,16 @@ onMounted(async ()=>{
 
     try {
 
-        const response =  await request.get<IMapPoint>(`/postcalendarapi/place/${props.locationId}`);
 
-        currentLocation.value = response.data.name;
+
+        if(props.locationId==0){
+            currentLocation.value = "网络空间";
+        }
+        else{
+            const response =  await request.get<IMapPoint>(`/postcalendarapi/place/${props.locationId}`);
+            currentLocation.value = response.data.name;
+        }
+
         //message.success("获取时间段日程成功");
 
 

@@ -420,8 +420,7 @@ async function datePickerChange(){
         if(currentUser.user!==undefined){
             try {
 
-                console.log(calendarPeriod.value.start.unix())
-                console.log(calendarPeriod.value.end.unix())
+
 
 
                 const response =  await request.get<CalendarTimePeriod[]>
