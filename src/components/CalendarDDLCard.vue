@@ -8,7 +8,9 @@
                           :details=props.details
                           :end-time=props.endTime
                           :type=props.type
-                          :user-id=props.userId>
+                          :user-id=props.userId
+                          @submitEvent = "submitEvent"
+                          @deleteEvent = "deleteEvent">
 
     </TimePointEventModify>
     <a-card class = "DDLCard"
@@ -39,7 +41,7 @@
 
 <script setup lang="ts">
 import {InfoCircleOutlined,ClockCircleOutlined,DatabaseOutlined,EnvironmentOutlined,UserOutlined} from "@ant-design/icons-vue";
-import dayjs from "dayjs";
+import dayjs, {Dayjs} from "dayjs";
 import weekday from "dayjs/plugin/weekday";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -68,6 +70,33 @@ const props = defineProps<{
     userId: number,
     groupId: number,
     type:number
+}>()
+
+const emit = defineEmits<{
+    (event:'submitEvent',
+     val: {
+         id:number,
+         name:string,
+         details:string,
+         userId:number,
+         groupId:number,
+         placeId:number,
+         endDateTime:Dayjs,
+         type:number
+     }):void;
+
+    (event:'deleteEvent',
+     val: {
+         id:number,
+         name:string,
+         details:string,
+         userId:number,
+         groupId:number,
+         placeId:number,
+         endDateTime:string,
+         type:number
+
+     }):void;
 }>()
 
 
@@ -135,6 +164,35 @@ onMounted(async ()=>{
         ddlGroup.value = "个人"
     }
 })
+
+
+
+function submitEvent(val:{
+    id:number,
+    name:string,
+    details:string,
+    userId:number,
+    groupId:number,
+    placeId:number,
+    endDateTime:Dayjs,
+    type:number
+}){
+    emit('submitEvent',val);
+}
+
+
+function deleteEvent(val:{
+    id:number,
+    name:string,
+    details:string,
+    userId:number,
+    groupId:number,
+    placeId:number,
+    endDateTime:string,
+    type:number
+}){
+    emit('deleteEvent',val);
+}
 </script>
 
 <style scoped>

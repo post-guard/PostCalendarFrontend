@@ -31,12 +31,10 @@ declare module '@vue/runtime-core' {
     AMenu: typeof import('ant-design-vue/es')['Menu']
     AMenuItem: typeof import('ant-design-vue/es')['MenuItem']
     AModal: typeof import('ant-design-vue/es')['Modal']
-    APagination: typeof import('ant-design-vue/es')['Pagination']
     APopover: typeof import('ant-design-vue/es')['Popover']
     ARadio: typeof import('ant-design-vue/es')['Radio']
     ARadioButton: typeof import('ant-design-vue/es')['RadioButton']
     ARadioGroup: typeof import('ant-design-vue/es')['RadioGroup']
-    ARangePicker: typeof import('ant-design-vue/es')['RangePicker']
     ARow: typeof import('ant-design-vue/es')['Row']
     ASelect: typeof import('ant-design-vue/es')['Select']
     ASpace: typeof import('ant-design-vue/es')['Space']
@@ -55,6 +53,7 @@ declare module '@vue/runtime-core' {
     TimeDisplayCom: typeof import('./src/components/TimeDisplayCom.vue')['default']
     TimePeriodEventAdd: typeof import('./src/components/TimePeriodEventAdd.vue')['default']
     TimePeriodEventModify: typeof import('./src/components/TimePeriodEventModify.vue')['default']
+    TimePointEventAdd: typeof import('./src/components/TimePointEventAdd.vue')['default']
     TimePointEventModify: typeof import('./src/components/TimePointEventModify.vue')['default']
   }
 }

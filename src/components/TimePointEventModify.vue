@@ -52,10 +52,17 @@
         </a-form-item>
 
         <a-form-item>
-            <a-date-picker style="width:40%"
+            <a-date-picker style="width:45%"
                            size="large"
                            :show-time="{ format: 'HH:mm:ss' }"
                            v-model:value="eventRef.currentTime" />
+
+            <a-select
+                size="large"
+                v-model:value="eventRef.type"
+                style="position:absolute;width: 45% ; right: 0"
+                :options="eventRef.typeOptions"
+            ></a-select>
 
         </a-form-item>
 
@@ -159,7 +166,53 @@ const eventRef = ref({
     currentTime:dayjs('1970-01-01T00:00:00Z'),
 
 
-    type:1,
+    type:props.type,
+    typeOptions:[
+        {
+            value: 0,
+            label: "购物"
+        },
+        {
+            value: 1,
+            label: "洗澡"
+        },
+        {
+            value: 2,
+            label: "取外卖"
+        },
+        {
+            value: 3,
+            label: "取快递"
+        },
+        {
+            value: 4,
+            label: "寄快递"
+        },
+        {
+            value: 5,
+            label: "外出"
+        },
+        {
+            value: 6,
+            label: "送物品"
+        },
+        {
+            value: 7,
+            label: "拿物品"
+        },
+        {
+            value: 8,
+            label: "运动"
+        },
+        {
+            value: 9,
+            label: "完成作业"
+        },
+        {
+            value: 10,
+            label: "其它"
+        },
+    ]
 })
 
 const eventFormRef = ref();
@@ -238,15 +291,6 @@ onMounted(async()=>{
 function submitEvent(){
     //进行事件的修改
 
-
-
-    /*const submitEndTime = eventRef.value.currentDate
-        .add(currentTime.value[1].hour(),'hour')
-        .add(currentTime.value[1].minute(),'minute')
-        .add(currentTime.value[1].second(),'second')*/
-
-
-
     const emitval={
         id:props.id,
         name:eventRef.value.name,
@@ -262,9 +306,6 @@ function submitEvent(){
     emit('submitEvent',emitval);
 
     visible.value = false
-    //console.log(submitStartTime,submitStartTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'))
-
-
 
 }
 

@@ -1,7 +1,9 @@
 <template>
 <div class="ddlZoneDiv">
 
-
+      <TimePointEventAdd ref="eventModel"
+                        @submitEvent="addEvent">
+      </TimePointEventAdd>
 
       <a-list class="ddlList"
               item-layout="horizontal"
@@ -20,13 +22,26 @@
                                :group-id = item.groupId
                                :location-id = item.placeId
                                :end-time = item.endDateTime
-                               :type = item.type>
+                               :type = item.type
+                               @submitEvent = "changeEvent"
+                               @deleteEvent = "deleteEvent">
 
               </CalendarDDLCard>
           </a-list-item>
       </template>
 
     </a-list>
+
+    <a-button size="large"
+              shape="circle"
+              style="position: absolute;
+                     left: 110%;
+                     top:80%"
+              @click="()=>{eventModel.visible = true}">
+        <template #icon style="color: blue">
+            <PlusOutlined />
+        </template>
+    </a-button>
 
 </div>
 </template>
@@ -44,6 +59,9 @@ import dayjs, {Dayjs} from "dayjs";
 import weekday from "dayjs/plugin/weekday";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import {PlusOutlined} from "@ant-design/icons-vue";
+import TimePointEventAdd from "@/components/TimePointEventAdd.vue";
+
 
 dayjs.extend(weekday);
 dayjs.extend(utc);
@@ -65,6 +83,8 @@ const calendarPeriod = ref<Dayjs>(
 let ddlList = ref<CalendarTimePoint[]>([]);
 
 let ddlListRef = ref<CalendarDDLCard[]>([]);
+
+const eventModel = ref();
 
 onBeforeUpdate(async() => {
     ddlListRef.value = [];
@@ -116,6 +136,279 @@ function setDDLCardRef(el: CalendarDDLCard|undefined){
 
         ddlListRef.value.push(el)
 
+    }
+}
+
+
+async function changeEvent(val:{
+    id:number,
+    name:string,
+    details:string,
+    userId:number,
+    groupId:number,
+    placeId:number,
+    endDateTime:Dayjs,
+    type:number
+}){
+    console.log(val);
+    console.log(val.endDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'))
+    if(val.userId==0){//组织事件修改
+
+        try {
+
+            const response =  await request.put<CalendarTimePoint>
+            (`/postcalendarapi/timePointEvent/group/${val.groupId}`,{
+                id:val.id,
+                name:val.name,
+                details:val.details,
+                userId:val.userId,
+                groupId:val.groupId,
+                placeId:val.placeId,
+                endDateTime:val.endDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'),
+                type:val.type
+            });
+
+
+            message.success("修改组织DDL事件成功");
+
+            await ddlListReLoad();
+
+        }catch (err){
+            const axiosError = err as AxiosError<IResponse<CalendarTimePoint>>;
+            if (axiosError.response?.status != undefined &&
+                axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                let errorMessage = "修改组织DDL事件失败";
+                message.error(errorMessage);
+            }
+        }
+
+    }
+    else{//个人事件修改
+        if(currentUser.user!==undefined){
+            try {
+
+                const response =  await request.put<CalendarTimePoint>
+                (`/postcalendarapi/timePointEvent/user/${currentUser.user.id}`,{
+                    id:val.id,
+                    name:val.name,
+                    details:val.details,
+                    userId:val.userId,
+                    groupId:val.groupId,
+                    placeId:val.placeId,
+                    endDateTime:val.endDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'),
+                    type:val.type
+                });
+
+
+                message.success("修改个人DDL事件成功");
+
+                await ddlListReLoad();
+
+            }catch (err){
+                const axiosError = err as AxiosError<IResponse<CalendarTimePoint>>;
+                if (axiosError.response?.status != undefined &&
+                    axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                    let errorMessage = "修改个人DDL事件失败";
+                    message.error(errorMessage);
+                }
+            }
+        }
+    }
+}
+
+
+
+async function deleteEvent(val:{
+    id:number,
+    name:string,
+    details:string,
+    userId:number,
+    groupId:number,
+    placeId:number,
+    endDateTime:string,
+    type:number
+}){
+    if(val.userId==0){//删除组织事件
+
+        try {
+
+            const response =  await request.deleteWithBody<CalendarTimePoint>
+            (`/postcalendarapi/timePointEvent/group/${val.groupId}`,{
+                id:val.id,
+                name:val.name,
+                details:val.details,
+                userId:val.userId,
+                groupId:val.groupId,
+                placeId:val.placeId,
+                endDateTime:val.endDateTime,
+                type:val.type
+            });
+
+
+            message.success("删除组织DDL事件成功");
+
+            await ddlListReLoad();
+
+        }catch (err){
+            const axiosError = err as AxiosError<IResponse<CalendarTimePoint>>;
+            if (axiosError.response?.status != undefined &&
+                axiosError.response.status >= 400 && axiosError.response.status < 500) {
+                let errorMessage = "删除组织DDL事件失败";
+                message.error(errorMessage);
+            }
+        }
+
+    }
+    else{//删除个人事件
+        if(currentUser.user!==undefined){
+            try {
+
+                const response =  await request.deleteWithBody<CalendarTimePoint>
+                (`/postcalendarapi/timePointEvent/user/${currentUser.user.id}`,{
+                    id:val.id,
+                    name:val.name,
+                    details:val.details,
+                    userId:val.userId,
+                    groupId:val.groupId,
+                    placeId:val.placeId,
+                    endDateTime:val.endDateTime,
+                    type:val.type
+                });
+
+
+                message.success("删除个人DDL事件成功");
+
+                await ddlListReLoad();
+
+            }catch (err){
+                const axiosError = err as AxiosError<IResponse<CalendarTimePoint>>;
+                if (axiosError.response?.status != undefined &&
+                    axiosError.response.status >= 400 && axiosError.response.status < 500) {
+                    console.log(axiosError.response.data)
+                    let errorMessage = "删除个人DDL事件失败";
+                    message.error(errorMessage);
+                }
+            }
+        }
+    }
+}
+
+
+async function ddlListReLoad(){
+
+        ddlList.value = [];
+        ddlListRef.value = [];
+
+
+        if(currentUser.user!==undefined){
+            try {
+
+                const response =  await request.get<CalendarTimePoint[]>
+                (`/postcalendarapi/timePointEvent/user/${currentUser.user.id}?begin=${calendarPeriod.value.subtract(3,'month').unix()}&end=${calendarPeriod.value.add(3,'month').unix()}`);
+
+                message.success("获取DDL日程成功");
+                for(let ddlAlready of response.data){
+                    const ddl : CalendarTimePoint = {
+                        id: ddlAlready.id,
+                        name : ddlAlready.name,
+                        details: ddlAlready.details,
+                        userId: ddlAlready.userId,
+                        groupId: ddlAlready.groupId,
+                        placeId: ddlAlready.placeId,
+                        endDateTime: ddlAlready.endDateTime,
+                        type:ddlAlready.type
+                    }
+
+                    ddlList.value.push(ddl);
+                }
+
+            }catch (err){
+                const axiosError = err as AxiosError<IResponse<CalendarTimePoint[]>>;
+                if (axiosError.response?.status != undefined &&
+                    axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                    let errorMessage = "获取DDL日程失败";
+                    message.error(errorMessage);
+                }
+            }
+        }
+}
+
+
+async function addEvent(val:{
+    name:string,
+    details:string,
+    userId:number,
+    groupId:number,
+    placeId:number,
+    endDateTime:Dayjs,
+    type:number
+}){
+    if(val.userId==0){//组织事件添加
+
+            try {
+
+                const response =  await request.post<CalendarTimePoint>
+                (`/postcalendarapi/timePointEvent/group/${val.groupId}`,{
+
+                    name:val.name,
+                    details:val.details,
+                    userId:val.userId,
+                    groupId:val.groupId,
+                    placeId:val.placeId,
+                    endDateTime:val.endDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'),
+                    type:val.type
+                });
+
+
+                message.success("添加组织DDL事件成功");
+
+                await ddlListReLoad();
+
+            }catch (err){
+                const axiosError = err as AxiosError<IResponse<CalendarTimePoint>>;
+                if (axiosError.response?.status != undefined &&
+                    axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                    let errorMessage = "添加组织DDL事件失败";
+                    message.error(errorMessage);
+                }
+            }
+    }
+    else{//个人事件添加
+        if(currentUser.user!==undefined){
+
+                try {
+
+                    const response = await request.post<CalendarTimePoint>
+                    (`/postcalendarapi/timePointEvent/user/${currentUser.user.id}`, {
+
+                        name: val.name,
+                        details: val.details,
+                        userId: val.userId,
+                        groupId: val.groupId,
+                        placeId: val.placeId,
+                        endDateTime: val.endDateTime.utc(true).format('YYYY-MM-DDTHH:mm:ss[Z]'),
+                        type:val.type
+                    });
+
+
+                    message.success("添加个人DDL事件成功");
+
+                    await ddlListReLoad();
+
+                } catch (err) {
+                    const axiosError = err as AxiosError<IResponse<CalendarTimePoint>>;
+                    if (axiosError.response?.status != undefined &&
+                        axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                        let errorMessage = "添加个人DDL事件失败";
+                        message.error(errorMessage);
+                    }
+                }
+            }
     }
 }
 </script>
