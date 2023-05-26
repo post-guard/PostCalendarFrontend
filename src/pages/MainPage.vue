@@ -42,6 +42,11 @@
 
       <a-layout>
         <a-layout-header style="background: #fff; padding: 0;z-index: 5">
+          <div class="mainClock">
+              <TimeDisplayCom>
+
+              </TimeDisplayCom>
+          </div>
           <div id="loginStatus">
             <a-button type="primary" @click="loginButtonClicked">
               {{ loginButtonMessage }}
@@ -75,6 +80,7 @@ import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { WebStorage } from "@/utils/Storage";
 import { useUserStore } from "@/stores/UserStore";
+import TimeDisplayCom from "@/components/TimeDisplayCom.vue";
 
 const router = useRouter();
 const storage = new WebStorage("localStorage");

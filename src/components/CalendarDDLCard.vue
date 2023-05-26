@@ -35,7 +35,12 @@
         &nbsp;&nbsp;&nbsp;&nbsp;
         <UserOutlined style="color: #48614d"/>
         {{ddlGroup}}
+
+
     </a-card>
+<!--    <div class="ddlMask">
+
+    </div>-->
 </div>
 </template>
 
@@ -206,5 +211,14 @@ function deleteEvent(val:{
     width: 100%;
     height: 100%;
     border-radius: 8px;
+}
+.ddlMask{
+    pointer-events:none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    opacity: 100;
+    background-color: black;
 }
 </style>
