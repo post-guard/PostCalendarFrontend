@@ -59,7 +59,7 @@
 
 <script setup lang="ts">
 
-import {onMounted, ref} from "vue";
+import {onMounted, onUnmounted, ref} from "vue";
 import type {Dayjs} from "dayjs";
 import {DoubleLeftOutlined,DoubleRightOutlined,ClockCircleOutlined} from "@ant-design/icons-vue";
 import dayjs from "dayjs";
@@ -71,6 +71,7 @@ import type {IResponse} from "@/models/IResponse";
 import {Request} from "@/utils/Request";
 import type {IClock} from "@/models/IClock";
 import {message} from "ant-design-vue";
+import {createSocket} from "@/models/WebSocket";
 
 dayjs.extend(weekday);
 dayjs.extend(utc);
@@ -90,14 +91,7 @@ const clockModalValue = ref<Dayjs>(dayjs());
 
 onMounted(async ()=>{
 
-    await getCurrentTime();
-
-    setInterval(getCurrentTime,200);
-})
-
-async function getCurrentTime() {
-
-    try {
+   /* try {
 
         const response = await request.get<IClock>(`/postcalendarapi/clock/`);
 
@@ -112,7 +106,25 @@ async function getCurrentTime() {
                   console.log(axiosError.response.data.message)
         }
 
-    }
+    }*/
+
+    createSocket("wss://server.rrricardo.top/postcalendarapi/websocket/clock");
+    window.addEventListener('onmessageWS', e=>getCurrentTime(e))
+})
+
+onUnmounted(()=>{
+    window.removeEventListener('onmessageWS', e=>getCurrentTime(e));
+})
+
+async function getCurrentTime(event:any) {
+
+
+    const data = event && event.detail.data
+
+    currentTime.value.now = dayjs(data)
+
+    //console.log(data);
+
 }
 
 
