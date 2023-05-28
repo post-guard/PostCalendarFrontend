@@ -36,6 +36,14 @@
             </span>
           </a-menu-item>
 
+
+          <a-menu-item key="log">
+              <TagOutlined />
+              <span>
+              日志
+            </span>
+          </a-menu-item>
+
         </a-menu>
       </a-layout-sider>
 
@@ -55,9 +63,17 @@
         </a-layout-header>
         <a-layout-content style="margin: 0 16px">
 
-          <router-view>
 
-          </router-view>
+<!--            <router-view>
+
+            </router-view>-->
+            <router-view v-slot="{ Component }">
+                <keep-alive include="LogPage">
+                    <component :is="Component" />
+                </keep-alive>
+            </router-view>
+
+
 
         </a-layout-content>
         <a-layout-footer style="text-align: center;z-index: 5">
@@ -75,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { CalendarOutlined, UserOutlined, GlobalOutlined ,ScheduleOutlined} from "@ant-design/icons-vue";
+import { CalendarOutlined, UserOutlined, GlobalOutlined ,ScheduleOutlined,TagOutlined} from "@ant-design/icons-vue";
 import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { WebStorage } from "@/utils/Storage";
@@ -122,6 +138,10 @@ function menu_selected() {
 
     case 'home':
       router.push({ path: "/home" })
+      break;
+
+    case 'log':
+          router.push({ path: "/log" })
       break;
 
     default:
