@@ -90,8 +90,11 @@ export class Socket implements ISocket{
         console.log('websocket'+this.ip+'已断开....正在尝试重连')
         if (this.socket.readyState !== 2) {
             //Socket = null
-            
-            createSocket(this.ip,this.type)
+            const inheritIp = this.ip;
+            const inheritType = this.type;
+
+            Sockets.splice(Sockets.indexOf(this),1);
+            createSocket(inheritIp,inheritType)
         }
     }
     /**发送心跳
@@ -118,7 +121,7 @@ export const createSocket = (url:string,type:string) => {
     //Socket && Socket.close()
 
     const hasSocket = ()=>{
-        console.log(Sockets)
+
         for(let socket of Sockets){
             if(socket.ip==url){
                 return true;
@@ -139,6 +142,8 @@ export const createSocket = (url:string,type:string) => {
     } else {
         console.log("websocket:"+url+"已连接")
     }
+
+    console.log(Sockets)
 }
 
 
