@@ -31,7 +31,7 @@ export class Socket implements ISocket{
 
     /**打开WS之后发送心跳 */
     public onopenWS = () => {
-        this.sendPing()
+        //this.sendPing()
     }
 
     /**连接失败重连 */
@@ -90,6 +90,7 @@ export class Socket implements ISocket{
         console.log('websocket'+this.ip+'已断开....正在尝试重连')
         if (this.socket.readyState !== 2) {
             //Socket = null
+            
             createSocket(this.ip,this.type)
         }
     }

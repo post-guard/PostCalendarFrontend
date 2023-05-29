@@ -64,9 +64,7 @@
         <a-layout-content style="margin: 0 16px">
 
 
-<!--            <router-view>
 
-            </router-view>-->
             <router-view v-slot="{ Component }">
                 <keep-alive include="LogPage">
                     <component :is="Component" />
@@ -92,11 +90,12 @@
 
 <script setup lang="ts">
 import { CalendarOutlined, UserOutlined, GlobalOutlined ,ScheduleOutlined,TagOutlined} from "@ant-design/icons-vue";
-import { ref, watch } from "vue";
+import {onMounted, onUnmounted, ref, watch} from "vue";
 import { useRouter } from "vue-router";
 import { WebStorage } from "@/utils/Storage";
 import { useUserStore } from "@/stores/UserStore";
 import TimeDisplayCom from "@/components/TimeDisplayCom.vue";
+import {createSocket} from "@/utils/WebSocket";
 
 const router = useRouter();
 const storage = new WebStorage("localStorage");
@@ -117,6 +116,20 @@ watch(() => router, (newValue) => {
   { immediate: true, deep: true }
   //immediate负责首次监听即触发的功能，deep负责监听对象内部属性发生变化
 );
+
+
+onMounted(async ()=>{
+    await userStore.updateUserInformation();
+    if(userStore.user!=undefined){
+        createSocket(`wss://server.rrricardo.top/postcalendarapi/websocket/alarm/${userStore.user.id}`,'alarm');
+        window.addEventListener('onmessageWS', getAlarm);
+    }
+
+})
+
+onUnmounted(()=>{
+    window.removeEventListener('onmessageWS', getAlarm);
+})
 
 function menu_selected() {
   switch (selectedKeys.value[0]) {
@@ -164,6 +177,18 @@ async function init() {
   } else {
     loginButtonMessage.value = "退出登录";
   }
+}
+
+
+function getAlarm(event:any){
+    const data = event && event.detail.data
+    const type = event && event.detail.type
+
+    if(type=='alarm')
+    {
+
+        console.log(data);
+    }
 }
 </script>
 
