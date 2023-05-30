@@ -89,13 +89,27 @@
 </template>
 
 <script setup lang="ts">
-import { CalendarOutlined, UserOutlined, GlobalOutlined ,ScheduleOutlined,TagOutlined} from "@ant-design/icons-vue";
-import {onMounted, onUnmounted, ref, watch} from "vue";
+import {
+    CalendarOutlined,
+    UserOutlined,
+    GlobalOutlined,
+    ScheduleOutlined,
+    TagOutlined,
+    BellOutlined
+} from "@ant-design/icons-vue";
+import {h, onMounted, onUnmounted, ref, watch} from "vue";
 import { useRouter } from "vue-router";
 import { WebStorage } from "@/utils/Storage";
 import { useUserStore } from "@/stores/UserStore";
 import TimeDisplayCom from "@/components/TimeDisplayCom.vue";
 import {createSocket} from "@/utils/WebSocket";
+import {notification} from "ant-design-vue";
+import type {IGroup} from "@/models/IGroup";
+import type {AxiosError} from "axios";
+import type {IResponse} from "@/models/IResponse";
+import {Request} from "@/utils/Request";
+import type {IMapPoint} from "@/models/IMapPoint";
+
 
 const router = useRouter();
 const storage = new WebStorage("localStorage");
@@ -105,6 +119,10 @@ const selectedKeys = ref([""]);
 const loginButtonMessage = ref("登录");
 
 const userStore = useUserStore();
+const request = new Request();
+
+const audio = new Audio();
+audio.src = "public/alarm.wav"
 
 init();
 
@@ -180,14 +198,158 @@ async function init() {
 }
 
 
-function getAlarm(event:any){
+async function getAlarm(event:any){
     const data = event && event.detail.data
     const type = event && event.detail.type
 
     if(type=='alarm')
     {
-        console.log(data);
+        const alarmData = JSON.parse(data);
+
+        console.log(alarmData)
+
+        if(alarmData.timePointEvents!=null){
+            for(let timePointEvent of alarmData.timePointEvents){
+
+                let event={
+                    name:timePointEvent.name,
+                    group:'',
+                    location:''
+                }
+
+                if(timePointEvent.userId!=0){//个人事件
+                    event.group='个人'
+                }
+                else{//集体事件
+
+                    try {
+
+                        const response =  await request.get<IGroup>(`/postcalendarapi/group/${timePointEvent.groupId}`);
+                        event.group='集体【'+response.data.name+'】'
+
+                    }catch (err){
+                        const axiosError = err as AxiosError<IResponse<IGroup>>;
+                        if (axiosError.response?.status != undefined &&
+                            axiosError.response.status >= 400 && axiosError.response.status < 500) {
+                            event.group='未知集体'
+                        }
+                    }
+                }
+
+
+                try {
+
+                    if(timePointEvent.locationId==0){
+                        event.location = "网络空间";
+                    }
+                    else{
+                        const response =  await request.get<IMapPoint>(`/postcalendarapi/place/${timePointEvent.placeId}`);
+                        event.location = response.data.name;
+                    }
+
+                }catch (err){
+                    const axiosError = err as AxiosError<IResponse<IMapPoint>>;
+                    if (axiosError.response?.status != undefined &&
+                        axiosError.response.status >= 400 && axiosError.response.status < 500) {
+                        event.location = "未知地点";
+                    }
+                }
+
+                showNotification(alarmData.alarmType,event);
+
+            }
+        }
+        if(alarmData.timeSpanEvents!=null){
+            for(let timeSpanEvent of alarmData.timeSpanEvents){
+
+                let event={
+                    name:timeSpanEvent.name,
+                    group:'',
+                    location:''
+                }
+
+                if(timeSpanEvent.userId!=0){//个人事件
+                    event.group='个人'
+                }
+                else{//集体事件
+
+                    try {
+
+                        const response =  await request.get<IGroup>(`/postcalendarapi/group/${timeSpanEvent.groupId}`);
+                        event.group='集体【'+response.data.name+'】'
+
+                    }catch (err){
+                        const axiosError = err as AxiosError<IResponse<IGroup>>;
+                        if (axiosError.response?.status != undefined &&
+                            axiosError.response.status >= 400 && axiosError.response.status < 500) {
+                            event.group='未知集体'
+                        }
+                    }
+                }
+
+
+                try {
+
+                    if(timeSpanEvent.locationId==0){
+                        event.location = "网络空间";
+                    }
+                    else{
+                        const response =  await request.get<IMapPoint>(`/postcalendarapi/place/${timeSpanEvent.placeId}`);
+                        event.location = response.data.name;
+                    }
+
+                }catch (err){
+                    const axiosError = err as AxiosError<IResponse<IMapPoint>>;
+                    if (axiosError.response?.status != undefined &&
+                        axiosError.response.status >= 400 && axiosError.response.status < 500) {
+                        event.location = "未知地点";
+                    }
+                }
+
+                showNotification(alarmData.alarmType,event);
+
+            }
+        }
+
     }
+}
+
+
+async function showNotification(type:number,event:any){
+
+    await audio.play();
+
+    if(type == 0){
+
+        notification.open({
+            message: '一小时后',
+            description:
+            event.name+"    "+event.location+"    "+event.group
+                ,
+            icon: () => h(BellOutlined, { style: 'color: #FFC15EFF' }),
+
+        });
+    }
+    else if(type == 1){
+        notification.open({
+            message: '现在',
+            description:
+                event.name+"    "+event.location+"    "+event.group
+            ,
+            icon: () => h(BellOutlined, { style: 'color: #30FF37FF' }),
+        });
+    }
+    else {
+        notification.open({
+            message: '明天待办事项',
+            description:
+                event.name+"    "+event.location+"    "+event.group
+            ,
+            icon: () => h(BellOutlined, { style: 'color: #62A6FFFF' }),
+        });
+    }
+
+
 }
 </script>
 
