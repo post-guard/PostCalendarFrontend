@@ -1,5 +1,6 @@
 <template>
     <div ref="popoverDom"
+         style="overflow: hidden"
          @contextmenu.prevent
          @mousedown="e=>rightMouseDown(e)"
          @mouseup="e=>rightMouseUp(e)">

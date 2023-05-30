@@ -1,4 +1,5 @@
 <template>
+    <div class="MapEditorDiv">
     <a-button class="resize_button" shape="circle" size="large" @click="buttonResize">
         <template #icon>
             <ReloadOutlined />
@@ -63,11 +64,12 @@
             </CoordinateLineCom>
         </div>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import {Canvas, Image, Line} from "fabric";
-import { onBeforeUpdate, onMounted, reactive, ref} from "vue";
+import {nextTick, onBeforeUpdate, onMounted, reactive, ref} from "vue";
 import { ReloadOutlined, ZoomInOutlined, ZoomOutOutlined } from "@ant-design/icons-vue";
 import CoordinatePointCom from '@/components/CoordinatePointCom.vue';
 import { CoordinatePoint } from "@/models/CoordinatePoint";
@@ -232,18 +234,24 @@ onMounted(async () => {
         }
 
 
+
         await navigationOneDest(73,104);
+
+        buttonResize()
 
     }
 })
 
-
+nextTick(()=>{
+    updatePoints();
+    updateLines();
+})
 
 function setPointRef(el: CoordinatePointCom|undefined) {
 
     if (el) {
         coordinate_point_list_ref.push(el)
-        updatePoints();
+        //updatePoints();
 
     }
 
@@ -253,7 +261,7 @@ function setLineRef(el: CoordinateLineCom|undefined) {
 
     if (el) {
         coordinate_line_list_ref.push(el)
-        updateLines();
+        //updateLines();
 
     }
 
@@ -293,10 +301,12 @@ function zoom(event: any, canvas: Canvas, background: Image) {
     background.set('left', event.e.offsetX - (event.e.offsetX - background.getX()) * afterScale / preScale);
     background.set('top', event.e.offsetY - (event.e.offsetY - background.getY()) * afterScale / preScale);
 
-    canvas.renderAll();
-
     updatePoints();
     updateLines();
+
+    canvas.renderAll();
+
+
 }
 
 /**
@@ -878,5 +888,11 @@ async function navigationComplex(pointIdList:number[]){
     position: absolute;
     left: 80%;
     top: 86%;
+}
+
+.MapEditorDiv{
+
+    height: inherit;
+    width: inherit;
 }
 </style>

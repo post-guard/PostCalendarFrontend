@@ -186,7 +186,6 @@ function getAlarm(event:any){
 
     if(type=='alarm')
     {
-        console.log("alarm!!")
         console.log(data);
     }
 }

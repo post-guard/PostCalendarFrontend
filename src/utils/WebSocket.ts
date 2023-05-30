@@ -4,7 +4,7 @@ interface ISocket{
     ip:string;
 }
 
-let Sockets:Socket[]=[];
+export const Sockets:Socket[]=[];
 
 export class Socket implements ISocket{
     public ip: string;

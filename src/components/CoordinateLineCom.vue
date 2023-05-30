@@ -1,6 +1,7 @@
 <template>
     <div ref="popoverDom"
          @contextmenu.prevent
+         style="overflow: hidden"
          >
   <a-popover title="" v-model:visible="popoverVisible">
 
@@ -160,6 +161,8 @@ function updateStatus(startPoint: { x:number,y:number },endPoint:{ x:number,y:nu
         popoverDom.value.style.transformOrigin="0 3px";
         popoverDom.value.style.width = props.length*scale+"px";
         popoverDom.value.style.height = 6+"px";
+        popoverDom.value.style.overflowY = "hidden";
+        popoverDom.value.style.overflowX = "hidden";
 
         //console.log(popoverDom.value?.style.left);
         //console.log(popoverDom.value?.style.top);

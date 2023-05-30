@@ -35,12 +35,12 @@
         &nbsp;&nbsp;&nbsp;&nbsp;
         <UserOutlined style="color: #48614d"/>
         {{ddlGroup}}
+        <div class="ddlMask" ref="ddlMask">
 
+        </div>
 
     </a-card>
-<!--    <div class="ddlMask">
 
-    </div>-->
 </div>
 </template>
 
@@ -50,13 +50,14 @@ import dayjs, {Dayjs} from "dayjs";
 import weekday from "dayjs/plugin/weekday";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import {onMounted, ref} from "vue";
+import {onMounted, onUnmounted, ref} from "vue";
 import type {IMapPoint} from "@/models/IMapPoint";
 import type {AxiosError} from "axios";
 import type {IResponse} from "@/models/IResponse";
 import {Request} from "@/utils/Request";
 import type {IGroup} from "@/models/IGroup";
 import TimePointEventModify from "@/components/TimePointEventModify.vue";
+
 
 
 dayjs.extend(weekday);
@@ -123,6 +124,7 @@ const ddlLocation = ref("未标明地点")
 const ddlGroup = ref()
 
 const eventModel = ref()
+const ddlMask = ref<HTMLElement>();
 
 onMounted(async ()=>{
 
@@ -168,10 +170,35 @@ onMounted(async ()=>{
     else {//个人事件
         ddlGroup.value = "个人"
     }
+
+    window.addEventListener('onmessageWS', getCurrentTimeDDL);
+
 })
 
 
+onUnmounted(()=>{
+    window.removeEventListener('onmessageWS', getCurrentTimeDDL);
+})
 
+function getCurrentTimeDDL(event:any){
+    const data = event && event.detail.data
+    const type = event && event.detail.type
+
+    if(type=='clock')
+    {
+        if(dayjs(data).isAfter(dayjs.tz(props.endTime))){
+            if(ddlMask.value!=undefined){
+                ddlMask.value.style.opacity = '0.5';
+            }
+
+        }
+        else{
+            if(ddlMask.value!=undefined){
+                ddlMask.value.style.opacity = '0';
+            }
+        }
+    }
+}
 function submitEvent(val:{
     id:number,
     name:string,
@@ -217,8 +244,11 @@ function deleteEvent(val:{
     position: absolute;
     width: 100%;
     height: 100%;
+    top:0;
+    left: 0;
     border-radius: 8px;
-    opacity: 100;
+    opacity: 0;
     background-color: black;
+    z-index: 5;
 }
 </style>
