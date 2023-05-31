@@ -109,6 +109,7 @@ import type {AxiosError} from "axios";
 import type {IResponse} from "@/models/IResponse";
 import {Request} from "@/utils/Request";
 import type {IMapPoint} from "@/models/IMapPoint";
+import {usePlaceStore} from "@/stores/PlaceStore";
 
 
 const router = useRouter();
@@ -121,8 +122,10 @@ const loginButtonMessage = ref("登录");
 const userStore = useUserStore();
 const request = new Request();
 
+const placeStore = usePlaceStore();
+
 const audio = new Audio();
-audio.src = "public/alarm.wav"
+audio.src = "/alarm.wav"
 
 init();
 
@@ -141,6 +144,14 @@ onMounted(async ()=>{
     if(userStore.user!=undefined){
         createSocket(`wss://server.rrricardo.top/postcalendarapi/websocket/alarm/${userStore.user.id}`,'alarm');
         window.addEventListener('onmessageWS', getAlarm);
+    }
+
+    if(placeStore.nowPosition==undefined){
+        const indexPlace =  await request.get<IMapPoint>(`/postcalendarapi/place/104`);
+
+        placeStore.setPlace(indexPlace.data);//设定初始位置是学五公寓id:104
+        console.log("初始位置设置成功:");
+        console.log(placeStore.nowPosition)
     }
 
 })
@@ -206,9 +217,22 @@ async function getAlarm(event:any){
     {
         const alarmData = JSON.parse(data);
 
-        console.log(alarmData)
+        //console.log(alarmData)
 
         if(alarmData.timePointEvents!=null){
+
+            if(alarmData.alarmType == 1){//只对现在发生的事进行导航
+                if(placeStore.navigationList!=undefined){
+                    const lastPlace =  await request.get<IMapPoint>(`/postcalendarapi/place/${placeStore.navigationList[placeStore.navigationList.length-1]}`);
+
+                    placeStore.setPlace(lastPlace.data);//设定当前位置是上一次导航的终点,这一项只会设置一次
+
+                    placeStore.setNavigationList([]);//设置完当前位置后,清空原导航列表
+                }
+
+            }
+
+
             for(let timePointEvent of alarmData.timePointEvents){
 
                 let event={
@@ -245,6 +269,15 @@ async function getAlarm(event:any){
                     else{
                         const response =  await request.get<IMapPoint>(`/postcalendarapi/place/${timePointEvent.placeId}`);
                         event.location = response.data.name;
+                        if(alarmData.alarmType == 1){//只对现在发生的事进行导航
+                            if(placeStore.navigationList!=undefined){
+
+                                placeStore.navigationList.push(response.data.id);//向当前导航列表添加地点
+                            }
+                            else{
+                                placeStore.navigationList = [response.data.id];
+                            }
+                        }
                     }
 
                 }catch (err){
@@ -258,6 +291,8 @@ async function getAlarm(event:any){
                 showNotification(alarmData.alarmType,event);
 
             }
+
+
         }
         if(alarmData.timeSpanEvents!=null){
             for(let timeSpanEvent of alarmData.timeSpanEvents){
@@ -296,6 +331,18 @@ async function getAlarm(event:any){
                     else{
                         const response =  await request.get<IMapPoint>(`/postcalendarapi/place/${timeSpanEvent.placeId}`);
                         event.location = response.data.name;
+
+                        if(alarmData.alarmType == 1){//只对现在发生的事进行导航
+                            if(placeStore.navigationList!=undefined){
+                                const lastPlace =  await request.get<IMapPoint>(`/postcalendarapi/place/${placeStore.navigationList[placeStore.navigationList.length-1]}`);
+
+                                placeStore.setPlace(lastPlace.data);//设定当前位置是上一次导航的终点
+                                placeStore.setNavigationList([response.data.id]);//设定当前导航列表
+                            }
+                            else{
+                                placeStore.navigationList = [response.data.id];
+                            }
+                        }
                     }
 
                 }catch (err){
@@ -327,6 +374,7 @@ async function showNotification(type:number,event:any){
             event.name+"    "+event.location+"    "+event.group
                 ,
             icon: () => h(BellOutlined, { style: 'color: #FFC15EFF' }),
+            duration: 10
 
         });
     }
@@ -337,6 +385,7 @@ async function showNotification(type:number,event:any){
                 event.name+"    "+event.location+"    "+event.group
             ,
             icon: () => h(BellOutlined, { style: 'color: #30FF37FF' }),
+            duration: 10
         });
     }
     else {
@@ -346,6 +395,7 @@ async function showNotification(type:number,event:any){
                 event.name+"    "+event.location+"    "+event.group
             ,
             icon: () => h(BellOutlined, { style: 'color: #62A6FFFF' }),
+            duration: 10
         });
     }
 

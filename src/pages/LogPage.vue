@@ -52,7 +52,7 @@ async function getLog(event:any) {
             logData.value.shift();
         }
         logData.value.push({title:data});
-        console.log(data);
+        //console.log(data);
     }
 
 

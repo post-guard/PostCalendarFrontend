@@ -17,7 +17,7 @@
     "fabric": "6.0.0-beta3",
     "pinia": "^2.0.35",
     "vue": "^3.2.47",
-    "vue-router": "4"
+    "vue-router": "^4.2.2"
   },
   "devDependencies": {
     "@types/node": "^18.14.2",

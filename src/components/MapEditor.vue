@@ -83,6 +83,7 @@ import CoordinateLineCom from "@/components/CoordinateLineCom.vue";
 import {getAngle, getLength} from "@/models/MathMethods";
 import type {IMapRoad} from "@/models/IMapRoad";
 import type {IMapNavigation} from "@/models/IMapNavigation";
+import {usePlaceStore} from "@/stores/PlaceStore";
 
 
 const request = new Request();
@@ -107,6 +108,8 @@ let coordinate_line_list_ref:CoordinateLineCom [] = reactive([]);
 const lineSamplePos = ref<{start:{pos:{x:number,y:number},id:number},
                             end:{pos:{x:number,y:number},id:number}}>
                             ({start:{pos:{x:-1,y:-1},id:-1},end:{pos:{x:-1,y:-1},id:-1}});
+
+const placeStore = usePlaceStore();
 
 onBeforeUpdate(async() => {
     coordinate_point_list_ref = [];
@@ -174,6 +177,7 @@ onMounted(async () => {
                 point.id = pointAlready.id;
                 coordinate_point_list.push(point);
             }
+            updatePoints();
 
         }catch (err){
             const axiosError = err as AxiosError<IResponse<IMapPoint[]>>;
@@ -233,12 +237,32 @@ onMounted(async () => {
             }
         }
 
+        //导航设置,只会在每次进入页面时刷新
+        if(placeStore.nowPosition!=undefined){
+            console.log("进入地图页导航设置")
+            console.log(placeStore.nowPosition)
+            console.log(placeStore.navigationList)
+            if(placeStore.navigationList!=undefined){
 
 
-        await navigationOneDest(73,104);
+                if(placeStore.navigationList.length==1){
+                    //单点导航
+                    await navigationOneDest(placeStore.nowPosition.id,placeStore.navigationList[0]);
+                }
+                else{
+                    const navigationComplexList = placeStore.navigationList.slice();
+                    navigationComplexList.unshift(placeStore.nowPosition.id);
+                    console.log(placeStore.navigationList)
+                    await navigationComplex(navigationComplexList);
+                }
+            }
+        }
 
-        buttonResize()
 
+        await nextTick(() => {
+            updatePoints();
+            updateLines();
+        })
     }
 })
 
@@ -796,15 +820,15 @@ async function navigationOneDest(startPointId:number,endPointId:number){
 
                 if(line.id==lineRes.id){
 
-                    line.react_image.set({"stroke":"#30ff37"});
-                    line.react_image.set({"fill":"#a9ffb6"});
+                    line.react_image.set({"stroke":"#ff3030"});
+                    line.react_image.set({"fill":"#ffa9bf"});
 
                 }
             }
 
         }
             outsize_canvas.value.renderAll();
-
+        buttonResize();
 
     }catch (err){
         const axiosError = err as AxiosError<IResponse<IMapRoad>>;
@@ -846,14 +870,15 @@ async function navigationComplex(pointIdList:number[]){
 
                 if(line.id==lineRes.id){
 
-                    line.react_image.set({"stroke":"#30ff37"});
-                    line.react_image.set({"fill":"#a9ffb6"});
+                    line.react_image.set({"stroke":"#ff3030"});
+                    line.react_image.set({"fill":"#ffa9eb"});
 
                 }
             }
 
         }
         outsize_canvas.value.renderAll();
+        buttonResize();
 
 
     }catch (err){

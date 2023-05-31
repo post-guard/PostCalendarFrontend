@@ -126,7 +126,7 @@ async function getCurrentTime(event:any) {
         currentTime.value.now = dayjs(data)
     }
 
-    console.log(data);
+    //console.log(data);
 
 }
 
