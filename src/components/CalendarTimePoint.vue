@@ -432,7 +432,7 @@ async function addEvent(val:{
 
 
 async function searchEvent(val:{
-    name:string,
+    name:string|undefined,
     groupId:number[]|undefined,
     placeId:number[]|undefined,
     startDateTime:Dayjs|undefined,
@@ -441,11 +441,14 @@ async function searchEvent(val:{
 }){
     ddlList.value = [];
     ddlListRef.value = [];
-
+    console.log(val)
     if(currentUser.user!==undefined){
         try {
 
-            let timeList = null;
+            let timeList:IResponse<CalendarTimePoint[]>= {
+                message: '',
+                data: []
+            };
                 if(val.startDateTime!=undefined && val.endDateTime!=undefined){
                     timeList =  await request.get<CalendarTimePoint[]>
                     (`/postcalendarapi/timePointEvent/user/${currentUser.user.id}?begin=${val.startDateTime.unix()}&end=${val.endDateTime.unix()}`);
@@ -456,12 +459,13 @@ async function searchEvent(val:{
                 }
 
 
-                const groupList=[];
-                const placeList=[];
-                const typeList=[];
-                const nameList=[];
+                const groupList:CalendarTimePoint[]=[];
+                const placeList:CalendarTimePoint[]=[];
+                const typeList:CalendarTimePoint[]=[];
+                const nameList:CalendarTimePoint[]=[];
+                const nameCopyList:CalendarTimePoint[]=[];
 
-            //message.success("DDL日程成功");
+
             for(let ddlAlready of timeList.data){
                 const ddl : CalendarTimePoint = {
                     id: ddlAlready.id,
@@ -474,8 +478,9 @@ async function searchEvent(val:{
                     type:ddlAlready.type
                 }
 
+                nameCopyList.push(ddl);
 
-                if(val.groupId!=undefined){
+                if(val.groupId!=undefined && val.groupId.length!=0){
                     if(val.groupId.includes(ddl.groupId)){
                         groupList.push(ddl);
                     }
@@ -484,7 +489,7 @@ async function searchEvent(val:{
                     groupList.push(ddl);
                 }
 
-                if(val.placeId!=undefined){
+                if(val.placeId!=undefined && val.placeId.length!=0){
                     if(val.placeId.includes(ddl.placeId)){
                         placeList.push(ddl);
                     }
@@ -493,7 +498,7 @@ async function searchEvent(val:{
                     placeList.push(ddl);
                 }
 
-                if(val.type!=undefined){
+                if(val.type!=undefined && val.type.length!=0){
                     if(val.type.includes(ddl.type)){
                         typeList.push(ddl);
                     }
@@ -501,14 +506,12 @@ async function searchEvent(val:{
                 else{
                     typeList.push(ddl);
                 }
-
-                //ddlList.value.push(ddl);
             }
             /*此时，有三个列表，里面分别是满足时间要求且分别满足组织、地点、类型要求的事件
             如果组织、地点、类型用户没有输入（就是undefined）,那么这个列表里就是满足时间要求的全部事件
              */
             let nameResponse;
-            if(val.name!=undefined){
+            if(val.name!=undefined && val.name!=''){
                 nameResponse =  await request.post<CalendarTimePoint[]>
                 (`/postcalendarapi/searchTimePointEvent/${currentUser.user.id}`,
                     {
@@ -518,22 +521,32 @@ async function searchEvent(val:{
             else{
                 nameResponse = timeList;
             }
-
+            //解决js的对象相同问题,写法粪但是管用
             for(let ddlAlready of nameResponse.data) {
-                const ddl: CalendarTimePoint = {
-                    id: ddlAlready.id,
-                    name: ddlAlready.name,
-                    details: ddlAlready.details,
-                    userId: ddlAlready.userId,
-                    groupId: ddlAlready.groupId,
-                    placeId: ddlAlready.placeId,
-                    endDateTime: ddlAlready.endDateTime,
-                    type: ddlAlready.type
+                for(let ddlCopy of nameCopyList){
+                    if(ddlAlready.id == ddlCopy.id){
+                        nameList.push(ddlCopy);
+                    }
                 }
-                nameList.push(ddl);
             }
-            //接下来进行四个列表的取交集操作
 
+
+            //接下来进行四个列表的取交集操作
+            let searchResultList = placeList.filter((ddl)=>{
+                return typeList.includes(ddl);
+            })
+
+            searchResultList = searchResultList.filter((ddl)=>{
+                return groupList.includes(ddl);
+            })
+
+            searchResultList = searchResultList.filter((ddl)=>{
+                return nameList.includes(ddl);
+            })
+            console.log(searchResultList);
+            for(let searchResult of searchResultList){
+                ddlList.value.push(searchResult);
+            }
 
 
 

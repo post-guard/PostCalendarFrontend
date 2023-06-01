@@ -9,6 +9,7 @@
                 <a-form-item style="width: 20%">
                     <a-input v-model:value="eventRef.name" placeholder="事件名称"
                              size="large"
+                             @change="searchEvent"
 
                     />
                 </a-form-item>
@@ -24,6 +25,7 @@
                             :maxTagTextLength = 4
                             v-model:value="eventRef.type"
                             :options="eventRef.typeOptions"
+                            @change="searchEvent"
 
                         ></a-select>
 
@@ -40,6 +42,7 @@
                         :maxTagTextLength = 4
                         v-model:value=eventRef.locationId
                         :options="locationOptions"
+                        @change="searchEvent"
 
                     ></a-select>
                 </a-form-item>
@@ -55,6 +58,7 @@
                         :maxTagTextLength = 4
                         v-model:value=eventRef.groupId
                         :options="groupOptions"
+                        @change="searchEvent"
                     ></a-select>
                 </a-form-item>
 
@@ -65,6 +69,7 @@
                         :placeholder="['起始时间段', '终止时间段']"
                         v-model:value=searchTimePeriod
                         size="large"
+                        @change="searchEvent"
                     />
                 </a-form-item>
             </a-form>
@@ -83,7 +88,6 @@ import type {IUserGroupLink} from "@/models/IUserGroupLink";
 import type {IMapPoint} from "@/models/IMapPoint";
 import dayjs, {Dayjs} from "dayjs";
 import utc from "dayjs/plugin/utc";
-import {SearchOutlined} from "@ant-design/icons-vue";
 
 dayjs.extend(utc)
 const request = new Request();
@@ -107,8 +111,8 @@ const eventRef = ref({
 
     groupId:undefined,
 
-    startDateTime:undefined,
-    endDateTime:undefined,
+    startDateTime:<Dayjs|undefined>undefined,
+    endDateTime:<Dayjs|undefined>undefined,
 
 
     type:undefined,
@@ -165,12 +169,11 @@ const currentUser = useUserStore();
 const locationOptions = ref<{ value:number,label:string }[]>([]);
 const groupOptions = ref<{ value:number,label:string }[]>([]);
 
-const searchTimePeriod= ref<[Dayjs|undefined,Dayjs|undefined]>([eventRef.value.startDateTime,eventRef.value.endDateTime]);
+const searchTimePeriod= ref<Dayjs[]|undefined[]|null>([]);
 
 
 onMounted(async()=>{
     await currentUser.updateUserInformation();
-
 
     //加载用户组织列表
 
@@ -228,6 +231,17 @@ onMounted(async()=>{
 function searchEvent(){
     //进行事件的搜索
     //在查询组织与个人时，设定为组织Id=0即为个人事件
+
+
+    if(searchTimePeriod.value!=null){
+        eventRef.value.startDateTime = searchTimePeriod.value[0];
+        eventRef.value.endDateTime = searchTimePeriod.value[1];
+    }
+    else {
+        eventRef.value.startDateTime = undefined;
+        eventRef.value.endDateTime = undefined;
+    }
+
 
     const emitVal={
         name:eventRef.value.name,
