@@ -35,6 +35,7 @@ declare module '@vue/runtime-core' {
     ARadio: typeof import('ant-design-vue/es')['Radio']
     ARadioButton: typeof import('ant-design-vue/es')['RadioButton']
     ARadioGroup: typeof import('ant-design-vue/es')['RadioGroup']
+    ARangePicker: typeof import('ant-design-vue/es')['RangePicker']
     ARow: typeof import('ant-design-vue/es')['Row']
     ASelect: typeof import('ant-design-vue/es')['Select']
     ASpace: typeof import('ant-design-vue/es')['Space']
@@ -55,5 +56,6 @@ declare module '@vue/runtime-core' {
     TimePeriodEventModify: typeof import('./src/components/TimePeriodEventModify.vue')['default']
     TimePointEventAdd: typeof import('./src/components/TimePointEventAdd.vue')['default']
     TimePointEventModify: typeof import('./src/components/TimePointEventModify.vue')['default']
+    TimePointEventSearch: typeof import('./src/components/TimePointEventSearch.vue')['default']
   }
 }

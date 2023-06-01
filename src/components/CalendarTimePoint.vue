@@ -1,15 +1,19 @@
 <template>
 <div class="ddlZoneDiv">
 
-      <TimePointEventAdd ref="eventModel"
+      <TimePointEventAdd ref="eventAddModel"
                         @submitEvent="addEvent">
       </TimePointEventAdd>
+
+      <TimePointEventSearch ref="eventSearchPopover"
+                         @searchEvent="searchEvent">
+      </TimePointEventSearch>
 
       <a-list class="ddlList"
               item-layout="horizontal"
           :data-source  = ddlList
           :pagination="false"
-          size="Large"
+          size="large"
           :grid="{ gutter: 20, column: 1 }"
   >
       <template #renderItem="{ item }">
@@ -35,13 +39,25 @@
     <a-button size="large"
               shape="circle"
               style="position: absolute;
-                     left: 110%;
+                     left: 105%;
                      top:80%"
-              @click="()=>{eventModel.visible = true}">
+              @click="()=>{eventAddModel.visible = true}">
         <template #icon style="color: blue">
             <PlusOutlined />
         </template>
     </a-button>
+
+
+<!--    <a-button size="large"
+              shape="circle"
+              style="position: absolute;
+                     left: 110%;
+                     top:72%"
+              >
+        <template #icon style="color: blue">
+            <SearchOutlined />
+        </template>
+    </a-button>-->
 
 </div>
 </template>
@@ -61,6 +77,7 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import {PlusOutlined} from "@ant-design/icons-vue";
 import TimePointEventAdd from "@/components/TimePointEventAdd.vue";
+import TimePointEventSearch from "@/components/TimePointEventSearch.vue";
 
 
 dayjs.extend(weekday);
@@ -84,7 +101,7 @@ let ddlList = ref<CalendarTimePoint[]>([]);
 
 let ddlListRef = ref<CalendarDDLCard[]>([]);
 
-const eventModel = ref();
+const eventAddModel = ref();
 
 onBeforeUpdate(async() => {
     ddlListRef.value = [];
@@ -409,6 +426,65 @@ async function addEvent(val:{
                     }
                 }
             }
+    }
+}
+
+
+async function searchEvent(val:{
+    name:string,
+    groupId:number[]|undefined,
+    placeId:number[]|undefined,
+    startDateTime:Dayjs|undefined,
+    endDateTime:Dayjs|undefined,
+    type:number[]|undefined
+}){
+    ddlList.value = [];
+    ddlListRef.value = [];
+
+    if(currentUser.user!==undefined){
+        try {
+
+            let response = null;
+                if(val.startDateTime!=undefined && val.endDateTime!=undefined){
+                    response =  await request.get<CalendarTimePoint[]>
+                    (`/postcalendarapi/timePointEvent/user/${currentUser.user.id}?begin=${val.startDateTime.unix()}&end=${val.endDateTime.unix()}`);
+                }
+                else{
+                    response = await request.get<CalendarTimePoint[]>
+                    (`/postcalendarapi/timePointEvent/user/${currentUser.user.id}?begin=${calendarPeriod.value.subtract(3,'month').unix()}&end=${calendarPeriod.value.add(3,'month').unix()}`);
+                }
+
+
+            //message.success("DDL日程成功");
+            for(let ddlAlready of response.data){
+                const ddl : CalendarTimePoint = {
+                    id: ddlAlready.id,
+                    name : ddlAlready.name,
+                    details: ddlAlready.details,
+                    userId: ddlAlready.userId,
+                    groupId: ddlAlready.groupId,
+                    placeId: ddlAlready.placeId,
+                    endDateTime: ddlAlready.endDateTime,
+                    type:ddlAlready.type
+                }
+
+                if(val.groupId!=undefined){
+                    if(val.groupId==0){
+
+                    }
+                }
+                //ddlList.value.push(ddl);
+            }
+
+        }catch (err){
+            const axiosError = err as AxiosError<IResponse<CalendarTimePoint[]>>;
+            if (axiosError.response?.status != undefined &&
+                axiosError.response.status >= 400 && axiosError.response.status < 500) {
+
+                let errorMessage = "查询DDL日程失败";
+                message.error(errorMessage);
+            }
+        }
     }
 }
 </script>
