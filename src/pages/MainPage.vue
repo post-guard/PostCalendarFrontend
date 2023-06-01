@@ -116,7 +116,7 @@ const router = useRouter();
 const storage = new WebStorage("localStorage");
 
 const collapsed = ref(true);
-const selectedKeys = ref([""]);
+const selectedKeys = ref(["calendar"]);
 const loginButtonMessage = ref("登录");
 
 const userStore = useUserStore();
@@ -126,6 +126,7 @@ const placeStore = usePlaceStore();
 
 const audio = new Audio();
 audio.src = "/alarm.wav"
+router.push({ path: "/calendar" });//进入页面时默认进入日历页
 
 init();
 

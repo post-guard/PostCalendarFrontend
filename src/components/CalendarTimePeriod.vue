@@ -693,8 +693,14 @@ async function addEvent(val:{
                 if (axiosError.response?.status != undefined &&
                     axiosError.response.status >= 400 && axiosError.response.status < 500) {
 
-                    let errorMessage = "添加组织日程失败";
-                    message.error(errorMessage);
+                    if(axiosError.response.status==444){
+                        console.log(axiosError.response.data)
+                    }
+                    else{
+                        let errorMessage = "添加组织日程失败";
+                        console.log(axiosError.response.data)
+                        message.error(errorMessage);
+                    }
                 }
             }
         }
@@ -724,8 +730,14 @@ async function addEvent(val:{
                     if (axiosError.response?.status != undefined &&
                         axiosError.response.status >= 400 && axiosError.response.status < 500) {
 
-                        let errorMessage = "添加组织日程失败";
-                        message.error(errorMessage);
+                        if(axiosError.response.status==444){
+                            console.log(axiosError.response.data)
+                        }
+                        else{
+                            let errorMessage = "添加组织日程失败";
+                            console.log(axiosError.response.data)
+                            message.error(errorMessage);
+                        }
                     }
                 }
             }
@@ -762,8 +774,14 @@ async function addEvent(val:{
                     if (axiosError.response?.status != undefined &&
                         axiosError.response.status >= 400 && axiosError.response.status < 500) {
 
-                        let errorMessage = "添加个人日程失败";
-                        message.error(errorMessage);
+                        if(axiosError.response.status==444){
+                            console.log(axiosError.response.data)
+                        }
+                        else{
+                            let errorMessage = "添加个人日程失败";
+                            console.log(axiosError.response.data)
+                            message.error(errorMessage);
+                        }
                     }
                 }
             }
@@ -792,9 +810,14 @@ async function addEvent(val:{
                         const axiosError = err as AxiosError<IResponse<CalendarTimePeriod>>;
                         if (axiosError.response?.status != undefined &&
                             axiosError.response.status >= 400 && axiosError.response.status < 500) {
-
-                            let errorMessage = "添加个人日程失败";
-                            message.error(errorMessage);
+                                    if(axiosError.response.status==444){
+                                        console.log(axiosError.response.data)
+                                    }
+                                    else{
+                                        let errorMessage = "添加个人日程失败";
+                                        console.log(axiosError.response.data)
+                                        message.error(errorMessage);
+                                    }
                         }
                     }
                 }

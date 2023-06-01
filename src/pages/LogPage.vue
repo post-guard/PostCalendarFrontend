@@ -22,11 +22,15 @@
 <script setup lang="ts">
 import {onMounted, onUnmounted,ref} from "vue";
 import {createSocket} from "@/utils/WebSocket";
+import {useUserStore} from "@/stores/UserStore";
+const userStore = useUserStore();
 
-
-onMounted(()=>{
-    createSocket("wss://server.rrricardo.top/postcalendarapi/websocket/logging",'logging');
+onMounted(async ()=>{
+    await userStore.updateUserInformation();
+    if(userStore.user!=undefined){
+    createSocket(`wss://server.rrricardo.top/postcalendarapi/websocket/logging/${userStore.user.id}`,'logging');
     window.addEventListener('onmessageWS', getLog);
+    }
 })
 
 onUnmounted(()=>{

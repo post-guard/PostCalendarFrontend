@@ -45,6 +45,11 @@
                  centered
                  title="修改系统时间"
                  @ok="updateTime">
+            <template #footer>
+                <a-button key="reset" @click="resetTime">Reset</a-button>
+                <a-button key="ok" type="primary"  @click="updateTime">ok</a-button>
+            </template>
+
             <a-date-picker show-time
                            placeholder="选择时间"
                            size="large"
@@ -72,6 +77,7 @@ import {Request} from "@/utils/Request";
 import type {IClock} from "@/models/IClock";
 import {message} from "ant-design-vue";
 import {createSocket} from "@/utils/WebSocket";
+import {useUserStore} from "@/stores/UserStore";
 
 dayjs.extend(weekday);
 dayjs.extend(utc);
@@ -89,8 +95,10 @@ const clockModalVisible = ref(false);
 
 const clockModalValue = ref<Dayjs>(dayjs());
 
-onMounted(async ()=>{
+const userStore = useUserStore();
 
+onMounted(async ()=>{
+    await userStore.updateUserInformation();
     try {
 
         const response = await request.get<IClock>(`/postcalendarapi/clock/`);
@@ -108,8 +116,11 @@ onMounted(async ()=>{
 
     }
 
-    createSocket("wss://server.rrricardo.top/postcalendarapi/websocket/clock",'clock');
-    window.addEventListener('onmessageWS', getCurrentTime)
+    if(userStore.user!=undefined){
+        createSocket(`wss://server.rrricardo.top/postcalendarapi/websocket/clock/${userStore.user.id}`,'clock');
+        window.addEventListener('onmessageWS', getCurrentTime)
+    }
+
 })
 
 onUnmounted(()=>{
@@ -190,7 +201,7 @@ async function updateTime(){
             now:dayjs(clockModalValue.value).format("YYYY-MM-DD[T]HH:mm:ss")
         });
 
-        message.success("修改时间成功成功",1)
+        message.success("修改时间成功",1)
         /*currentTime.value.now = dayjs(response.data.now)
         currentTime.value.time = response.data.time*/
 
@@ -205,6 +216,35 @@ async function updateTime(){
 
     clockModalVisible.value = false;
 }
+
+
+
+async function resetTime(){
+
+
+    try {
+
+        const response = await request.post<IClock>(`/postcalendarapi/clock/reset`,{
+            now:dayjs(clockModalValue.value).format("YYYY-MM-DD[T]HH:mm:ss")
+        });
+
+        message.success("修改时间成功",1)
+        /*currentTime.value.now = dayjs(response.data.now)
+        currentTime.value.time = response.data.time*/
+
+    } catch (err) {
+        const axiosError = err as AxiosError<IResponse<IClock>>;
+        if (axiosError.response?.status != undefined &&
+            axiosError.response.status >= 400 && axiosError.response.status < 500) {
+            console.log(axiosError.response.data.message)
+        }
+
+    }
+
+    clockModalVisible.value = false;
+}
+
+
 
 //TODO:对日程页和ddl页的当前时间要统一更改为这个系统时钟
 </script>
