@@ -206,7 +206,7 @@ async function updateTime(){
     clockModalVisible.value = false;
 }
 
-//TODO:对日程页和ddl页的当前时间要统一更改为这个系统时钟，同时要设置ddl页的过期效果
+//TODO:对日程页和ddl页的当前时间要统一更改为这个系统时钟
 </script>
 
 <style scoped>

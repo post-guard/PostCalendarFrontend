@@ -1,13 +1,14 @@
 <template>
+    <TimePointEventSearch ref="eventSearchPopover"
+                          @searchEvent="searchEvent">
+    </TimePointEventSearch>
 <div class="ddlZoneDiv">
 
       <TimePointEventAdd ref="eventAddModel"
                         @submitEvent="addEvent">
       </TimePointEventAdd>
 
-      <TimePointEventSearch ref="eventSearchPopover"
-                         @searchEvent="searchEvent">
-      </TimePointEventSearch>
+
 
       <a-list class="ddlList"
               item-layout="horizontal"
@@ -444,19 +445,24 @@ async function searchEvent(val:{
     if(currentUser.user!==undefined){
         try {
 
-            let response = null;
+            let timeList = null;
                 if(val.startDateTime!=undefined && val.endDateTime!=undefined){
-                    response =  await request.get<CalendarTimePoint[]>
+                    timeList =  await request.get<CalendarTimePoint[]>
                     (`/postcalendarapi/timePointEvent/user/${currentUser.user.id}?begin=${val.startDateTime.unix()}&end=${val.endDateTime.unix()}`);
                 }
                 else{
-                    response = await request.get<CalendarTimePoint[]>
+                    timeList = await request.get<CalendarTimePoint[]>
                     (`/postcalendarapi/timePointEvent/user/${currentUser.user.id}?begin=${calendarPeriod.value.subtract(3,'month').unix()}&end=${calendarPeriod.value.add(3,'month').unix()}`);
                 }
 
 
+                const groupList=[];
+                const placeList=[];
+                const typeList=[];
+                const nameList=[];
+
             //message.success("DDL日程成功");
-            for(let ddlAlready of response.data){
+            for(let ddlAlready of timeList.data){
                 const ddl : CalendarTimePoint = {
                     id: ddlAlready.id,
                     name : ddlAlready.name,
@@ -468,13 +474,68 @@ async function searchEvent(val:{
                     type:ddlAlready.type
                 }
 
-                if(val.groupId!=undefined){
-                    if(val.groupId==0){
 
+                if(val.groupId!=undefined){
+                    if(val.groupId.includes(ddl.groupId)){
+                        groupList.push(ddl);
                     }
                 }
+                else{
+                    groupList.push(ddl);
+                }
+
+                if(val.placeId!=undefined){
+                    if(val.placeId.includes(ddl.placeId)){
+                        placeList.push(ddl);
+                    }
+                }
+                else{
+                    placeList.push(ddl);
+                }
+
+                if(val.type!=undefined){
+                    if(val.type.includes(ddl.type)){
+                        typeList.push(ddl);
+                    }
+                }
+                else{
+                    typeList.push(ddl);
+                }
+
                 //ddlList.value.push(ddl);
             }
+            /*此时，有三个列表，里面分别是满足时间要求且分别满足组织、地点、类型要求的事件
+            如果组织、地点、类型用户没有输入（就是undefined）,那么这个列表里就是满足时间要求的全部事件
+             */
+            let nameResponse;
+            if(val.name!=undefined){
+                nameResponse =  await request.post<CalendarTimePoint[]>
+                (`/postcalendarapi/searchTimePointEvent/${currentUser.user.id}`,
+                    {
+                        prefix: val.name
+                    });
+            }
+            else{
+                nameResponse = timeList;
+            }
+
+            for(let ddlAlready of nameResponse.data) {
+                const ddl: CalendarTimePoint = {
+                    id: ddlAlready.id,
+                    name: ddlAlready.name,
+                    details: ddlAlready.details,
+                    userId: ddlAlready.userId,
+                    groupId: ddlAlready.groupId,
+                    placeId: ddlAlready.placeId,
+                    endDateTime: ddlAlready.endDateTime,
+                    type: ddlAlready.type
+                }
+                nameList.push(ddl);
+            }
+            //接下来进行四个列表的取交集操作
+
+
+
 
         }catch (err){
             const axiosError = err as AxiosError<IResponse<CalendarTimePoint[]>>;
@@ -492,10 +553,10 @@ async function searchEvent(val:{
 <style scoped>
 .ddlZoneDiv{
     position: relative;
-    top:0;
+    top:10%;
     left:20%;
     width: 60%;
-    height: 100%;
+    height: 95%;
 }
 
 .ddlList{

@@ -1,87 +1,74 @@
 <template>
-    <a-popover title="查询DDL日程"
-               trigger="click"
-               >
-        <template #content>
+    <div class="searchBarDiv">
             <a-form
                 class="eventFormClass"
-                :label-col="{ span: 8 }"
-                :wrapper-col="{ span: 24 }"
                 autocomplete="off"
+                layout="inline"
             >
 
-                <a-form-item>
+                <a-form-item style="width: 20%">
                     <a-input v-model:value="eventRef.name" placeholder="事件名称"
                              size="large"
+
                     />
                 </a-form-item>
 
 
-                <a-form-item>
+                <a-form-item style="width: 15%">
 
                         <a-select
                             size="large"
                             placeholder="事件类型"
                             mode="multiple"
-                            :max-tag-count = 2
+                            :max-tag-count = 1
+                            :maxTagTextLength = 4
                             v-model:value="eventRef.type"
                             :options="eventRef.typeOptions"
+
                         ></a-select>
 
                 </a-form-item>
 
-                <a-form-item>
+                <a-form-item style="width: 15%">
                     <a-select
                         show-search
                         placeholder="事件地点"
                         size="large"
                         mode="multiple"
                         optionFilterProp="label"
-                        :max-tag-count = 2
+                        :max-tag-count = 1
+                        :maxTagTextLength = 4
                         v-model:value=eventRef.locationId
                         :options="locationOptions"
+
                     ></a-select>
                 </a-form-item>
 
-                <a-form-item>
+                <a-form-item style="width: 15%">
                     <a-select
                         show-search
                         placeholder="事件组织"
                         size="large"
                         mode="multiple"
                         optionFilterProp="label"
-                        :max-tag-count = 2
+                        :max-tag-count = 1
+                        :maxTagTextLength = 4
                         v-model:value=eventRef.groupId
                         :options="groupOptions"
                     ></a-select>
                 </a-form-item>
 
-                <a-form-item>
+                <a-form-item style="width: 28%">
                     <a-range-picker
                         :show-time="{ format: 'HH:mm:ss' }"
                         format="YYYY-MM-DD HH:mm:ss"
                         :placeholder="['起始时间段', '终止时间段']"
                         v-model:value=searchTimePeriod
-                        size="middle"
+                        size="large"
                     />
                 </a-form-item>
-
-
-
             </a-form>
-        </template>
-
-            <a-button size="large"
-              shape="circle"
-              style="position: absolute;
-                     left: 105%;
-                     top:72%"
-              >
-        <template #icon style="color: blue">
-            <SearchOutlined />
-        </template>
-    </a-button>
-    </a-popover>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -256,5 +243,11 @@ function searchEvent(){
 </script>
 
 <style scoped>
-
+.searchBarDiv{
+    position: absolute;
+    top:2%;
+    left: 0;
+    width: 100%;
+    height: 10%;
+}
 </style>
