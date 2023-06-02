@@ -5,6 +5,10 @@
                             @submitEvent="addEvent">
         </TimePeriodEventAdd>
 
+        <SchoolEventAdd ref="schoolModel" @importEvent="importEvent">
+
+        </SchoolEventAdd>
+
         <div class = "calendar">
 
 
@@ -36,6 +40,12 @@
                         <template #icon>
                             <PlusOutlined/>
                         </template>
+                    </a-button>
+
+                    <a-button type="primary"
+                              style="left: 4%"
+                              @click="()=>{schoolModel.visible = true}">
+                        导入课表
                     </a-button>
 
                 </template>
@@ -92,6 +102,7 @@ import weekOfYear from "dayjs/plugin/weekOfYear"
 import {PlusOutlined} from "@ant-design/icons-vue";
 
 import TimePeriodEventAdd from "@/components/TimePeriodEventAdd.vue";
+import SchoolEventAdd from "@/components/SchoolEventAdd.vue";
 dayjs.extend(weekOfYear)
 
 let colorBarList = ref<CalendarTimePeriod[]>([]);
@@ -133,6 +144,7 @@ const calendarPeriod = ref({//控制日历显示的日期
 
 
 const eventModel = ref();
+const schoolModel = ref();
 
 function calendarColumns(columnDay:string){
 
@@ -877,6 +889,37 @@ async function addEvent(val:{
                 }
                 await datePickerChange();
             }
+        }
+    }
+}
+
+
+
+async function importEvent(val:{
+    schoolId:string,
+    schoolPassword:string,
+    schoolSemester:string
+}){
+
+    try {
+        if(currentUser.user!=undefined){
+
+            const response =  await request.post<any>
+            (`/postcalendarapi/curriculum/${val.schoolSemester}`,{
+                username:val.schoolId,
+                password:val.schoolPassword,
+                userId:currentUser.user.id
+            });
+
+            message.success("导入课表成功")
+            await datePickerChange();
+        }
+
+    }catch (err){
+        const axiosError = err as AxiosError<IResponse<any>>;
+        if (axiosError.response?.status != undefined &&
+            axiosError.response.status >= 400 && axiosError.response.status < 500) {
+            message.error("导入课表失败")
         }
     }
 }

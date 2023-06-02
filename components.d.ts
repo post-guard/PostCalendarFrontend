@@ -51,6 +51,7 @@ declare module '@vue/runtime-core' {
     MapEditor: typeof import('./src/components/MapEditor.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SchoolEventAdd: typeof import('./src/components/SchoolEventAdd.vue')['default']
     TimeDisplayCom: typeof import('./src/components/TimeDisplayCom.vue')['default']
     TimePeriodEventAdd: typeof import('./src/components/TimePeriodEventAdd.vue')['default']
     TimePeriodEventModify: typeof import('./src/components/TimePeriodEventModify.vue')['default']
