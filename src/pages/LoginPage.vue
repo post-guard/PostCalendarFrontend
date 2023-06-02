@@ -29,9 +29,9 @@
           </a-form-item>
 
           <a-form-item>
-            <a href="/#/register" id="click-to-register">
-              没有账号？点我注册
-            </a>
+              <router-link to="/register" id="click-to-register">
+                  没有账号？点我注册
+              </router-link>
           </a-form-item>
 
           <a-form-item>
