@@ -240,8 +240,8 @@ onMounted(async () => {
         //导航设置,只会在每次进入页面时刷新
         if(placeStore.nowPosition!=undefined){
             console.log("进入地图页导航设置")
+            console.log("导航出发点")
             console.log(placeStore.nowPosition)
-            console.log(placeStore.navigationList)
             if(placeStore.navigationList!=undefined){
 
 
@@ -253,7 +253,8 @@ onMounted(async () => {
                     const navigationComplexList = placeStore.navigationList.slice();
                     navigationComplexList.unshift(placeStore.nowPosition.id);
                     navigationComplexList.push(placeStore.nowPosition.id);
-                    console.log(placeStore.navigationList)
+                    console.log("导航地点列表")
+                    console.log(navigationComplexList)
                     await navigationComplex(navigationComplexList);
                 }
             }
