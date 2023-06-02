@@ -252,7 +252,7 @@ onMounted(async () => {
                 else{
                     const navigationComplexList = placeStore.navigationList.slice();
                     navigationComplexList.unshift(placeStore.nowPosition.id);
-                    navigationComplexList.push(placeStore.nowPosition.id);
+                    //navigationComplexList.push(placeStore.nowPosition.id);
                     console.log("导航地点列表")
                     console.log(navigationComplexList)
                     await navigationComplex(navigationComplexList);

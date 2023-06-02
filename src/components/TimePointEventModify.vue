@@ -281,7 +281,7 @@ onMounted(async()=>{
         }
     }
 
-    eventRef.value.currentTime = dayjs(props.endTime);
+    eventRef.value.currentTime = dayjs.tz(props.endTime);
 
 })
 
