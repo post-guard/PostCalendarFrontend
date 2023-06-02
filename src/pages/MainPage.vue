@@ -218,15 +218,15 @@ async function getAlarm(event:any){
     {
         const alarmData = JSON.parse(data);
 
-        //console.log(alarmData)
+        console.log(alarmData)
 
         if(alarmData.timePointEvents!=null){
 
             if(alarmData.alarmType == 1){//只对现在发生的事进行导航
                 if(placeStore.navigationList!=undefined){
-                    const lastPlace =  await request.get<IMapPoint>(`/postcalendarapi/place/${placeStore.navigationList[placeStore.navigationList.length-1]}`);
-
-                    placeStore.setPlace(lastPlace.data);//设定当前位置是上一次导航的终点,这一项只会设置一次
+                    //const lastPlace =  await request.get<IMapPoint>(`/postcalendarapi/place/${placeStore.navigationList[placeStore.navigationList.length-1]}`);
+                    //const lastPlace =  await request.get<IMapPoint>(`/postcalendarapi/place/${placeStore.navigationList[0]}`);
+                    //placeStore.setPlace(lastPlace.data);//设定当前位置是上一次导航的终点,这一项只会设置一次
 
                     placeStore.setNavigationList([]);//设置完当前位置后,清空原导航列表
                 }
@@ -335,9 +335,9 @@ async function getAlarm(event:any){
 
                         if(alarmData.alarmType == 1){//只对现在发生的事进行导航
                             if(placeStore.navigationList!=undefined){
-                                const lastPlace =  await request.get<IMapPoint>(`/postcalendarapi/place/${placeStore.navigationList[placeStore.navigationList.length-1]}`);
+                                //const lastPlace =  await request.get<IMapPoint>(`/postcalendarapi/place/${placeStore.navigationList[placeStore.navigationList.length-1]}`);
 
-                                placeStore.setPlace(lastPlace.data);//设定当前位置是上一次导航的终点
+                                //placeStore.setPlace(lastPlace.data);//设定当前位置是上一次导航的终点
                                 placeStore.setNavigationList([response.data.id]);//设定当前导航列表
                             }
                             else{

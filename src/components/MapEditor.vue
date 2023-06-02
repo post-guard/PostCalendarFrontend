@@ -248,6 +248,9 @@ onMounted(async () => {
                 if(placeStore.navigationList.length==1){
                     //单点导航
                     await navigationOneDest(placeStore.nowPosition.id,placeStore.navigationList[0]);
+
+                    const lastPlace =  await request.get<IMapPoint>(`/postcalendarapi/place/${placeStore.navigationList[0]}`);
+                    placeStore.setPlace(lastPlace.data);
                 }
                 else{
                     const navigationComplexList = placeStore.navigationList.slice();
@@ -256,6 +259,8 @@ onMounted(async () => {
                     console.log("导航地点列表")
                     console.log(navigationComplexList)
                     await navigationComplex(navigationComplexList);
+                    const lastPlace =  await request.get<IMapPoint>(`/postcalendarapi/place/${navigationComplexList[0]}`);
+                    placeStore.setPlace(lastPlace.data);
                 }
             }
         }
