@@ -131,9 +131,9 @@ onMounted(async ()=>{
 
     //设置随机颜色，根据开始时间和结束时间定
     const setBackgroundColor = {
-        R : (dayjs(props.startTime).unix()+startTimeTransform.weekday())%90+120,
-        G : (dayjs(props.endTime).unix()+startTimeTransform.weekday())%50+120,
-        B : (dayjs(props.startTime).unix()+dayjs(props.endTime).unix()+startTimeTransform.weekday())%80+120,
+        R : (dayjs(props.startTime).unix()/startTimeTransform.weekday())%90+80,
+        G : (dayjs(props.endTime).unix()/startTimeTransform.weekday())%50+90,
+        B : (dayjs(props.startTime).unix()+dayjs(props.endTime).unix()/startTimeTransform.weekday())%70+150,
         A : 255, //其实我也不知道会是什么颜色
     }
 

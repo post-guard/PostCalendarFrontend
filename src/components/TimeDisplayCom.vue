@@ -1,7 +1,7 @@
 <template>
     <div class="timeShower">
 
-            <div class="currentDate" style="font-size: large">
+            <div class="currentDate" >
                 {{currentTime.now.year()}}年{{currentTime.now.month()+1}}月{{currentTime.now.date()}}日
 
                 星期{{"日一二三四五六".charAt(currentTime.now.day())}}
@@ -264,7 +264,8 @@ async function resetTime(){
     top:0;
     width: auto;
     height: auto;
-    left:10%
+    left:10%;
+    font-size: large
 }
 .currentTime{
     position: absolute;

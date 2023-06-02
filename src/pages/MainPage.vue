@@ -2,7 +2,13 @@
   <div>
     <a-layout style="min-height: 100vh;">
       <a-layout-sider v-model:collapsed="collapsed" :collapsible=true :defaultCollapsed=true style="z-index: 5">
-        <div class="logo" />
+        <div class="logo" style="background: none">
+            <img src="/postLogo.ico"
+                 alt="logo"
+                 width="32"
+                 height="32"
+                 style="position:absolute;left: 30%">
+        </div>
 
         <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline" @select="menu_selected">
 
