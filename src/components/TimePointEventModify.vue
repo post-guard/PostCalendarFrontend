@@ -319,7 +319,7 @@ function deleteEvent(){
         userId:props.userId,
         groupId:props.groupId,
         placeId:props.locationId,
-        endDateTime:props.endTime+"Z",
+        endDateTime:props.endTime,
         type:props.type
     }
 

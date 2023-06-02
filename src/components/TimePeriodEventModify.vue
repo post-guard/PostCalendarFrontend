@@ -285,8 +285,8 @@ function deleteEvent(){
         userId:props.userId,
         groupId:props.groupId,
         placeId:props.locationId,
-        beginDateTime:props.startTime+"Z",
-        endDateTime:props.endTime+"Z"
+        beginDateTime:props.startTime,
+        endDateTime:props.endTime
     }
 
 
