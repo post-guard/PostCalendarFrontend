@@ -103,7 +103,7 @@ import { WebStorage } from "@/utils/Storage";
 import { useUserStore } from "@/stores/UserStore";
 import TimeDisplayCom from "@/components/TimeDisplayCom.vue";
 import {createSocket} from "@/utils/WebSocket";
-import {notification} from "ant-design-vue";
+import {message, notification} from "ant-design-vue";
 import type {IGroup} from "@/models/IGroup";
 import type {AxiosError} from "axios";
 import type {IResponse} from "@/models/IResponse";
@@ -365,7 +365,11 @@ async function getAlarm(event:any){
 
 async function showNotification(type:number,event:any){
 
-    await audio.play();
+    try {
+        await audio.play();
+    }catch (e){
+        message.error("当前浏览器无法播放提示音")
+    }
 
     if(type == 0){
 

@@ -536,8 +536,21 @@ async function changeEvent(val:{
                 if (axiosError.response?.status != undefined &&
                     axiosError.response.status >= 400 && axiosError.response.status < 500) {
 
-                    let errorMessage = "修改组织日程失败";
-                    message.error(errorMessage);
+                    if(axiosError.response.status==444){
+                        if(axiosError.response.data!=undefined){
+                            const recommendedTime = JSON.parse(axiosError.response.data.message);
+                            message.error("修改组织日程冲突");
+                            message.warn("推荐时间(1):"+dayjs(recommendedTime[0].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[0].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                            message.warn("推荐时间(2):"+dayjs(recommendedTime[1].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[1].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                            message.warn("推荐时间(3):"+dayjs(recommendedTime[2].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[2].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                        }
+
+                    }
+                    else{
+                        let errorMessage = "修改组织日程失败";
+                        console.log(axiosError.response.data)
+                        message.error(errorMessage);
+                    }
                 }
             }
 
@@ -568,8 +581,21 @@ async function changeEvent(val:{
                 if (axiosError.response?.status != undefined &&
                     axiosError.response.status >= 400 && axiosError.response.status < 500) {
 
-                    let errorMessage = "修改个人日程失败";
-                    message.error(errorMessage);
+                    if(axiosError.response.status==444){
+                        if(axiosError.response.data!=undefined){
+                            const recommendedTime = JSON.parse(axiosError.response.data.message);
+                            message.error("修改个人日程冲突");
+                            message.warn("推荐时间(1):"+dayjs(recommendedTime[0].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[0].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                            message.warn("推荐时间(2):"+dayjs(recommendedTime[1].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[1].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                            message.warn("推荐时间(3):"+dayjs(recommendedTime[2].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[2].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                        }
+
+                    }
+                    else{
+                        let errorMessage = "修改个人日程失败";
+                        console.log(axiosError.response.data)
+                        message.error(errorMessage);
+                    }
                 }
             }
         }
@@ -694,7 +720,14 @@ async function addEvent(val:{
                     axiosError.response.status >= 400 && axiosError.response.status < 500) {
 
                     if(axiosError.response.status==444){
-                        console.log(axiosError.response.data)
+                        if(axiosError.response.data!=undefined){
+                            const recommendedTime = JSON.parse(axiosError.response.data.message);
+                            message.error("添加组织日程冲突");
+                            message.warn("推荐时间(1):"+dayjs(recommendedTime[0].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[0].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                            message.warn("推荐时间(2):"+dayjs(recommendedTime[1].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[1].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                            message.warn("推荐时间(3):"+dayjs(recommendedTime[2].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[2].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                        }
+
                     }
                     else{
                         let errorMessage = "添加组织日程失败";
@@ -731,7 +764,14 @@ async function addEvent(val:{
                         axiosError.response.status >= 400 && axiosError.response.status < 500) {
 
                         if(axiosError.response.status==444){
-                            console.log(axiosError.response.data)
+                            if(axiosError.response.data!=undefined){
+                                const recommendedTime = JSON.parse(axiosError.response.data.message);
+                                message.error("添加组织日程冲突");
+                                message.warn("推荐时间(1):"+dayjs(recommendedTime[0].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[0].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                                message.warn("推荐时间(2):"+dayjs(recommendedTime[1].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[1].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                                message.warn("推荐时间(3):"+dayjs(recommendedTime[2].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[2].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                            }
+
                         }
                         else{
                             let errorMessage = "添加组织日程失败";
@@ -775,7 +815,14 @@ async function addEvent(val:{
                         axiosError.response.status >= 400 && axiosError.response.status < 500) {
 
                         if(axiosError.response.status==444){
-                            console.log(axiosError.response.data)
+                            if(axiosError.response.data!=undefined){
+                                const recommendedTime = JSON.parse(axiosError.response.data.message);
+                                message.error("添加个人日程冲突");
+                                message.warn("推荐时间(1):"+dayjs(recommendedTime[0].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[0].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                                message.warn("推荐时间(2):"+dayjs(recommendedTime[1].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[1].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                                message.warn("推荐时间(3):"+dayjs(recommendedTime[2].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[2].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                            }
+
                         }
                         else{
                             let errorMessage = "添加个人日程失败";
@@ -785,7 +832,7 @@ async function addEvent(val:{
                     }
                 }
             }
-            else{//非周期事件
+            else{//周期事件
                 for(let time = 0; time < val.periodicTimes; time++) {
                     try {
 
@@ -810,14 +857,21 @@ async function addEvent(val:{
                         const axiosError = err as AxiosError<IResponse<CalendarTimePeriod>>;
                         if (axiosError.response?.status != undefined &&
                             axiosError.response.status >= 400 && axiosError.response.status < 500) {
-                                    if(axiosError.response.status==444){
-                                        console.log(axiosError.response.data)
-                                    }
-                                    else{
-                                        let errorMessage = "添加个人日程失败";
-                                        console.log(axiosError.response.data)
-                                        message.error(errorMessage);
-                                    }
+                            if(axiosError.response.status==444){
+                                if(axiosError.response.data!=undefined){
+                                    const recommendedTime = JSON.parse(axiosError.response.data.message);
+                                    message.error("添加个人日程冲突");
+                                    message.warn("推荐时间(1):"+dayjs(recommendedTime[0].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[0].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                                    message.warn("推荐时间(2):"+dayjs(recommendedTime[1].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[1].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                                    message.warn("推荐时间(3):"+dayjs(recommendedTime[2].beginTime).format("YYYY-MM-DD HH:mm:ss")+"~"+dayjs(recommendedTime[2].endTime).format("YYYY-MM-DD HH:mm:ss"),10)
+                                }
+
+                            }
+                            else{
+                                let errorMessage = "添加个人日程失败";
+                                console.log(axiosError.response.data)
+                                message.error(errorMessage);
+                            }
                         }
                     }
                 }
